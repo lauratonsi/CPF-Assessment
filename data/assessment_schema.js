@@ -105,6 +105,26 @@
     ]
   };
 
+  /* Fabbrica di una dipendenza vuota (riga dell'editor dello Step 3, §3.4).
+     Relazione orientata B -> A: `source` = B (origine/asset a monte),
+     `target` = A (di norma la funzione stessa o un suo componente). */
+  root.CPF.blankDependency = function (targetDefault) {
+    return {
+      id: "dep-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      source: "",
+      target: targetDefault || "",
+      resource_or_condition: "",
+      class: "cyber",                        // fisica|cyber|logica|geografica
+      position: "upstream",                  // upstream|internal|downstream
+      coupling: "tight",                     // tight|loose
+      operational_state_relevant: "normal",  // normal|stressed|repair_restoration
+      failure_type_if_relevant: null,        // cascading|escalating|common_cause|null
+      activation_time_tolerable: "",
+      alternative_available: false,
+      alternative_description: ""
+    };
+  };
+
   root.CPF.blankAssessment = function (id) {
     var now = new Date().toISOString();
     return {

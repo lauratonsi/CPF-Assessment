@@ -5,194 +5,40 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Test — regime-engine · CPF Assessment</title>
 <link rel="stylesheet" href="../assets/theme.css">
+<script>(function(){try{var t=localStorage.getItem("cpf-theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
 <style>
   .wrap { max-width: 60rem; }
-  table { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
-  th, td { text-align: left; padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--border); vertical-align: top; }
-  .pass { color: var(--ok); font-weight: 600; }
-  .fail { color: var(--danger); font-weight: 600; }
-  .sum { font-family: var(--mono); margin: 1rem 0; padding: 0.7rem 1rem; border-radius: 6px; border: 1px solid var(--border); }
-  .sum.ok { border-color: var(--ok); }
-  .sum.ko { border-color: var(--danger); }
-  code { font-family: var(--mono); font-size: 0.8rem; }
+  .meta-links { font-family: var(--mono); font-size: 0.74rem; color: var(--muted); margin: 0.4rem 0 0; }
+  .meta-links a { margin-right: 0.9rem; }
+  code { font-family: var(--mono); font-size: 0.82rem; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header class="masthead"><h1>Test — <code>regime-engine.js</code></h1>
-    <p class="dek">Batteria di asserzioni su <code>CPF.classifyRegimes</code> e <code>CPF.sizeClass</code>. Apri questo file nel browser dopo ogni modifica a <code>regime_rules.js</code> o <code>regime-engine.js</code>.</p>
+  <header class="masthead">
+    <h1>Test — <code>regime-engine.js</code></h1>
+    <p class="dek">Asserzioni sulla classificazione multi-regime: <code>CPF.classifyRegimes</code> e <code>CPF.sizeClass</code>. Ogni caso fissa un input, l'esito atteso e la regola normativa che lo giustifica. Si rieseguono a ogni apertura della pagina.</p>
+    <p class="meta-links">
+      <a href="calcs.html">→ test dei calcoli §3.6</a>
+      <a href="../pages/test.html">→ pagina di verifica nel sito</a>
+      <a href="cases.js">cases.js</a>
+    </p>
   </header>
-  <div id="sum" class="sum">esecuzione…</div>
-  <table><thead><tr><th>#</th><th>Caso</th><th>Atteso</th><th>Esito</th></tr></thead><tbody id="rows"></tbody></table>
+
+  <div id="sum" class="tr-sum">esecuzione…</div>
+  <div id="out"></div>
+
+  <p class="disclaimer">Un esito verde indica coerenza del motore con le regole codificate in <code>data/regime_rules.js</code>, non una validazione giuridica.</p>
 </div>
 
 <script src="../data/regime_classifier.js"></script>
 <script src="../data/regime_rules.js"></script>
 <script src="../assets/regime-engine.js"></script>
+<script src="cases.js"></script>
+<script src="runner.js"></script>
 <script>
-(function () {
-  var tests = [], pass = 0;
-
-  function t(name, fn) { tests.push({ name: name, fn: fn }); }
-  function eq(actual, expected, what) {
-    var a = JSON.stringify(actual), e = JSON.stringify(expected);
-    if (a !== e) throw new Error((what || "") + " → atteso " + e + ", ottenuto " + a);
-  }
-
-  /* ---- sizeClass ---- */
-  t("sizeClass: 600 dip / 900 M€ → grande", function () {
-    eq(CPF.sizeClass({ employees: 600, turnover_meur: 900, balance_meur: 800 }), "grande");
-  });
-  t("sizeClass: 120 dip / 30 M€ → media", function () {
-    eq(CPF.sizeClass({ employees: 120, turnover_meur: 30, balance_meur: 20 }), "media");
-  });
-  t("sizeClass: 20 dip / 5 M€ → piccola", function () {
-    eq(CPF.sizeClass({ employees: 20, turnover_meur: 5, balance_meur: 4 }), "piccola");
-  });
-  t("sizeClass: 8 dip / 1 M€ → micro", function () {
-    eq(CPF.sizeClass({ employees: 8, turnover_meur: 1, balance_meur: 1 }), "micro");
-  });
-
-  /* ---- NIS2 precedenza ---- */
-  t("NIS2: Allegato I + grande → essenziale", function () {
-    var p = CPF.classifyRegimes({ sector_annex: "annex_i", sector_nis2: "energia", size: { employees: 600, turnover_meur: 900, balance_meur: 800 } });
-    eq(p.nis2.applicable, true, "applicable"); eq(p.nis2.qualification, "essenziale", "qualification");
-  });
-  t("NIS2: Allegato I + media → importante", function () {
-    var p = CPF.classifyRegimes({ sector_annex: "annex_i", sector_nis2: "energia", size: { employees: 120, turnover_meur: 30, balance_meur: 20 } });
-    eq(p.nis2.qualification, "importante");
-  });
-  t("NIS2: Allegato II + grande → importante", function () {
-    var p = CPF.classifyRegimes({ sector_annex: "annex_ii", sector_nis2: "chimica", size: { employees: 600, turnover_meur: 900, balance_meur: 800 } });
-    eq(p.nis2.qualification, "importante");
-  });
-  t("NIS2: Allegato I + piccola → fuori perimetro", function () {
-    var p = CPF.classifyRegimes({ sector_annex: "annex_i", sector_nis2: "energia", size: { employees: 20, turnover_meur: 5, balance_meur: 4 } });
-    eq(p.nis2.applicable, false, "applicable"); eq(p.nis2.qualification, "fuori_perimetro", "qualification");
-  });
-  t("NIS2: caso speciale servizi fiduciari qualificati → essenziale a prescindere dalla dimensione", function () {
-    var p = CPF.classifyRegimes({ sector_annex: null, size: { employees: 5, turnover_meur: 1, balance_meur: 1 }, nis2_special_cases: ["trust_qualified"] });
-    eq(p.nis2.qualification, "essenziale");
-  });
-  t("NIS2: telco piccola → in perimetro, importante", function () {
-    var p = CPF.classifyRegimes({ size: { employees: 20, turnover_meur: 5, balance_meur: 4 }, nis2_special_cases: ["telco"] });
-    eq(p.nis2.applicable, true, "applicable"); eq(p.nis2.qualification, "importante", "qualification");
-  });
-  t("NIS2: designazione CER come soggetto critico forza NIS2 essenziale", function () {
-    var p = CPF.classifyRegimes({ sector_annex: "annex_i", sector_nis2: "energia", size: { employees: 20, turnover_meur: 5, balance_meur: 4 }, cer_sector: "energia", cer_formally_designated: true });
-    eq(p.nis2.qualification, "essenziale", "nis2"); eq(p.cer.designation, "soggetto_critico", "cer");
-  });
-
-  /* ---- CER ---- */
-  t("CER: settore CER + criteri di impatto ma nessuna designazione → potenziale soggetto critico + verifica", function () {
-    var p = CPF.classifyRegimes({ cer_sector: "acqua_potabile", cer_significance: ["utenti", "alternative"] });
-    eq(p.cer.designation, "potenziale_soggetto_critico", "designation");
-    eq(p.verification_flags.length > 0, true, "verification flag presente");
-  });
-  t("CER: Piano di Resilienza adottato → traccia di attuazione presente", function () {
-    var p = CPF.classifyRegimes({ cer_sector: "acqua_potabile", cer_formally_designated: true, cer_resilience_plan_adopted: true });
-    eq(p.cer.trace.some(function (t) { return /Piano di Resilienza indicato/.test(t.esito); }), true, "piano di resilienza");
-  });
-
-  /* ---- DORA ---- */
-  t("DORA: entità finanziaria → applicabile con nota lex specialis", function () {
-    var p = CPF.classifyRegimes({ dora_financial_entity: true });
-    eq(p.dora.applicable, true, "applicable");
-    eq(/lex specialis|luogo delle corrispondenti/i.test(p.dora.note || ""), true, "nota lex specialis");
-  });
-
-  t("NIS2/ACN: qualifica formalmente notificata → prevale sul calcolo orientativo", function () {
-    var p = CPF.classifyRegimes({ acn_formal_qualification: "essenziale" });
-    eq(p.nis2.applicable, true, "applicable");
-    eq(p.nis2.qualification, "essenziale", "qualification");
-    eq(p.nis2.formal_acn_qualification, true, "formal qualification");
-  });
-
-  /* ---- PSNC / lex specialis nazionale ---- */
-  t("PSNC: asset incluso + NIS2 applicabile → prevalenza per ambito e verifica", function () {
-    var p = CPF.classifyRegimes({ sector_annex: "annex_i", sector_nis2: "energia", size: { employees: 600, turnover_meur: 900, balance_meur: 800 }, psnc_assets: true });
-    eq(p.psnc.applicable, true, "psnc");
-    eq(p.nis2.psnc_exclusion, true, "nis2.psnc_exclusion");
-    eq(p.interactions.some(function (i) { return i.type === "lex specialis nazionale"; }), true, "interazione PSNC");
-  });
-  t("PSNC: nessun asset indicato → non applicabile", function () {
-    eq(CPF.classifyRegimes({}).psnc.applicable, false);
-  });
-
-  /* ---- CRA ---- */
-  t("CRA: immette prodotto senza categoria → applicabile, ordinario, flag di verifica", function () {
-    var p = CPF.classifyRegimes({ cra_places_product: true, cra_role: "fabbricante" });
-    eq(p.cra.applicable, true, "applicable"); eq(p.cra.category, "ordinario", "category");
-    eq(p.verification_flags.some(function (v) { return /CRA/.test(v); }), true, "verifica categoria CRA");
-  });
-
-  /* ---- Regolamento Macchine ---- */
-  t("Macchine: fabbricante + software di sicurezza → organismo notificato obbligatorio", function () {
-    var p = CPF.classifyRegimes({ macchine_roles: ["fabbricante"], macchine_annex_i_part_a_flags: ["safety_software"] });
-    eq(p.macchine.applicable, true, "applicable"); eq(p.macchine.notified_body_required, true, "notified body");
-  });
-
-  /* ---- AI Act: la chiave delicata ---- */
-  t("AI Act: canale 6.1 con finalità di sicurezza → alto rischio, esclusione NON applicabile", function () {
-    var p = CPF.classifyRegimes({ ai_system: true, ai_channel1: true, ai_channel1_safety_purpose: true, ai_exclusion_conditions: ["procedurale"] });
-    eq(p.ai_act.high_risk, true, "high_risk"); eq(p.ai_act.channel, "art6_1", "channel");
-  });
-  t("AI Act (Reg. 2026/1744): canale 6.1 SENZA finalità di sicurezza → non alto rischio, da verificare", function () {
-    var p = CPF.classifyRegimes({ ai_system: true, ai_channel1: true });
-    eq(p.ai_act.high_risk, false, "high_risk"); eq(p.ai_act.status, "canale_6_1_non_attivato", "status");
-  });
-  t("AI Act (Reg. 2026/1744): canale 6.1 non attivato ma uso Allegato III → alto rischio per il canale 6.2", function () {
-    var p = CPF.classifyRegimes({ ai_system: true, ai_channel1: true, ai_channel2: true });
-    eq(p.ai_act.high_risk, true, "high_risk"); eq(p.ai_act.channel, "art6_2", "channel");
-    eq(p.ai_act.compliance_deadline, "2027-12-02", "deadline");
-  });
-  t("AI Act (Reg. 2026/1744): calendario differito — canale 6.2 → 2027-12-02, canale 6.1 → 2028-08-02", function () {
-    eq(CPF.classifyRegimes({ ai_system: true, ai_channel2: true }).ai_act.compliance_deadline, "2027-12-02");
-    eq(CPF.classifyRegimes({ ai_system: true, ai_channel1: true, ai_channel1_safety_purpose: true }).ai_act.compliance_deadline, "2028-08-02");
-  });
-  t("AI Act: canale 6.2 + condizione di esclusione + no profilazione → escluso", function () {
-    var p = CPF.classifyRegimes({ ai_system: true, ai_channel2: true, ai_exclusion_conditions: ["procedurale"], ai_profiling: false });
-    eq(p.ai_act.high_risk, "escluso");
-  });
-  t("AI Act: canale 6.2 + profilazione → alto rischio nonostante le condizioni di esclusione", function () {
-    var p = CPF.classifyRegimes({ ai_system: true, ai_channel2: true, ai_exclusion_conditions: ["procedurale"], ai_profiling: true });
-    eq(p.ai_act.high_risk, true);
-  });
-  t("AI Act: canale 6.2 senza esclusioni → alto rischio", function () {
-    var p = CPF.classifyRegimes({ ai_system: true, ai_channel2: true });
-    eq(p.ai_act.high_risk, true);
-  });
-
-  /* ---- interazioni ---- */
-  t("Interazioni: CRA + Macchine + AI Act applicabili → 3+ interazioni cumulative", function () {
-    var p = CPF.classifyRegimes({
-      cra_places_product: true, macchine_roles: ["fabbricante"],
-      ai_system: true, ai_channel1: true
-    });
-    eq(p.interactions.length >= 3, true, "almeno 3 interazioni, trovate " + p.interactions.length);
-  });
-  t("Ogni regime porta un trace non vuoto", function () {
-    var p = CPF.classifyRegimes({});
-    ["nis2", "cer", "dora", "cra", "macchine", "ai_act"].forEach(function (k) {
-      eq((p[k].trace || []).length > 0, true, k + ".trace");
-    });
-  });
-
-  /* ---- esecuzione ---- */
-  var rows = document.getElementById("rows");
-  tests.forEach(function (test, i) {
-    var tr = document.createElement("tr");
-    var ok = true, msg = "";
-    try { test.fn(); pass++; } catch (e) { ok = false; msg = e.message; }
-    tr.innerHTML = "<td>" + (i + 1) + "</td><td>" + test.name + "</td><td>—</td>"
-      + '<td class="' + (ok ? "pass" : "fail") + '">' + (ok ? "PASS" : "FAIL — " + msg) + "</td>";
-    rows.appendChild(tr);
-  });
-  var sum = document.getElementById("sum");
-  var ok = pass === tests.length;
-  sum.className = "sum " + (ok ? "ok" : "ko");
-  sum.textContent = pass + " / " + tests.length + " test superati" + (ok ? " ✓" : " ✗");
-})();
+  CPF.runTests({ suites: ["engine"], mount: document.getElementById("out"), summary: document.getElementById("sum") });
 </script>
+<script src="../assets/theme-toggle.js"></script>
 </body>
 </html>

@@ -42,6 +42,7 @@
     <a href="step4a-conseguenze.html">4a · Conseguenze</a>
     <a href="step4b-capacita.html">4b · Capacità</a>
     <a href="dashboard.html">Esito</a>
+    <a href="test.html">Verifica</a>
   </nav>
   <header class="masthead">
     <h1>Step 2 — Definizione della funzione cyber-fisica</h1>
@@ -82,9 +83,14 @@
   var REG = [["nis2", "NIS2"], ["cer", "CER"], ["dora", "DORA"], ["cra", "CRA"], ["macchine", "Reg. Macchine"], ["ai_act", "AI Act"]];
   var scales = CPF.data.scales;
 
-  // default: se la lista dei regimi rilevanti è vuota, la inizializza con quelli applicabili
-  if (!F.regimes_relevant_to_this_function || !F.regimes_relevant_to_this_function.length) {
-    F.regimes_relevant_to_this_function = REG.filter(function (r) { return RP[r[0]] && RP[r[0]].applicable; }).map(function (r) { return r[0]; });
+  // default (solo alla prima apertura): la lista dei regimi rilevanti parte da
+  // quelli applicabili all'organizzazione. Dopo, una lista vuota è una scelta
+  // esplicita dell'utente e va rispettata.
+  if (!F._regimes_initialized) {
+    if (!F.regimes_relevant_to_this_function || !F.regimes_relevant_to_this_function.length) {
+      F.regimes_relevant_to_this_function = REG.filter(function (r) { return RP[r[0]] && RP[r[0]].applicable; }).map(function (r) { return r[0]; });
+    }
+    F._regimes_initialized = true;
   }
 
   function regState(key) {
@@ -96,7 +102,14 @@
     if (key === "nis2") return '<span class="meta">' + (r.qualification || "applicabile") + '</span>';
     if (key === "cer") return '<span class="meta">' + String(r.designation || "applicabile").replace(/_/g, " ") + '</span>';
     if (key === "cra") return '<span class="meta">' + String(r.category || "applicabile").replace(/_/g, " ") + '</span>';
-    if (key === "ai_act") return '<span class="meta">' + (r.high_risk === true ? "alto rischio" : r.high_risk === "escluso" ? "alto rischio escluso" : "applicabile") + '</span>';
+    if (key === "ai_act") {
+      var s = r.status === "vietato" ? "vietato"
+        : r.high_risk === true ? "alto rischio"
+        : r.high_risk === "escluso" ? "alto rischio escluso"
+        : r.status === "canale_6_1_non_attivato" ? "da verificare (art. 6.1)"
+        : "applicabile";
+      return '<span class="meta">' + s + '</span>';
+    }
     return '<span class="meta">applicabile</span>';
   }
 
@@ -148,7 +161,11 @@
     $("fn_perimeter").value = F.perimeter || "";
     $("crit_why").value = F.criticality_rationale || "";
     if (F.criticality) { var r = document.querySelector('input[name="crit"][value="' + F.criticality + '"]'); if (r) r.checked = true; }
-    REG.forEach(function (rg) { $("reg_" + rg[0]).checked = regState(rg[0]); });
+    REG.forEach(function (rg) {
+      $("reg_" + rg[0]).checked = regState(rg[0]);
+      var why = document.querySelector('[data-why="' + rg[0] + '"]');
+      if (why && RP[rg[0]]) why.value = RP[rg[0]].override_reason || "";
+    });
     syncOverrides();
   }
 
@@ -160,8 +177,10 @@
       document.querySelector('[data-ovr="' + k + '"]').hidden = !over;
       var why = document.querySelector('[data-why="' + k + '"]');
       why.hidden = !over;
-      if (RP[k]) RP[k].overridden_from_org_profile = over;
-      if (over && RP[k]) { RP[k].override_reason = why.value || ""; }
+      if (RP[k]) {
+        RP[k].overridden_from_org_profile = over;
+        RP[k].override_reason = over ? (why.value || "") : "";
+      }
     });
   }
 

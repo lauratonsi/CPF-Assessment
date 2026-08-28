@@ -1,0 +1,305 @@
+/* CPF Assessment — batteria di test condivisa.
+   Un solo file di casi, usato da:
+     - tests/engine.html   (suite "engine")
+     - tests/calcs.html    (suite "calcs")
+     - pages/test.html      (tutte le suite, vista integrata nel sito)
+
+   Ogni caso: { suite, group, name, fn }.  fn() lancia un'eccezione se fallisce.
+   Nessuna dipendenza dal DOM: i casi girano anche sotto jsc con uno shim minimo. */
+(function (root) {
+  var T = (root.CPF_TEST_CASES = []);
+
+  function eq(actual, expected, what) {
+    var a = JSON.stringify(actual), e = JSON.stringify(expected);
+    if (a !== e) throw new Error((what ? what + ": " : "") + "atteso " + e + ", ottenuto " + a);
+  }
+  function ok(cond, what) { if (!cond) throw new Error(what || "condizione falsa"); }
+  function has(arr, re, what) {
+    ok((arr || []).some(function (x) { return re.test(String(x)); }), what || ("nessun elemento corrisponde a " + re));
+  }
+  function traceHas(node, re, what) {
+    ok((node.trace || []).some(function (s) { return re.test(s.esito) || re.test(s.base); }), what || ("trace privo di " + re));
+  }
+  function t(suite, group, name, fn) { T.push({ suite: suite, group: group, name: name, fn: fn }); }
+
+  var C = function (a) { return root.CPF.classifyRegimes(a); };
+
+  /* ================================================================
+     SUITE "engine" — CPF.sizeClass / CPF.classifyRegimes
+     ================================================================ */
+
+  /* ---- sizeClass (Racc. 2003/361/CE) ---- */
+  t("engine", "sizeClass", "600 dip / 900 M€ → grande", function () {
+    eq(root.CPF.sizeClass({ employees: 600, turnover_meur: 900, balance_meur: 800 }), "grande");
+  });
+  t("engine", "sizeClass", "120 dip / 30 M€ → media", function () {
+    eq(root.CPF.sizeClass({ employees: 120, turnover_meur: 30, balance_meur: 20 }), "media");
+  });
+  t("engine", "sizeClass", "20 dip / 5 M€ → piccola", function () {
+    eq(root.CPF.sizeClass({ employees: 20, turnover_meur: 5, balance_meur: 4 }), "piccola");
+  });
+  t("engine", "sizeClass", "8 dip / 1 M€ → micro", function () {
+    eq(root.CPF.sizeClass({ employees: 8, turnover_meur: 1, balance_meur: 1 }), "micro");
+  });
+  t("engine", "sizeClass", "solo dipendenti (120) senza dati economici → media", function () {
+    eq(root.CPF.sizeClass({ employees: 120, turnover_meur: null, balance_meur: null }), "media");
+  });
+  t("engine", "sizeClass", "solo dipendenti (300) senza dati economici → grande", function () {
+    eq(root.CPF.sizeClass({ employees: 300, turnover_meur: null, balance_meur: null }), "grande");
+  });
+  t("engine", "sizeClass", "nessun dato → null", function () {
+    eq(root.CPF.sizeClass({ employees: null, turnover_meur: null, balance_meur: null }), null);
+  });
+
+  /* ---- NIS2: catena di precedenza (§2.1.1) ---- */
+  t("engine", "NIS2", "Allegato I + grande → essenziale", function () {
+    var p = C({ sector_annex: "annex_i", sector_nis2: "energia", size: { employees: 600, turnover_meur: 900, balance_meur: 800 } });
+    eq(p.nis2.applicable, true, "applicable"); eq(p.nis2.qualification, "essenziale", "qualification");
+  });
+  t("engine", "NIS2", "Allegato I + media → importante", function () {
+    eq(C({ sector_annex: "annex_i", sector_nis2: "energia", size: { employees: 120, turnover_meur: 30, balance_meur: 20 } }).nis2.qualification, "importante");
+  });
+  t("engine", "NIS2", "Allegato II + grande → importante", function () {
+    eq(C({ sector_annex: "annex_ii", sector_nis2: "chimica", size: { employees: 600, turnover_meur: 900, balance_meur: 800 } }).nis2.qualification, "importante");
+  });
+  t("engine", "NIS2", "Allegato II + media → importante", function () {
+    eq(C({ sector_annex: "annex_ii", sector_nis2: "chimica", size: { employees: 120, turnover_meur: 30, balance_meur: 20 } }).nis2.qualification, "importante");
+  });
+  t("engine", "NIS2", "Allegato I + piccola → fuori perimetro (size-cap rule)", function () {
+    var p = C({ sector_annex: "annex_i", sector_nis2: "energia", size: { employees: 20, turnover_meur: 5, balance_meur: 4 } });
+    eq(p.nis2.applicable, false, "applicable"); eq(p.nis2.qualification, "fuori_perimetro", "qualification");
+    traceHas(p.nis2, /size-cap rule/, "spiega la size-cap rule");
+  });
+  t("engine", "NIS2", "nessun settore, nessun caso speciale → fuori perimetro", function () {
+    eq(C({}).nis2.applicable, false);
+  });
+  t("engine", "NIS2", "caso speciale (servizi fiduciari qualificati) → essenziale a prescindere dalla dimensione", function () {
+    eq(C({ size: { employees: 5, turnover_meur: 1, balance_meur: 1 }, nis2_special_cases: ["trust_qualified"] }).nis2.qualification, "essenziale");
+  });
+  t("engine", "NIS2", "telco piccola → in perimetro, importante", function () {
+    var p = C({ size: { employees: 20, turnover_meur: 5, balance_meur: 4 }, nis2_special_cases: ["telco"] });
+    eq(p.nis2.applicable, true, "applicable"); eq(p.nis2.qualification, "importante", "qualification");
+  });
+  t("engine", "NIS2", "telco grande → in perimetro, essenziale", function () {
+    eq(C({ size: { employees: 600, turnover_meur: 900, balance_meur: 800 }, nis2_special_cases: ["telco"] }).nis2.qualification, "essenziale");
+  });
+  t("engine", "NIS2", "designazione CER come soggetto critico forza NIS2 essenziale (art. 3 §1 lett. f)", function () {
+    var p = C({ sector_annex: "annex_i", sector_nis2: "energia", size: { employees: 20, turnover_meur: 5, balance_meur: 4 }, cer_sector: "energia", cer_formally_designated: true });
+    eq(p.nis2.qualification, "essenziale", "nis2"); eq(p.cer.designation, "soggetto_critico", "cer");
+  });
+  t("engine", "NIS2", "designazione discrezionale dello Stato membro (importante) su soggetto altrimenti fuori perimetro", function () {
+    eq(C({ ms_designation: "importante" }).nis2.qualification, "importante");
+  });
+  t("engine", "NIS2", "qualifica ACN formalmente notificata prevale sul calcolo orientativo", function () {
+    var p = C({ sector_annex: "annex_i", sector_nis2: "energia", size: { employees: 20, turnover_meur: 5, balance_meur: 4 }, acn_formal_qualification: "essenziale" });
+    eq(p.nis2.qualification, "essenziale", "qualification"); eq(p.nis2.formal_acn_qualification, true, "flag ACN");
+  });
+  t("engine", "NIS2", "sola registrazione ACN (nessuna qualifica) → flag di verifica, nessuna qualificazione", function () {
+    var p = C({ acn_platform_registered: true });
+    eq(p.nis2.applicable, false, "non qualificato");
+    has(p.verification_flags, /ACN/, "verifica ACN");
+  });
+
+  /* ---- CER (Dir. 2022/2557 / D.Lgs. 134/2024) ---- */
+  t("engine", "CER", "settore + criteri di impatto ma nessuna designazione → potenziale soggetto critico + verifica", function () {
+    var p = C({ cer_sector: "acqua_potabile", cer_significance: ["utenti", "alternative"] });
+    eq(p.cer.designation, "potenziale_soggetto_critico", "designation");
+    has(p.verification_flags, /CER/, "flag di verifica CER");
+  });
+  t("engine", "CER", "settore senza alcun criterio → non designato", function () {
+    eq(C({ cer_sector: "acqua_potabile" }).cer.designation, "non_designato");
+  });
+  t("engine", "CER", "designato + Piano di Resilienza adottato → traccia di attuazione", function () {
+    traceHas(C({ cer_sector: "acqua_potabile", cer_formally_designated: true, cer_resilience_plan_adopted: true }).cer, /Piano di Resilienza/, "piano di resilienza");
+  });
+  t("engine", "CER", "designato senza Piano di Resilienza → flag di verifica sul piano", function () {
+    has(C({ cer_sector: "acqua_potabile", cer_formally_designated: true }).verification_flags, /Piano di Resilienza/, "verifica piano");
+  });
+  t("engine", "CER", "settore nazionale acque irrigue riconosciuto", function () {
+    eq(C({ cer_sector: "acque_irrigue", cer_formally_designated: true }).cer.applicable, true);
+  });
+
+  /* ---- DORA (Reg. 2022/2554) ---- */
+  t("engine", "DORA", "entità finanziaria → applicabile con nota lex specialis", function () {
+    var p = C({ dora_financial_entity: true });
+    eq(p.dora.applicable, true, "applicable");
+    ok(/lex specialis|luogo delle corrispondenti/i.test(p.dora.note || ""), "nota lex specialis");
+  });
+  t("engine", "DORA", "fornitore TIC terzo critico (art. 31) → applicabile, ramo distinto", function () {
+    var p = C({ dora_ict_tpp_critical: true });
+    eq(p.dora.applicable, true, "applicable");
+    traceHas(p.dora, /fornitore TIC|art\. 31|Lead Overseer|sorveglianza/i, "ramo fornitore TIC");
+  });
+  t("engine", "DORA", "non entità finanziaria né TIP critico → non applicabile", function () {
+    eq(C({}).dora.applicable, false);
+  });
+
+  /* ---- PSNC / lex specialis nazionale (D.Lgs. 138/2024 art. 33) ---- */
+  t("engine", "PSNC", "asset nel Perimetro + NIS2 applicabile → prevalenza per ambito + interazione + verifica", function () {
+    var p = C({ sector_annex: "annex_i", sector_nis2: "energia", size: { employees: 600, turnover_meur: 900, balance_meur: 800 }, psnc_assets: true });
+    eq(p.psnc.applicable, true, "psnc");
+    eq(p.nis2.psnc_exclusion, true, "nis2.psnc_exclusion");
+    ok(p.interactions.some(function (i) { return i.type === "lex specialis nazionale"; }), "interazione PSNC");
+    has(p.verification_flags, /PSNC/, "verifica PSNC");
+  });
+  t("engine", "PSNC", "nessun asset indicato → non applicabile", function () {
+    eq(C({}).psnc.applicable, false);
+  });
+
+  /* ---- CRA (Reg. 2024/2847) ---- */
+  t("engine", "CRA", "immette prodotto senza categoria → applicabile, ordinario in via prudenziale, flag di verifica", function () {
+    var p = C({ cra_places_product: true, cra_role: "fabbricante" });
+    eq(p.cra.applicable, true, "applicable"); eq(p.cra.category, "ordinario", "category");
+    has(p.verification_flags, /CRA/, "verifica categoria");
+  });
+  t("engine", "CRA", "categoria critica dichiarata → riportata nel profilo", function () {
+    eq(C({ cra_places_product: true, cra_role: "fabbricante", cra_category: "critico" }).cra.category, "critico");
+  });
+  t("engine", "CRA", "ruolo importatore/distributore → traccia di obblighi ridotti", function () {
+    traceHas(C({ cra_places_product: true, cra_role: "importatore_distributore" }).cra, /importatore|ridotti/i, "obblighi ridotti");
+  });
+  t("engine", "CRA", "non immette prodotti → non applicabile", function () {
+    eq(C({}).cra.applicable, false);
+  });
+
+  /* ---- Regolamento Macchine (Reg. 2023/1230) ---- */
+  t("engine", "Macchine", "fabbricante + software di sicurezza → organismo notificato obbligatorio", function () {
+    var p = C({ macchine_roles: ["fabbricante"], macchine_annex_i_part_a_flags: ["safety_software"] });
+    eq(p.macchine.applicable, true, "applicable"); eq(p.macchine.notified_body_required, true, "notified body");
+  });
+  t("engine", "Macchine", "fabbricante senza componenti Allegato I Parte A → nessun organismo notificato", function () {
+    eq(C({ macchine_roles: ["fabbricante"] }).macchine.notified_body_required, false);
+  });
+  t("engine", "Macchine", "modifica sostanziale → traccia di equiparazione al fabbricante", function () {
+    traceHas(C({ macchine_roles: ["modifica_sostanziale"] }).macchine, /modifica sostanziale|equiparazione/i, "modifica sostanziale");
+  });
+  t("engine", "Macchine", "connessione digitale che incide sulla safety → verifica RESS 1.1.9 / 1.2.1", function () {
+    has(C({ macchine_roles: ["fabbricante"], macchine_digital_connection: true }).verification_flags, /1\.1\.9|1\.2\.1/, "verifica RESS");
+  });
+
+  /* ---- AI Act (Reg. 2024/1689 + Digital Omnibus, Reg. (UE) 2026/1744) ---- */
+  t("engine", "AI Act", "nessun sistema di IA → non applicabile", function () {
+    eq(C({}).ai_act.applicable, false);
+  });
+  t("engine", "AI Act", "pratica vietata (art. 5) → status vietato, nota nudifier/CSAM dal 2 dic 2026", function () {
+    var p = C({ ai_system: true, ai_prohibited: true });
+    eq(p.ai_act.status, "vietato", "status");
+    traceHas(p.ai_act, /2 dicembre 2026|materiale intimo|abuso sessuale/i, "nota Reg. 2026/1744");
+  });
+  t("engine", "AI Act", "IA presente ma fuori dai due canali → non ad alto rischio + nota trasparenza (art. 50)", function () {
+    var p = C({ ai_system: true });
+    eq(p.ai_act.high_risk, false, "high_risk");
+    has(p.notes, /[Aa]rt\. 50|trasparenza/, "nota trasparenza");
+  });
+  t("engine", "AI Act", "canale 6.1 con finalità di sicurezza → alto rischio, esclusione 6.3 non invocabile", function () {
+    var p = C({ ai_system: true, ai_channel1: true, ai_channel1_safety_purpose: true, ai_exclusion_conditions: ["procedurale"] });
+    eq(p.ai_act.high_risk, true, "high_risk"); eq(p.ai_act.channel, "art6_1", "channel");
+  });
+  t("engine", "AI Act", "Reg. 2026/1744 — canale 6.1 SENZA finalità di sicurezza (e nessun uso Allegato III) → non alto rischio, da verificare", function () {
+    var p = C({ ai_system: true, ai_channel1: true });
+    eq(p.ai_act.high_risk, false, "high_risk"); eq(p.ai_act.status, "canale_6_1_non_attivato", "status");
+    has(p.verification_flags, /2026\/1744|finalità.*sicurezza/i, "verifica finalità");
+  });
+  t("engine", "AI Act", "Reg. 2026/1744 — canale 6.1 non attivato ma uso Allegato III → alto rischio sul canale 6.2", function () {
+    var p = C({ ai_system: true, ai_channel1: true, ai_channel2: true });
+    eq(p.ai_act.high_risk, true, "high_risk"); eq(p.ai_act.channel, "art6_2", "channel");
+  });
+  t("engine", "AI Act", "Reg. 2026/1744 — calendario differito: canale 6.2 → 2027-12-02", function () {
+    eq(C({ ai_system: true, ai_channel2: true }).ai_act.compliance_deadline, "2027-12-02");
+  });
+  t("engine", "AI Act", "Reg. 2026/1744 — calendario differito: canale 6.1 → 2028-08-02", function () {
+    eq(C({ ai_system: true, ai_channel1: true, ai_channel1_safety_purpose: true }).ai_act.compliance_deadline, "2028-08-02");
+  });
+  t("engine", "AI Act", "canale 6.2 + condizione di esclusione (art. 6.3) + no profilazione → alto rischio escluso", function () {
+    eq(C({ ai_system: true, ai_channel2: true, ai_exclusion_conditions: ["procedurale"], ai_profiling: false }).ai_act.high_risk, "escluso");
+  });
+  t("engine", "AI Act", "canale 6.2 + esclusione ma con profilazione di persone fisiche → resta alto rischio", function () {
+    eq(C({ ai_system: true, ai_channel2: true, ai_exclusion_conditions: ["procedurale"], ai_profiling: true }).ai_act.high_risk, true);
+  });
+  t("engine", "AI Act", "canale 6.2 senza esclusioni → alto rischio", function () {
+    eq(C({ ai_system: true, ai_channel2: true }).ai_act.high_risk, true);
+  });
+  t("engine", "AI Act", "uso Allegato III selezionato → etichetta dell'uso nel trace", function () {
+    traceHas(C({ ai_system: true, ai_channel2: true, ai_annex_iii_use: "infra_critiche" }).ai_act, /infrastrutture digitali critiche|acqua, gas/i, "etichetta uso");
+  });
+  t("engine", "AI Act", "alto rischio + supervisione e robustezza non pronte → open_requirements = [oversight, robustness]", function () {
+    var p = C({ ai_system: true, ai_channel2: true });
+    eq(p.ai_act.open_requirements.slice().sort(), ["oversight", "robustness"]);
+    has(p.verification_flags, /art\. 14/, "verifica art. 14");
+    has(p.verification_flags, /art\. 15/, "verifica art. 15");
+  });
+  t("engine", "AI Act", "alto rischio + entrambi i requisiti pronti → open_requirements vuoto", function () {
+    eq(C({ ai_system: true, ai_channel2: true, ai_oversight_ready: true, ai_robustness_ready: true }).ai_act.open_requirements, []);
+  });
+  t("engine", "AI Act", "alto rischio in ambiente OT con dati di campo → nota art. 437-bis c.p. + limite epistemico Modbus/OPC", function () {
+    var p = C({ ai_system: true, ai_channel2: true, ai_ot_field_data: true });
+    has(p.notes, /437-bis/, "nota art. 437-bis");
+    traceHas(p.ai_act, /limite epistemico|Modbus|OPC/i, "limite epistemico OT");
+    has(p.verification_flags, /man-in-the-middle|Modbus\/OPC/i, "verifica catena sensori");
+  });
+
+  /* ---- interazioni tra regimi ---- */
+  t("engine", "Interazioni", "CRA + Macchine + AI Act → almeno 3 interazioni cumulative", function () {
+    var p = C({ cra_places_product: true, macchine_roles: ["fabbricante"], ai_system: true, ai_channel1: true, ai_channel1_safety_purpose: true });
+    ok(p.interactions.length >= 3, "trovate " + p.interactions.length);
+  });
+  t("engine", "Interazioni", "entità finanziaria in Allegato I → interazione NIS2/DORA lex specialis", function () {
+    var p = C({ sector_annex: "annex_i", sector_nis2: "bancario", size: { employees: 600, turnover_meur: 900, balance_meur: 800 }, dora_financial_entity: true });
+    ok(p.interactions.some(function (i) { return i.pair.indexOf("nis2") !== -1 && i.pair.indexOf("dora") !== -1; }), "interazione NIS2/DORA");
+  });
+  t("engine", "Traccia", "ogni regime porta un trace non vuoto (motivazione, §3.6-3.7)", function () {
+    var p = C({});
+    ["nis2", "cer", "dora", "cra", "macchine", "ai_act", "psnc"].forEach(function (k) {
+      ok((p[k].trace || []).length > 0, k + ".trace vuoto");
+    });
+  });
+
+  /* ================================================================
+     SUITE "calcs" — calcoli derivati §3.6 (assets/app.js)
+     ================================================================ */
+  var mk = function (cur, tgt, ess, thr) {
+    return { domain_id: "segmentazione", current_profile: cur, target_profile: tgt, is_essential: ess, non_compensable_threshold: thr };
+  };
+
+  t("calcs", "dimensionGap", "livello non determinabile → incertezza_probatoria, gap null", function () {
+    eq(root.CPF.dimensionGap({ level: 3, evidentiary_strength: "non_determinabile" }, { level: 4 }), { state: "incertezza_probatoria", gap: null });
+  });
+  t("calcs", "dimensionGap", "corroborato 2→4 → gap 2", function () {
+    eq(root.CPF.dimensionGap({ level: 2, evidentiary_strength: "corroborata" }, { level: 4 }).gap, 2);
+  });
+  t("calcs", "essentialShortfall", "essenziale, corrente < soglia → divario_essenziale (have/need)", function () {
+    var s = root.CPF.essentialShortfall(mk({ estensione: { level: 2, evidentiary_strength: "corroborata" } }, {}, true, { dimension: "estensione", min_level: 5, rationale: "x" }));
+    eq(s.kind, "divario_essenziale"); eq([s.have, s.need], [2, 5]);
+  });
+  t("calcs", "essentialShortfall", "soglia su livello non determinabile → verifica (non intervento)", function () {
+    eq(root.CPF.essentialShortfall(mk({ estensione: { level: 2, evidentiary_strength: "non_determinabile" } }, {}, true, { dimension: "estensione", min_level: 5, rationale: "x" })).kind, "verifica");
+  });
+  t("calcs", "domainPriority", "crit 4 + essenziale + gap 3 corroborato → intervento alta, nessuna verifica", function () {
+    var p = root.CPF.domainPriority(mk(
+      { consolidamento: { level: 2, evidentiary_strength: "corroborata" }, estensione: { level: 2, evidentiary_strength: "corroborata" } },
+      { consolidamento: { level: 4 }, estensione: { level: 5 } }, true, null), 4);
+    eq(p.priorita_intervento.band, "alta"); eq(p.priorita_verifica, null);
+  });
+  t("calcs", "domainPriority", "divario essenziale → intervento alta anche con criticità 1 (anello debole)", function () {
+    var p = root.CPF.domainPriority(mk({ estensione: { level: 2, evidentiary_strength: "corroborata" } }, { estensione: { level: 3 } }, true, { dimension: "estensione", min_level: 5, rationale: "x" }), 1);
+    eq(p.priorita_intervento.band, "alta"); eq(!!p.priorita_intervento.essential_shortfall, true);
+  });
+  t("calcs", "domainPriority", "livello non determinabile → solo verifica, nessun intervento", function () {
+    var p = root.CPF.domainPriority(mk({ consolidamento: { level: 3, evidentiary_strength: "non_determinabile" } }, { consolidamento: { level: 4 } }, false, null), 3);
+    eq(p.priorita_intervento, null); eq(!!p.priorita_verifica, true);
+  });
+  t("calcs", "domainPriority", "livello parziale + gap → verifica, non intervento", function () {
+    var p = root.CPF.domainPriority(mk({ efficacia: { level: 2, evidentiary_strength: "parziale" } }, { efficacia: { level: 4 } }, false, null), 2);
+    eq(p.priorita_intervento, null); eq(p.priorita_verifica.items.length, 1);
+  });
+  t("calcs", "domainPriority", "nessun divario, tutto corroborato → nessuna priorità", function () {
+    var p = root.CPF.domainPriority(mk({ consolidamento: { level: 4, evidentiary_strength: "corroborata" } }, { consolidamento: { level: 4 } }, false, null), 3);
+    eq(p.priorita_intervento, null); eq(p.priorita_verifica, null);
+  });
+  t("calcs", "rankDomains", "il dominio con divario essenziale precede quello senza divari", function () {
+    var noGap = mk({ consolidamento: { level: 4, evidentiary_strength: "corroborata" } }, { consolidamento: { level: 4 } }, false, null);
+    var essShort = mk({ estensione: { level: 2, evidentiary_strength: "corroborata" } }, { estensione: { level: 3 } }, true, { dimension: "estensione", min_level: 5, rationale: "x" });
+    essShort.domain_id = "vulnerabilita";
+    eq(root.CPF.rankDomains([noGap, essShort], 3)[0].domain_id, "vulnerabilita");
+  });
+})(typeof window !== "undefined" ? window : this);

@@ -24,6 +24,44 @@
   .callout { border-left: 3px solid var(--accent); padding: 0.6rem 0.9rem; background: var(--surface-2); border-radius: 0 6px 6px 0; margin: 0.7rem 0; font-size: 0.85rem; }
   .callout h4 { margin: 0 0 0.3rem; font-size: 0.85rem; }
   .closing { font-size: 0.83rem; color: var(--muted); font-style: italic; margin-top: 0.5rem; }
+
+  /* ---- editor ---- */
+  .ed-intro { font-size: 0.86rem; color: var(--muted); margin: 0.2rem 0 1rem; }
+  .dep { border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem 0.9rem 0.9rem; margin: 0.7rem 0; background: var(--surface); }
+  .dep.critical { border-color: var(--danger); }
+  .dep-head { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+  .dep-not { font-size: 0.82rem; display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; flex: 1; }
+  .dep-not b { font-family: var(--mono); color: var(--accent-ink); background: var(--accent-tint); border-radius: 3px; padding: 0.02rem 0.3rem; }
+  .dep-not .arrow { font-family: var(--mono); color: var(--faint); }
+  .dep-not input { flex: 1; min-width: 8rem; font: inherit; font-size: 0.85rem; padding: 0.35rem 0.5rem; border: 1px solid var(--border); border-radius: 5px; background: var(--paper); color: var(--ink); }
+  .dep-del { font: inherit; font-size: 0.76rem; padding: 0.25rem 0.55rem; border: 1px solid var(--border); border-radius: 5px; background: transparent; color: var(--muted); cursor: pointer; flex: none; }
+  .dep-del:hover { border-color: var(--danger); color: var(--danger); }
+  .dep-grid { display: grid; gap: 0.55rem 0.7rem; margin-top: 0.7rem; grid-template-columns: 1fr; }
+  @media (min-width: 40rem) { .dep-grid { grid-template-columns: 1fr 1fr; } .dep-grid .wide { grid-column: 1 / -1; } }
+  .dep-grid label { display: block; font-size: 0.78rem; color: var(--muted); }
+  .dep-grid label > span { display: block; margin-bottom: 0.2rem; }
+  .dep-grid select, .dep-grid input, .dep-grid textarea {
+    width: 100%; font: inherit; font-size: 0.85rem; padding: 0.4rem 0.5rem;
+    border: 1px solid var(--border); border-radius: 5px; background: var(--paper); color: var(--ink);
+  }
+  .dep-grid textarea { min-height: 2.6rem; resize: vertical; }
+  .alt-toggle { display: flex; gap: 0.45rem; align-items: center; font-size: 0.82rem; margin-top: 0.7rem; cursor: pointer; }
+  .alt-desc { margin-top: 0.4rem; }
+  .alt-desc[hidden] { display: none; }
+  .alt-desc textarea { width: 100%; font: inherit; font-size: 0.85rem; padding: 0.4rem 0.5rem; border: 1px solid var(--border); border-radius: 5px; background: var(--paper); color: var(--ink); min-height: 2.4rem; resize: vertical; }
+  .dep-flags { margin: 0.6rem 0 0; padding: 0; list-style: none; }
+  .dep-flags li { font-size: 0.78rem; padding: 0.25rem 0; color: var(--accent-ink); }
+  .dep-flags li.warn { color: var(--danger); font-weight: 600; }
+  .dep-flags li::before { content: "▸ "; color: var(--faint); }
+
+  .dep-empty { font-size: 0.88rem; color: var(--muted); padding: 1rem 0; }
+  .ed-summary { border: 1px solid var(--border); border-radius: 7px; padding: 0.7rem 0.85rem; margin-top: 1rem; font-size: 0.82rem; background: var(--surface-2); }
+  .ed-summary b { font-family: var(--mono); }
+  .ed-summary .crit { color: var(--danger); }
+  .saved-note { font-family: var(--mono); font-size: 0.72rem; color: var(--faint); margin-top: 0.5rem; min-height: 1em; }
+
+  .toast { position: fixed; left: 50%; bottom: 1.4rem; transform: translateX(-50%); background: var(--ink); color: var(--paper); font-size: 0.85rem; padding: 0.6rem 1rem; border-radius: 6px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast.show { opacity: 0.95; }
 </style>
 </head>
 <body>
@@ -35,6 +73,7 @@
     <a href="step4a-conseguenze.html">4a · Conseguenze</a>
     <a href="step4b-capacita.html">4b · Capacità</a>
     <a href="dashboard.html">Esito</a>
+    <a href="test.html">Verifica</a>
   </nav>
   <header class="masthead">
     <h1>Step 3 — Mappatura delle dipendenze</h1>
@@ -43,17 +82,35 @@
 
   <div class="legend" id="legend"></div>
 
-  <section class="card" style="margin-top:2rem">
+  <section class="card" id="gate-card" style="margin-top:2rem" hidden>
     <h2>Editor delle dipendenze</h2>
-    <p class="muted">In costruzione. Tabella B→A: per ogni dipendenza — origine/destinazione, risorsa o condizione, classe, posizione, accoppiamento, stato operativo, tipo di guasto, tempo di attivazione tollerabile, alternativa. La visualizzazione Sankey sarà nella dashboard.</p>
-    <p class="muted" id="editor-gate" style="font-size:.85rem"></p>
+    <p class="muted" id="editor-gate"></p>
+    <div class="btn-row" style="justify-content:flex-start; margin-top:1rem">
+      <a class="btn btn--primary" href="step2-funzione.html">Vai allo Step 2</a>
+    </div>
+  </section>
+
+  <section class="card" id="editor" style="margin-top:2rem" hidden>
+    <h2>Editor delle dipendenze <span style="font-family:var(--mono);font-size:.7em;color:var(--faint)">B → A</span></h2>
+    <p class="ed-intro" id="ed-fn"></p>
+    <p class="ed-intro">Una riga per relazione. <b>B</b> è l'origine (fornitore, asset a monte, altro elemento); <b>A</b> è di norma la funzione stessa o un suo componente. Le righe con accoppiamento stretto e nessuna alternativa sono evidenziate: sono gli anelli in cui una perturbazione si propaga senza margine.</p>
+
+    <div id="dep-list"></div>
+
+    <div class="btn-row" style="justify-content:flex-start; margin-top:0.4rem">
+      <button type="button" class="btn" id="add-dep">+ Aggiungi dipendenza</button>
+    </div>
+
+    <div class="ed-summary" id="ed-summary" hidden></div>
+    <p class="saved-note" id="saved-note"></p>
   </section>
 
   <div class="btn-row">
     <a class="btn btn--ghost" href="step2-funzione.html">← Funzione</a>
-    <a class="btn btn--primary" href="step4a-conseguenze.html">Avanti: Conseguenze →</a>
+    <button type="button" class="btn btn--primary" id="next">Avanti: Conseguenze →</button>
   </div>
 </div>
+<div class="toast" id="toast"></div>
 
 <script src="../data/dependency_taxonomy.js"></script>
 <script src="../data/dependency_reference.js"></script>
@@ -61,77 +118,226 @@
 <script src="../assets/app.js"></script>
 <script>
 (function () {
-  var D = CPF.data.dependencyReference;
-  var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]; }); };
-  var out = [];
+  var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
 
-  function sectionHead(o) {
-    out.push('<h2>' + esc(o.title) + (o.thesis_ref ? ' <span class="ref">' + esc(o.thesis_ref) + '</span>' : '') + '</h2>');
-    if (o.subtitle) out.push('<p class="sub">' + esc(o.subtitle) + '</p>');
-    if (o.text) out.push('<p>' + esc(o.text) + '</p>');
-    if (o.source) out.push('<p class="ref">Fonte: ' + esc(o.source) + '</p>');
-  }
-  function card(it) {
-    var h = '<div class="tx"><h3>' + esc(it.label) + '</h3>';
-    if (it.notation) h += '<p><code class="notation">' + esc(it.notation) + '</code> ' + esc(it.notation_explanation || "") + '</p>';
-    h += '<p class="def">' + esc(it.definition) + '</p>';
-    if (it.implication) h += '<p class="note-inline">' + esc(it.implication) + '</p>';
-    if (it.caveat) h += '<p class="note-inline">' + esc(it.caveat) + '</p>';
-    if (it.model_role) h += '<p class="role">Nel modello: ' + esc(it.model_role) + '</p>';
-    if (it.example) h += '<p class="ex">' + esc(it.example) + '</p>';
-    return h + '</div>';
-  }
-  function grid(items, two) {
-    out.push('<div class="tax' + (two ? ' two' : '') + '">' + items.map(card).join("") + '</div>');
-  }
-  function callout(o) {
-    out.push('<div class="callout"><h4>' + esc(o.title) + (o.thesis_ref ? ' <span class="ref">' + esc(o.thesis_ref) + '</span>' : '') + '</h4><p>' + esc(o.text) + '</p>' + (o.example ? '<p class="ex">' + esc(o.example) + '</p>' : '') + '</div>');
-  }
+  /* ============ legenda (§3.4, testo di dependency_reference.js) ============ */
+  (function renderLegend() {
+    var D = CPF.data.dependencyReference;
+    if (!D) return;
+    var out = [];
+    function sectionHead(o) {
+      out.push('<h2>' + esc(o.title) + (o.thesis_ref ? ' <span class="ref">' + esc(o.thesis_ref) + '</span>' : '') + '</h2>');
+      if (o.subtitle) out.push('<p class="sub">' + esc(o.subtitle) + '</p>');
+      if (o.text) out.push('<p>' + esc(o.text) + '</p>');
+      if (o.source) out.push('<p class="ref">Fonte: ' + esc(o.source) + '</p>');
+    }
+    function card(it) {
+      var h = '<div class="tx"><h3>' + esc(it.label) + '</h3>';
+      if (it.notation) h += '<p><code class="notation">' + esc(it.notation) + '</code> ' + esc(it.notation_explanation || "") + '</p>';
+      h += '<p class="def">' + esc(it.definition) + '</p>';
+      if (it.implication) h += '<p class="note-inline">' + esc(it.implication) + '</p>';
+      if (it.caveat) h += '<p class="note-inline">' + esc(it.caveat) + '</p>';
+      if (it.model_role) h += '<p class="role">Nel modello: ' + esc(it.model_role) + '</p>';
+      if (it.example) h += '<p class="ex">' + esc(it.example) + '</p>';
+      return h + '</div>';
+    }
+    function grid(items, two) { out.push('<div class="tax' + (two ? ' two' : '') + '">' + items.map(card).join("") + '</div>'); }
+    function callout(o) {
+      out.push('<div class="callout"><h4>' + esc(o.title) + (o.thesis_ref ? ' <span class="ref">' + esc(o.thesis_ref) + '</span>' : '') + '</h4><p>' + esc(o.text) + '</p>' + (o.example ? '<p class="ex">' + esc(o.example) + '</p>' : '') + '</div>');
+    }
+    sectionHead(D.intro);
+    sectionHead(D.classes); grid(D.classes.items, true); out.push('<p class="closing">' + esc(D.classes.closing_note) + '</p>');
+    sectionHead(D.coupling); grid(D.coupling.items, true); out.push('<p class="closing">' + esc(D.coupling.dynamic_note) + '</p>'); callout(D.coupling.complexity_note);
+    sectionHead(D.positions); grid(D.positions.items, false); out.push('<p class="closing">' + esc(D.positions.important_distinction) + '</p>');
+    sectionHead(D.failure_types); grid(D.failure_types.items, false);
+    sectionHead(D.temporal_dimension); out.push('<p>' + esc(D.temporal_dimension.model_extension) + '</p>'); callout({ title: "Il punto chiave", text: D.temporal_dimension.key_point });
+    sectionHead(D.empirical_grounding); out.push('<p class="ex">' + esc(D.empirical_grounding.example) + '</p>'); out.push('<p>' + esc(D.empirical_grounding.tool_implication) + '</p>');
+    document.getElementById("legend").innerHTML = out.join("");
+  })();
 
-  // intro
-  sectionHead(D.intro);
+  /* ============ editor delle dipendenze ============ */
+  var TAX = CPF.data.dependencyTaxonomy;
+  var STATES = [
+    { id: "normal", label: "Normale" },
+    { id: "stressed", label: "Sotto stress / emergenza" },
+    { id: "repair_restoration", label: "Riparazione e ripristino" }
+  ];
+  var FAILURES = [{ id: "", label: "— nessuno / non rilevante —" }].concat(TAX.failure_types.map(function (f) {
+    return { id: f.id, label: f.label + (f.notation ? "  (" + f.notation + ")" : "") };
+  }));
 
-  // classi
-  sectionHead(D.classes);
-  grid(D.classes.items, true);
-  out.push('<p class="closing">' + esc(D.classes.closing_note) + '</p>');
-
-  // accoppiamento
-  sectionHead(D.coupling);
-  grid(D.coupling.items, true);
-  out.push('<p class="closing">' + esc(D.coupling.dynamic_note) + '</p>');
-  callout(D.coupling.complexity_note);
-
-  // posizione
-  sectionHead(D.positions);
-  grid(D.positions.items, false);
-  out.push('<p class="closing">' + esc(D.positions.important_distinction) + '</p>');
-
-  // tipi di guasto
-  sectionHead(D.failure_types);
-  grid(D.failure_types.items, false);
-
-  // dimensione temporale
-  sectionHead(D.temporal_dimension);
-  out.push('<p>' + esc(D.temporal_dimension.model_extension) + '</p>');
-  callout({ title: "Il punto chiave", text: D.temporal_dimension.key_point });
-
-  // radicamento empirico
-  sectionHead(D.empirical_grounding);
-  out.push('<p class="ex">' + esc(D.empirical_grounding.example) + '</p>');
-  out.push('<p>' + esc(D.empirical_grounding.tool_implication) + '</p>');
-
-  document.getElementById("legend").innerHTML = out.join("");
-
-  // gate verso l'editor: serve una funzione definita nello Step 2
   var params = new URLSearchParams(location.search);
   var a = params.get("id") ? CPF.loadAssessment(params.get("id")) : CPF.getActive();
-  var gate = document.getElementById("editor-gate");
+  var $ = function (id) { return document.getElementById(id); };
+
   if (!a || !a.function || !a.function.name) {
-    gate.textContent = "Definisci prima la funzione (Step 2): l'editor delle dipendenze si aggancia al perimetro della funzione.";
-  } else {
-    gate.textContent = "Funzione collegata: " + a.function.name + ".";
+    $("gate-card").hidden = false;
+    $("editor-gate").textContent = "Definisci prima la funzione (Step 2): l'editor delle dipendenze si aggancia al perimetro della funzione — l'elemento A di ogni relazione è, di norma, la funzione o un suo componente.";
+    $("next").addEventListener("click", function () { location.href = "step4a-conseguenze.html"; });
+    return;
   }
+  CPF.setActive(a.assessment_id);
+  if (!Array.isArray(a.dependencies)) a.dependencies = [];
+  var fnName = a.function.name;
+  $("editor").hidden = false;
+  $("ed-fn").innerHTML = "Funzione collegata: <b>" + esc(fnName) + "</b>. "
+    + (a.function.perimeter ? "Perimetro: " + esc(a.function.perimeter) : "");
+
+  var listEl = $("dep-list");
+  var toast = $("toast");
+  var savedNote = $("saved-note");
+  function flash(m) { toast.textContent = m; toast.classList.add("show"); setTimeout(function () { toast.classList.remove("show"); }, 1500); }
+
+  function opt(list, cur) {
+    return list.map(function (o) {
+      return '<option value="' + esc(o.id) + '"' + (String(o.id) === String(cur == null ? "" : cur) ? " selected" : "") + '>' + esc(o.label) + '</option>';
+    }).join("");
+  }
+
+  function depCard(d) {
+    return ''
+      + '<div class="dep" data-id="' + esc(d.id) + '">'
+      + '  <div class="dep-head">'
+      + '    <span class="dep-not"><b>B</b><input data-f="source" placeholder="origine (fornitore, asset a monte, altro elemento)" value="' + esc(d.source) + '">'
+      + '      <span class="arrow">→</span><b>A</b><input data-f="target" placeholder="' + esc(fnName) + '" value="' + esc(d.target) + '"></span>'
+      + '    <button type="button" class="dep-del" data-del>rimuovi</button>'
+      + '  </div>'
+      + '  <div class="dep-grid">'
+      + '    <label class="wide"><span>Risorsa o condizione trasferita / richiesta</span><textarea data-f="resource_or_condition" placeholder="cosa passa lungo questa relazione (energia, dato di processo, autorizzazione, collocazione fisica…)">' + esc(d.resource_or_condition) + '</textarea></label>'
+      + '    <label><span>Classe</span><select data-f="class">' + opt(TAX.classes, d.class) + '</select></label>'
+      + '    <label><span>Posizione</span><select data-f="position">' + opt(TAX.positions, d.position) + '</select></label>'
+      + '    <label><span>Accoppiamento</span><select data-f="coupling">' + opt(TAX.coupling, d.coupling) + '</select></label>'
+      + '    <label><span>Stato operativo rilevante</span><select data-f="operational_state_relevant">' + opt(STATES, d.operational_state_relevant) + '</select></label>'
+      + '    <label><span>Tipo di guasto</span><select data-f="failure_type_if_relevant">' + opt(FAILURES, d.failure_type_if_relevant || "") + '</select></label>'
+      + '    <label><span>Tempo di attivazione tollerabile</span><input data-f="activation_time_tolerable" placeholder="es. minuti · 8 h · giorni" value="' + esc(d.activation_time_tolerable) + '"></label>'
+      + '  </div>'
+      + '  <label class="alt-toggle"><input type="checkbox" data-f="alternative_available"' + (d.alternative_available ? " checked" : "") + '> Esiste un\'alternativa o una ridondanza per questa risorsa/condizione</label>'
+      + '  <div class="alt-desc"' + (d.alternative_available ? "" : " hidden") + '><textarea data-f="alternative_description" placeholder="quale alternativa, con quale capacità e tempo di subentro">' + esc(d.alternative_description) + '</textarea></div>'
+      + '  <ul class="dep-flags"></ul>'
+      + '</div>';
+  }
+
+  function render() {
+    if (!a.dependencies.length) {
+      listEl.innerHTML = '<p class="dep-empty">Nessuna dipendenza mappata. Comincia da ciò che, se venisse a mancare, fermerebbe o degraderebbe la funzione.</p>';
+    } else {
+      listEl.innerHTML = a.dependencies.map(depCard).join("");
+    }
+    decorate();
+    summarize();
+  }
+
+  function readCards() {
+    var cards = listEl.querySelectorAll(".dep");
+    var out = [];
+    Array.prototype.forEach.call(cards, function (el) {
+      var d = { id: el.getAttribute("data-id") };
+      Array.prototype.forEach.call(el.querySelectorAll("[data-f]"), function (f) {
+        var key = f.getAttribute("data-f");
+        if (f.type === "checkbox") d[key] = f.checked;
+        else d[key] = f.value;
+      });
+      if (d.failure_type_if_relevant === "") d.failure_type_if_relevant = null;
+      out.push(d);
+    });
+    a.dependencies = out;
+  }
+
+  function depIssues(d) {
+    var out = [];
+    var downstream = d.position === "downstream";
+    if (d.coupling === "tight" && !d.alternative_available && !downstream) {
+      out.push({ warn: true, text: "Anello critico: accoppiamento stretto e nessuna alternativa — la perturbazione si propaga senza margine." });
+    }
+    if (d.failure_type_if_relevant === "common_cause") {
+      out.push({ warn: false, text: "Causa comune (E → {A, B}): un singolo evento può colpire simultaneamente più elementi; verificare la correlazione geografica o infrastrutturale." });
+    }
+    if (d.failure_type_if_relevant === "cascading") {
+      out.push({ warn: false, text: "Guasto a cascata (A → B → C): tracciare la catena a valle di questo elemento." });
+    }
+    if (d.coupling === "tight" && !d.activation_time_tolerable) {
+      out.push({ warn: false, text: "Accoppiamento stretto senza tempo di attivazione tollerabile indicato: quantificare il margine." });
+    }
+    return out;
+  }
+
+  function decorate() {
+    Array.prototype.forEach.call(listEl.querySelectorAll(".dep"), function (el, i) {
+      var d = a.dependencies[i];
+      if (!d) return;
+      var issues = depIssues(d);
+      el.classList.toggle("critical", issues.some(function (x) { return x.warn; }));
+      var ul = el.querySelector(".dep-flags");
+      ul.innerHTML = issues.map(function (x) { return '<li class="' + (x.warn ? "warn" : "") + '">' + esc(x.text) + '</li>'; }).join("");
+    });
+  }
+
+  function summarize() {
+    var s = $("ed-summary");
+    if (!a.dependencies.length) { s.hidden = true; return; }
+    s.hidden = false;
+    var by = { upstream: 0, internal: 0, downstream: 0 };
+    var crit = 0, undet = 0;
+    a.dependencies.forEach(function (d) {
+      by[d.position] = (by[d.position] || 0) + 1;
+      if (depIssues(d).some(function (x) { return x.warn; })) crit++;
+      if (d.coupling === "tight" && !d.activation_time_tolerable) undet++;
+    });
+    s.innerHTML =
+      '<b>' + a.dependencies.length + '</b> dipendenze · <b>' + by.upstream + '</b> a monte · <b>' + by.internal + '</b> interne · <b>' + by.downstream + '</b> a valle'
+      + ' · <span class="' + (crit ? "crit" : "") + '"><b>' + crit + '</b> anelli critici</span>'
+      + (undet ? ' · <b>' + undet + '</b> senza margine temporale quantificato' : '')
+      + '<br><span class="muted" style="font-size:.78rem">La visualizzazione Sankey e l\'aggancio ai percorsi di compromissione (Step 4a) useranno questa mappa.</span>';
+  }
+
+  var saveTimer = null;
+  function persist(immediate) {
+    readCards();
+    decorate();
+    summarize();
+    clearTimeout(saveTimer);
+    var doSave = function () {
+      CPF.saveAssessment(a);
+      var now = new Date();
+      savedNote.textContent = "salvato automaticamente · " + now.toTimeString().slice(0, 8);
+    };
+    if (immediate) doSave(); else saveTimer = setTimeout(doSave, 500);
+  }
+
+  listEl.addEventListener("input", function () { persist(false); });
+  listEl.addEventListener("change", function (e) {
+    if (e.target && e.target.getAttribute("data-f") === "alternative_available") {
+      var wrap = e.target.closest(".dep").querySelector(".alt-desc");
+      wrap.hidden = !e.target.checked;
+    }
+    persist(false);
+  });
+  listEl.addEventListener("click", function (e) {
+    var btn = e.target.closest("[data-del]");
+    if (!btn) return;
+    var id = btn.closest(".dep").getAttribute("data-id");
+    a.dependencies = a.dependencies.filter(function (d) { return d.id !== id; });
+    render();
+    persist(true);
+  });
+
+  $("add-dep").addEventListener("click", function () {
+    readCards();
+    a.dependencies.push(CPF.blankDependency(fnName));
+    render();
+    persist(true);
+    var cards = listEl.querySelectorAll(".dep");
+    var last = cards[cards.length - 1];
+    if (last) { last.scrollIntoView({ behavior: "smooth", block: "center" }); last.querySelector('[data-f="source"]').focus(); }
+  });
+
+  $("next").addEventListener("click", function () {
+    persist(true);
+    flash("Dipendenze salvate");
+    location.href = "step4a-conseguenze.html?id=" + encodeURIComponent(a.assessment_id);
+  });
+
+  render();
 })();
 </script>
 <script src="../assets/theme-toggle.js"></script>

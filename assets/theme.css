@@ -157,3 +157,46 @@ textarea.field { min-height: 5rem; resize: vertical; }
 
 .muted { color: var(--muted); }
 .disclaimer { font-size: 0.8rem; color: var(--faint); border-top: 1px solid var(--border); margin-top: 2.5rem; padding-top: 1rem; }
+
+/* ---- runner dei test (tests/runner.js) ---- */
+.tr-sum {
+  position: sticky; top: 0; z-index: 20;
+  margin: 1.2rem 0; padding: 0.85rem 1rem;
+  border: 1px solid var(--border); border-radius: 8px; background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.tr-sum.ok { border-color: var(--ok); }
+.tr-sum.ko { border-color: var(--danger); }
+.tr-sum-line { font-family: var(--mono); font-size: 0.9rem; }
+.tr-sum-line b { font-size: 1.05rem; }
+.tr-sum-fail { color: var(--danger); font-weight: 600; }
+.tr-progress { margin-top: 0.55rem; height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; }
+.tr-progress span { display: block; height: 100%; background: var(--ok); transition: width 0.3s; }
+.tr-sum.ko .tr-progress span { background: var(--danger); }
+
+.tr-grp { margin: 1.1rem 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.tr-grp > h3 {
+  display: flex; align-items: center; gap: 0.5rem; margin: 0;
+  padding: 0.55rem 0.85rem; font-size: 0.88rem; font-family: var(--sans); font-weight: 600;
+  background: var(--surface-2); border-bottom: 1px solid var(--border);
+}
+.tr-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--ok); }
+.tr-grp.ko .tr-dot { background: var(--danger); }
+.tr-count { margin-left: auto; font-family: var(--mono); font-size: 0.75rem; color: var(--muted); }
+.tr-grp.ko .tr-count { color: var(--danger); }
+
+.tr-list { list-style: none; margin: 0; padding: 0; }
+.tr-list li {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem;
+  padding: 0.4rem 0.85rem; font-size: 0.84rem; border-top: 1px solid var(--border);
+}
+.tr-list li:first-child { border-top: 0; }
+.tr-list li.ko { background: color-mix(in srgb, var(--danger) 8%, transparent); }
+.tr-badge {
+  flex: none; font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.04em;
+  padding: 0.12rem 0.4rem; border-radius: 3px; border: 1px solid currentColor;
+}
+.tr-list li.ok .tr-badge { color: var(--ok); }
+.tr-list li.ko .tr-badge { color: var(--danger); }
+.tr-name { flex: 1; min-width: 12rem; }
+.tr-msg { width: 100%; font-family: var(--mono); font-size: 0.76rem; color: var(--danger); padding-left: 3.2rem; }

@@ -5,92 +5,37 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Test — calcoli derivati §3.6 · CPF Assessment</title>
 <link rel="stylesheet" href="../assets/theme.css">
+<script>(function(){try{var t=localStorage.getItem("cpf-theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
 <style>
   .wrap { max-width: 60rem; }
-  table { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
-  th, td { text-align: left; padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--border); }
-  .pass { color: var(--ok); font-weight: 600; }
-  .fail { color: var(--danger); font-weight: 600; }
-  .sum { font-family: var(--mono); margin: 1rem 0; padding: 0.7rem 1rem; border-radius: 6px; border: 1px solid var(--border); }
-  .sum.ok { border-color: var(--ok); } .sum.ko { border-color: var(--danger); }
-  code { font-family: var(--mono); font-size: 0.8rem; }
+  .meta-links { font-family: var(--mono); font-size: 0.74rem; color: var(--muted); margin: 0.4rem 0 0; }
+  .meta-links a { margin-right: 0.9rem; }
+  code { font-family: var(--mono); font-size: 0.82rem; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header class="masthead"><h1>Test — calcoli derivati <span style="font-family:var(--mono);font-size:.7em">§3.6</span></h1>
-    <p class="dek"><code>dimensionGap</code>, <code>essentialShortfall</code>, <code>domainPriority</code>, <code>rankDomains</code>. Priorità di intervento e di verifica tenute distinte; divario essenziale (anello debole) mai assorbito.</p>
+  <header class="masthead">
+    <h1>Test — calcoli derivati <span style="font-family:var(--mono);font-size:.7em">§3.6</span></h1>
+    <p class="dek"><code>dimensionGap</code>, <code>essentialShortfall</code>, <code>domainPriority</code>, <code>rankDomains</code>. Priorità di intervento e di verifica tenute distinte; il divario essenziale (anello debole) non è mai assorbito in una media.</p>
+    <p class="meta-links">
+      <a href="engine.html">→ test del motore dei regimi</a>
+      <a href="../pages/test.html">→ pagina di verifica nel sito</a>
+      <a href="cases.js">cases.js</a>
+    </p>
   </header>
-  <div id="sum" class="sum">esecuzione…</div>
-  <table><thead><tr><th>#</th><th>Caso</th><th>Esito</th></tr></thead><tbody id="rows"></tbody></table>
+
+  <div id="sum" class="tr-sum">esecuzione…</div>
+  <div id="out"></div>
 </div>
 
 <script src="../data/scales.js"></script>
 <script src="../assets/app.js"></script>
+<script src="cases.js"></script>
+<script src="runner.js"></script>
 <script>
-(function () {
-  var tests = [], pass = 0;
-  function t(n, fn) { tests.push({ name: n, fn: fn }); }
-  function eq(a, e, w) { if (JSON.stringify(a) !== JSON.stringify(e)) throw new Error((w || "") + " → " + JSON.stringify(a) + " ≠ " + JSON.stringify(e)); }
-  function mk(cur, tgt, ess, thr) { return { domain_id: "segmentazione", current_profile: cur, target_profile: tgt, is_essential: ess, non_compensable_threshold: thr }; }
-
-  t("dimensionGap: livello non determinabile → incertezza_probatoria, gap null", function () {
-    eq(CPF.dimensionGap({ level: 3, evidentiary_strength: "non_determinabile" }, { level: 4 }), { state: "incertezza_probatoria", gap: null });
-  });
-  t("dimensionGap: corroborato 2→4 → gap 2", function () {
-    eq(CPF.dimensionGap({ level: 2, evidentiary_strength: "corroborata" }, { level: 4 }).gap, 2);
-  });
-  t("essentialShortfall: essenziale, corrente < soglia → divario_essenziale", function () {
-    var s = CPF.essentialShortfall(mk({ estensione: { level: 2, evidentiary_strength: "corroborata" } }, {}, true, { dimension: "estensione", min_level: 5, rationale: "x" }));
-    eq(s.kind, "divario_essenziale"); eq([s.have, s.need], [2, 5]);
-  });
-  t("essentialShortfall: soglia su livello non determinabile → verifica", function () {
-    eq(CPF.essentialShortfall(mk({ estensione: { level: 2, evidentiary_strength: "non_determinabile" } }, {}, true, { dimension: "estensione", min_level: 5, rationale: "x" })).kind, "verifica");
-  });
-
-  t("domainPriority: crit 4 + essenziale + gap 3 corroborato → intervento alta, nessuna verifica", function () {
-    var p = CPF.domainPriority(mk(
-      { consolidamento: { level: 2, evidentiary_strength: "corroborata" }, estensione: { level: 2, evidentiary_strength: "corroborata" } },
-      { consolidamento: { level: 4 }, estensione: { level: 5 } }, true, null), 4);
-    eq(p.priorita_intervento.band, "alta"); eq(p.priorita_verifica, null);
-  });
-  t("domainPriority: divario essenziale → intervento alta anche con criticità 1", function () {
-    var p = CPF.domainPriority(mk({ estensione: { level: 2, evidentiary_strength: "corroborata" } }, { estensione: { level: 3 } }, true, { dimension: "estensione", min_level: 5, rationale: "x" }), 1);
-    eq(p.priorita_intervento.band, "alta"); eq(!!p.priorita_intervento.essential_shortfall, true);
-  });
-  t("domainPriority: livello non determinabile → solo verifica, nessun intervento", function () {
-    var p = CPF.domainPriority(mk({ consolidamento: { level: 3, evidentiary_strength: "non_determinabile" } }, { consolidamento: { level: 4 } }, false, null), 3);
-    eq(p.priorita_intervento, null); eq(!!p.priorita_verifica, true);
-  });
-  t("domainPriority: livello parziale + gap → verifica, non intervento", function () {
-    var p = CPF.domainPriority(mk({ efficacia: { level: 2, evidentiary_strength: "parziale" } }, { efficacia: { level: 4 } }, false, null), 2);
-    eq(p.priorita_intervento, null); eq(p.priorita_verifica.items.length, 1);
-  });
-  t("domainPriority: nessun divario, tutto corroborato → nessuna priorità", function () {
-    var p = CPF.domainPriority(mk({ consolidamento: { level: 4, evidentiary_strength: "corroborata" } }, { consolidamento: { level: 4 } }, false, null), 3);
-    eq(p.priorita_intervento, null); eq(p.priorita_verifica, null);
-  });
-  t("rankDomains: il dominio con divario essenziale viene prima di quello senza divari", function () {
-    var noGap = mk({ consolidamento: { level: 4, evidentiary_strength: "corroborata" } }, { consolidamento: { level: 4 } }, false, null);
-    var essShort = mk({ estensione: { level: 2, evidentiary_strength: "corroborata" } }, { estensione: { level: 3 } }, true, { dimension: "estensione", min_level: 5, rationale: "x" });
-    essShort.domain_id = "vulnerabilita";
-    var r = CPF.rankDomains([noGap, essShort], 3);
-    eq(r[0].domain_id, "vulnerabilita");
-  });
-
-  var rows = document.getElementById("rows");
-  tests.forEach(function (test, i) {
-    var ok = true, msg = "";
-    try { test.fn(); pass++; } catch (e) { ok = false; msg = e.message; }
-    var tr = document.createElement("tr");
-    tr.innerHTML = "<td>" + (i + 1) + "</td><td>" + test.name + "</td><td class='" + (ok ? "pass" : "fail") + "'>" + (ok ? "PASS" : "FAIL — " + msg) + "</td>";
-    rows.appendChild(tr);
-  });
-  var sum = document.getElementById("sum");
-  var ok = pass === tests.length;
-  sum.className = "sum " + (ok ? "ok" : "ko");
-  sum.textContent = pass + " / " + tests.length + " test superati" + (ok ? " ✓" : " ✗");
-})();
+  CPF.runTests({ suites: ["calcs"], mount: document.getElementById("out"), summary: document.getElementById("sum") });
 </script>
+<script src="../assets/theme-toggle.js"></script>
 </body>
 </html>

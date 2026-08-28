@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verifica del motore · CPF Assessment</title>
+<link rel="stylesheet" href="../assets/theme.css">
+<script>(function(){try{var t=localStorage.getItem("cpf-theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+<style>
+  .wrap { max-width: 60rem; }
+  .lead { border-left: 3px solid var(--accent); padding: 0.2rem 0 0.2rem 1rem; margin: 1.4rem 0; }
+  .lead p { margin: 0.5rem 0; font-size: 0.92rem; }
+  .grid { display: grid; gap: 0.7rem; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); margin: 1.4rem 0; }
+  .cov { border: 1px solid var(--border); border-radius: 7px; padding: 0.7rem 0.85rem; background: var(--surface); font-size: 0.83rem; }
+  .cov b { font-family: var(--serif); display: block; margin-bottom: 0.2rem; }
+  .cov span { color: var(--muted); }
+
+  .rerun { font-family: var(--mono); font-size: 0.72rem; }
+  .suite-h { font-family: var(--serif); font-size: 1.15rem; margin: 2rem 0 0.2rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .suite-h + p { margin-top: 0.2rem; font-size: 0.85rem; color: var(--muted); }
+  code { font-family: var(--mono); font-size: 0.82rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="stepper">
+    <a href="step1-regimi.html">1 · Regimi</a>
+    <a href="step2-funzione.html">2 · Funzione</a>
+    <a href="step3-dipendenze.html">3 · Dipendenze</a>
+    <a href="step4a-conseguenze.html">4a · Conseguenze</a>
+    <a href="step4b-capacita.html">4b · Capacità</a>
+    <a href="dashboard.html">Esito</a>
+    <span class="is-current">Verifica</span>
+  </nav>
+
+  <header class="masthead">
+    <h1>Verifica del motore di inferenza</h1>
+    <p class="dek">La stessa batteria di asserzioni che accompagna il codice, eseguita qui nel browser a ogni apertura della pagina. Serve a rendere ispezionabile — non solo dichiarata — la logica con cui lo strumento classifica i regimi e deriva le priorità.</p>
+  </header>
+
+  <div class="lead">
+    <p>Il modello del Capitolo 3 chiede che <b>ogni classificazione sia motivata e verificabile</b>, non semplicemente mostrata. Questa pagina è la contropartita operativa di quel requisito: ciascun caso fissa un input, l'esito atteso e la regola normativa che lo giustifica, così che una modifica al motore che rompa una regola sia visibile immediatamente.</p>
+    <p>I casi vivono in un unico file (<code>tests/cases.js</code>) e non dipendono dall'interfaccia: girano identici qui, nelle pagine tecniche <a href="../tests/engine.html">engine</a> e <a href="../tests/calcs.html">calcs</a>, e a riga di comando senza browser. La stessa proprietà — un input, un output atteso, una fonte — vale come esempio di trasparenza metodologica per il Capitolo 4.</p>
+    <p>La suite <b>engine</b> copre la classificazione multi-regime (Capitolo 2); la suite <b>calcs</b> copre i calcoli derivati del §3.6 (divari per dimensione, anello debole non compensabile, priorità di intervento tenuta distinta dalla priorità di verifica).</p>
+  </div>
+
+  <div class="grid">
+    <div class="cov"><b>NIS2</b><span>catena di precedenza: designazione CER, casi speciali, telco, size-cap rule, designazione dello Stato membro, qualifica ACN.</span></div>
+    <div class="cov"><b>CER</b><span>soggetto critico / potenziale / non designato; Piano di Resilienza; settori del recepimento italiano.</span></div>
+    <div class="cov"><b>DORA</b><span>entità finanziaria vs fornitore TIC terzo critico (art. 31); lex specialis sulla NIS2.</span></div>
+    <div class="cov"><b>PSNC</b><span>prevalenza nazionale per ambito sugli asset del Perimetro (art. 33 D.Lgs. 138/2024).</span></div>
+    <div class="cov"><b>CRA</b><span>categoria del prodotto, ruolo, flag di verifica per gli asset OT.</span></div>
+    <div class="cov"><b>Reg. Macchine</b><span>organismo notificato (Allegato I Parte A), modifica sostanziale, RESS 1.1.9 / 1.2.1.</span></div>
+    <div class="cov"><b>AI Act + Reg. (UE) 2026/1744</b><span>doppio canale dell'art. 6; restringimento del componente di sicurezza; calendario differito a date fisse; esclusione art. 6.3 e profilazione; requisiti art. 14/15; art. 437-bis c.p. e limite epistemico OT.</span></div>
+    <div class="cov"><b>Calcoli §3.6</b><span>gap per dimensione, incertezza probatoria, divario essenziale, priorità di intervento vs verifica, ordinamento dei domini.</span></div>
+  </div>
+
+  <div id="sum" class="tr-sum">esecuzione…</div>
+  <p class="rerun"><a href="#" id="rerun">↻ riesegui</a></p>
+
+  <h2 class="suite-h">Suite <code>engine</code> — classificazione multi-regime</h2>
+  <p>Riferimento: Capitolo 2 della tesi; <code>data/regime_rules.js</code> + <code>assets/regime-engine.js</code>.</p>
+  <div id="out-engine"></div>
+
+  <h2 class="suite-h">Suite <code>calcs</code> — calcoli derivati §3.6</h2>
+  <p>Riferimento: §3.6; <code>assets/app.js</code>.</p>
+  <div id="out-calcs"></div>
+
+  <p class="disclaimer">Un esito verde indica coerenza interna del motore con le regole codificate, non una validazione giuridica. Le designazioni caso per caso, le esclusioni per sicurezza nazionale e la valutazione integrale di conformità restano fuori dallo strumento.</p>
+</div>
+
+<script src="../data/scope_sectors.js"></script>
+<script src="../data/regime_classifier.js"></script>
+<script src="../data/regime_rules.js"></script>
+<script src="../data/scales.js"></script>
+<script src="../data/capability_domains.js"></script>
+<script src="../data/dependency_taxonomy.js"></script>
+<script src="../data/assessment_schema.js"></script>
+<script src="../data/organization_schema.js"></script>
+<script src="../assets/app.js"></script>
+<script src="../assets/regime-engine.js"></script>
+<script src="../tests/cases.js"></script>
+<script src="../tests/runner.js"></script>
+<script>
+(function () {
+  function run() {
+    var e = CPF.runTests({ suites: ["engine"], mount: document.getElementById("out-engine") });
+    var c = CPF.runTests({ suites: ["calcs"], mount: document.getElementById("out-calcs") });
+    var total = e.total + c.total, pass = e.pass + c.pass, fail = e.fail + c.fail;
+    var pct = total ? Math.round((pass / total) * 100) : 0;
+    var sum = document.getElementById("sum");
+    sum.className = "tr-sum " + (fail ? "ko" : "ok");
+    sum.innerHTML =
+      '<div class="tr-sum-line"><b>' + pass + ' / ' + total + '</b> test superati'
+      + (fail ? ' &nbsp;·&nbsp; <span class="tr-sum-fail">' + fail + ' falliti</span>' : ' &nbsp;·&nbsp; tutto verde')
+      + ' &nbsp;·&nbsp; engine ' + e.pass + '/' + e.total + ', calcs ' + c.pass + '/' + c.total + '</div>'
+      + '<div class="tr-progress"><span style="width:' + pct + '%"></span></div>';
+  }
+  document.getElementById("rerun").addEventListener("click", function (ev) { ev.preventDefault(); run(); });
+  run();
+})();
+</script>
+<script src="../assets/theme-toggle.js"></script>
+</body>
+</html>
