@@ -58,9 +58,9 @@
     // griglia livelli 1..5
     for (var L = 1; L <= 5; L++) {
       svg.appendChild(el("line", { x1: xFor(L), y1: padT, x2: xFor(L), y2: H - padB,
-        stroke: "var(--border)", "stroke-width": 1 }));
-      var t = el("text", { x: xFor(L), y: H - 8, "text-anchor": "middle",
-        "font-size": 10, fill: "var(--faint)" });
+        stroke: "var(--border)", "stroke-width": 1, opacity: L === 1 || L === 5 ? 0.9 : 0.45 }));
+      var t = el("text", { x: xFor(L), y: H - 7, "text-anchor": "middle",
+        "font-size": 9.5, "font-family": "var(--mono)", fill: "var(--faint)" });
       t.textContent = L;
       svg.appendChild(t);
     }
@@ -82,8 +82,9 @@
 
       // etichetta dimensione
       var dimLabel = (scales.dimensions[dim] && scales.dimensions[dim].label) || dim;
-      var lbl = el("text", { x: padL - 12, y: y + 3, "text-anchor": "end",
-        "font-size": 12, fill: shortfall ? "var(--danger)" : "var(--ink)" });
+      var lbl = el("text", { x: padL - 14, y: y + 3.5, "text-anchor": "end",
+        "font-size": 11.5, "font-family": "var(--sans)", "font-weight": 500,
+        fill: shortfall ? "var(--danger)" : "var(--ink)" });
       lbl.textContent = (shortfall ? "⚠ " : "") + dimLabel;
       svg.appendChild(lbl);
 
