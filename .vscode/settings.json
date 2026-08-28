@@ -1,0 +1,4 @@
+{
+  "// nota": "La cartella home ~/ è per errore un repo git. Questo impedisce a VS Code di agganciare quel repo invece di CPF-Assessment.",
+  "git.openRepositoryInParentFolders": "never"
+}
