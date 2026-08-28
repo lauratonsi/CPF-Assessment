@@ -207,3 +207,67 @@ textarea.field { min-height: 5rem; resize: vertical; }
   background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px;
   font-family: var(--mono); font-size: 0.74rem; line-height: 1.5; color: var(--ink); white-space: pre;
 }
+
+/* ============================================================
+   Rifiniture UI (2026-08-29)
+   ============================================================ */
+
+/* stepper: sticky, con marcatori di stato */
+.stepper {
+  position: sticky; top: 0; z-index: 40;
+  margin: 0 -1.5rem 1.6rem; padding: 0.8rem 1.5rem;
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--border);
+}
+@supports not (backdrop-filter: blur(6px)) { .stepper { background: var(--paper); } }
+.stepper a, .stepper span { transition: border-color .15s, color .15s, background .15s; }
+.stepper a:hover { border-color: var(--accent); color: var(--accent-ink); }
+.stepper .is-done { color: var(--ink); border-color: color-mix(in srgb, var(--ok) 45%, var(--border)); }
+.stepper .is-done::before { content: "✓ "; color: var(--ok); font-weight: 700; }
+.stepper .is-todo { opacity: 0.62; }
+.stepper .is-current { font-weight: 600; }
+
+/* riga di contesto sotto lo stepper (assets/nav.js) */
+.nav-context {
+  display: flex; align-items: baseline; gap: 0.15rem; flex-wrap: wrap;
+  margin: -0.8rem 0 1.8rem; font-size: 0.82rem;
+}
+.nav-context .nc-fn { font-family: var(--serif); font-weight: 600; }
+.nav-context .nc-org, .nav-context .nc-crit { color: var(--muted); }
+.nav-context .nc-link { margin-left: 0.6rem; font-family: var(--mono); font-size: 0.72rem; }
+
+/* masthead un filo più compatto nel wizard */
+.masthead { padding: 1.6rem 0 1.2rem; }
+.masthead h1 { font-size: clamp(1.6rem, 4vw, 2.3rem); }
+.dek { font-size: 0.92rem; color: var(--muted); max-width: 46rem; }
+
+/* bottoni */
+.btn { transition: border-color .15s, background .15s, transform .05s; font-weight: 500; }
+.btn:hover { border-color: var(--accent); }
+.btn:active { transform: translateY(1px); }
+.btn--primary { border-color: var(--accent); }
+.btn--primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); color: #fff; }
+.btn--ghost:hover { background: var(--surface-2); }
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* campi: focus più evidente */
+.field:focus, select.field:focus, input.field:focus, textarea.field:focus {
+  outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+/* card e liste dell'hub */
+.card { transition: border-color .15s; }
+.item { transition: border-color .15s, background .15s; }
+.item:hover { border-color: color-mix(in srgb, var(--accent) 40%, var(--border)); }
+
+/* utilità */
+.stack > * + * { margin-top: 0.9rem; }
+
+@media print {
+  .stepper, .theme-toggle, .toast { display: none !important; }
+  body { background: #fff; color: #000; }
+  .wrap { max-width: none; padding: 0; }
+  a { color: inherit; text-decoration: none; }
+}

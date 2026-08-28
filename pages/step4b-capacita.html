@@ -6,10 +6,57 @@
 <title>Step 4b — Capacità · CPF Assessment</title>
   <link rel="stylesheet" href="../assets/theme.css">
 <script>(function(){try{var t=localStorage.getItem("cpf-theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+<style>
+  .intro { font-size: 0.88rem; color: var(--muted); margin: 0.2rem 0 1.2rem; }
+
+  .dom { border: 1px solid var(--border); border-radius: 8px; padding: 0.9rem 1rem 1rem; margin: 0.9rem 0; background: var(--surface); }
+  .dom.ess { border-color: var(--danger); }
+  .dom h3 { font-size: 1rem; margin: 0 0 0.1rem; display: flex; gap: 0.5rem; align-items: baseline; flex-wrap: wrap; }
+  .dom h3 .tag { font-family: var(--mono); font-size: 0.62rem; padding: 0.06rem 0.4rem; border-radius: 3px; border: 1px solid var(--danger); color: var(--danger); }
+  .dom .dsc { font-size: 0.78rem; color: var(--muted); margin: 0 0 0.5rem; }
+  .dom .prio { margin: 0.2rem 0 0.6rem; display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .chip { font-family: var(--mono); font-size: 0.66rem; padding: 0.08rem 0.45rem; border-radius: 3px; border: 1px solid var(--border); color: var(--muted); }
+  .chip.int-alta { border-color: var(--danger); color: var(--danger); }
+  .chip.int-media { border-color: var(--accent); color: var(--accent-ink); }
+  .chip.ver { border-color: var(--accent); color: var(--accent-ink); background: var(--accent-tint); }
+
+  .dim { border-top: 1px solid var(--border); padding: 0.6rem 0; }
+  .dim .head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; }
+  .dim .dname { font-size: 0.86rem; font-weight: 600; }
+  .dim .tgt { font-family: var(--mono); font-size: 0.72rem; color: var(--faint); }
+  .dim .tgt b { color: var(--accent-ink); }
+  .dim .grid { display: grid; gap: 0.4rem 0.6rem; margin-top: 0.4rem; grid-template-columns: 1fr; }
+  @media (min-width: 40rem) { .dim .grid { grid-template-columns: 1fr 1fr; } .dim .grid .wide { grid-column: 1 / -1; } }
+  .dim label { font-size: 0.74rem; color: var(--muted); display: block; }
+  .dim label > span { display: block; margin-bottom: 0.15rem; }
+  .dim select, .dim input {
+    width: 100%; font: inherit; font-size: 0.83rem; padding: 0.36rem 0.5rem;
+    border: 1px solid var(--border); border-radius: 5px; background: var(--paper); color: var(--ink);
+  }
+  .dim .desc { font-size: 0.73rem; color: var(--faint); margin: 0.2rem 0 0; }
+  .dim .fb { margin: 0.35rem 0 0; font-size: 0.78rem; }
+  .dim .fb.gap { color: var(--accent-ink); }
+  .dim .fb.ok { color: var(--ok); }
+  .dim .fb.uncert { color: var(--accent-ink); }
+  .dim .fb.ess { color: var(--danger); font-weight: 600; }
+
+  .thr-fb { margin-top: 0.6rem; padding: 0.55rem 0.7rem; border-radius: 6px; font-size: 0.8rem; border: 1px solid var(--border); }
+  .thr-fb.short { border-color: var(--danger); color: var(--danger); background: color-mix(in srgb, var(--danger) 7%, transparent); font-weight: 600; }
+  .thr-fb.verify { border-color: var(--accent); color: var(--accent-ink); background: var(--accent-tint); }
+  .thr-fb.ok { border-color: var(--ok); color: var(--ok); }
+
+  .ed-summary { border: 1px solid var(--border); border-radius: 7px; padding: 0.7rem 0.85rem; margin-top: 1.2rem; font-size: 0.82rem; background: var(--surface-2); }
+  .ed-summary b { font-family: var(--mono); }
+  .ed-summary .crit { color: var(--danger); }
+  .ed-summary ul { margin: 0.4rem 0 0; padding-left: 1.1rem; }
+  .saved-note { font-family: var(--mono); font-size: 0.72rem; color: var(--faint); margin-top: 0.5rem; min-height: 1em; }
+  .toast { position: fixed; left: 50%; bottom: 1.4rem; transform: translateX(-50%); background: var(--ink); color: var(--paper); font-size: 0.85rem; padding: 0.6rem 1rem; border-radius: 6px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast.show { opacity: 0.95; }
+</style>
 </head>
 <body>
 <div class="wrap">
-  <nav class="stepper">
+  <nav class="stepper" data-nav>
     <a class="is-done" href="step1-regimi.html">1 · Regimi</a>
     <a class="is-done" href="step2-funzione.html">2 · Funzione</a>
     <a class="is-done" href="step3-dipendenze.html">3 · Dipendenze</a>
@@ -20,20 +67,266 @@
   </nav>
   <header class="masthead">
     <h1>Step 4b — Valutazione delle capacità</h1>
-    <p class="dek">Per ciascuno dei 6-7 domini: profilo corrente e obiettivo su quattro dimensioni indipendenti (consolidamento, estensione, efficacia, prestazione osservata), forza probatoria per livello, soglie non compensabili per le capacità essenziali. Riferimento: §3.5-3.6.</p>
+    <p class="dek">Per ciascun dominio richiesto dallo Step 4a: profilo corrente su quattro dimensioni indipendenti (consolidamento, estensione, efficacia, prestazione osservata), con la forza probatoria di ogni livello. Il confronto con il profilo obiettivo produce i divari; per le capacità essenziali la soglia non compensabile resta separata. Riferimento: §3.5-3.6.</p>
   </header>
-  <section class="card"><h2>In costruzione</h2>
-    <p class="muted">Griglia domini × dimensioni. Le conseguenze intollerabili e i percorsi di compromissione (logica CCE) alimentano il profilo obiettivo e le capacità essenziali.</p>
+
+  <section class="card" id="gate-card" hidden>
+    <h2 id="gate-title">Prima definisci conseguenze e percorsi</h2>
+    <p class="muted" id="gate-msg"></p>
+    <div class="btn-row" style="justify-content:flex-start; margin-top:1rem">
+      <a class="btn btn--primary" id="gate-link" href="step4a-conseguenze.html">Vai allo Step 4a</a>
+    </div>
   </section>
+
+  <div id="editor" hidden>
+    <p class="intro" id="ed-fn"></p>
+    <p class="intro">Il <b>livello</b> è ordinale (1-5), non un voto: descrive uno stato, non una percentuale. La <b>forza probatoria</b> è separata dal livello — «non determinabile» non abbassa il livello, ma sospende il divario e genera una priorità di <i>verifica</i>, non di intervento (§3.6).</p>
+
+    <div id="dom-list"></div>
+
+    <div class="ed-summary" id="ed-summary" hidden></div>
+    <p class="saved-note" id="saved-note"></p>
+  </div>
+
   <div class="btn-row">
     <a class="btn btn--ghost" href="step4a-conseguenze.html">← Conseguenze</a>
-    <a class="btn btn--primary" href="dashboard.html">Vedi esito →</a>
+    <button type="button" class="btn btn--primary" id="next">Vedi esito →</button>
   </div>
 </div>
+<div class="toast" id="toast"></div>
+
 <script src="../data/capability_domains.js"></script>
 <script src="../data/scales.js"></script>
 <script src="../data/assessment_schema.js"></script>
 <script src="../assets/app.js"></script>
+<script>
+(function () {
+  var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var $ = function (id) { return document.getElementById(id); };
+
+  var DOMS = CPF.data.capabilityDomains.domains;
+  var SC = CPF.data.scales.dimensions;
+  var STR = CPF.data.scales.evidentiary_strength.values; // corroborata | parziale | non_determinabile
+  var DIMS = ["consolidamento", "estensione", "efficacia", "prestazione_osservata"];
+  var domLabel = function (id) { var d = DOMS.filter(function (x) { return x.id === id; })[0]; return d ? d.label : id; };
+  var domDesc = function (id) { var d = DOMS.filter(function (x) { return x.id === id; })[0]; return d ? d.description : ""; };
+
+  var params = new URLSearchParams(location.search);
+  var a = params.get("id") ? CPF.loadAssessment(params.get("id")) : CPF.getActive();
+
+  if (!a || !a.function || !a.function.name) {
+    $("gate-card").hidden = false;
+    $("gate-title").textContent = "Prima definisci la funzione";
+    $("gate-msg").textContent = "Lo Step 4b valuta le capacità di una funzione già definita (Step 2) e collegata a conseguenze e percorsi (Step 4a).";
+    $("gate-link").textContent = "Vai allo Step 2"; $("gate-link").href = "step2-funzione.html";
+    $("next").addEventListener("click", function () { location.href = "dashboard.html"; });
+    return;
+  }
+  CPF.setActive(a.assessment_id);
+  if (!Array.isArray(a.capability_assessment)) a.capability_assessment = [];
+
+  if (!a.capability_assessment.length) {
+    $("gate-card").hidden = false;
+    $("gate-msg").textContent = "Nessun dominio di capacità richiesto: torna allo Step 4a e marca, nei percorsi di compromissione, le capacità necessarie a interromperli. Il profilo obiettivo — e questa griglia — si costruiscono da lì.";
+    $("next").addEventListener("click", function () { location.href = "dashboard.html"; });
+    return;
+  }
+
+  // assicura il profilo corrente per ogni dominio
+  a.capability_assessment.forEach(function (e) {
+    if (!e.current_profile) e.current_profile = CPF.blankCurrentProfile();
+    DIMS.forEach(function (d) {
+      if (!e.current_profile[d]) e.current_profile[d] = { level: 3, evidentiary_strength: "non_determinabile", evidence_notes: "" };
+    });
+    if (!Array.isArray(e.current_profile.estensione.excluded_essential_components)) e.current_profile.estensione.excluded_essential_components = [];
+    if (!e.target_profile) e.target_profile = {};
+  });
+
+  var crit = (typeof a.function.criticality === "number") ? a.function.criticality : null;
+  $("editor").hidden = false;
+  $("ed-fn").innerHTML = "Funzione: <b>" + esc(a.function.name) + "</b>"
+    + (crit ? " · criticità " + crit + "/4" : " · criticità non indicata")
+    + " · " + a.capability_assessment.length + " domini · "
+    + a.capability_assessment.filter(function (e) { return e.is_essential; }).length + " essenziali";
+
+  var listEl = $("dom-list"), toast = $("toast"), savedNote = $("saved-note");
+  var saveTimer = null;
+  function flash(m) { toast.textContent = m; toast.classList.add("show"); setTimeout(function () { toast.classList.remove("show"); }, 1500); }
+
+  function levelOpt(dim, cur) {
+    return SC[dim].levels.map(function (l) {
+      return '<option value="' + l.value + '"' + (Number(cur) === l.value ? " selected" : "") + '>' + l.value + " — " + esc(l.label) + '</option>';
+    }).join("");
+  }
+  function strOpt(cur) {
+    return STR.map(function (s) {
+      return '<option value="' + s.id + '"' + (s.id === cur ? " selected" : "") + '>' + esc(s.label) + '</option>';
+    }).join("");
+  }
+
+  function dimBlock(e, d) {
+    var cp = e.current_profile[d], tp = e.target_profile[d];
+    var curLv = SC[d].levels.filter(function (x) { return x.value === Number(cp.level); })[0];
+    var tgtLv = tp ? SC[d].levels.filter(function (x) { return x.value === Number(tp.level); })[0] : null;
+    var h = '<div class="dim" data-dim="' + d + '">'
+      + '<div class="head"><span class="dname">' + esc(SC[d].label) + '</span>'
+      + '<span class="tgt">obiettivo: ' + (tp ? '<b>' + tp.level + '</b> — ' + esc(tgtLv ? tgtLv.label : "") : "non definito") + '</span></div>'
+      + '<div class="grid">'
+      + '<label><span>Livello corrente</span><select data-f="level">' + levelOpt(d, cp.level) + '</select>'
+      + '<p class="desc">' + esc(curLv ? curLv.descriptor : "") + '</p></label>'
+      + '<label><span>Forza probatoria</span><select data-f="evidentiary_strength">' + strOpt(cp.evidentiary_strength) + '</select></label>'
+      + '<label class="wide"><span>Note di evidenza</span><input data-f="evidence_notes" placeholder="cosa sostiene il livello: documenti, test, audit, riscontri operativi" value="' + esc(cp.evidence_notes) + '"></label>';
+    if (d === "estensione") {
+      h += '<label class="wide"><span>Componenti essenziali esclusi dalla copertura (separati da virgola) — §3.6, non riassorbire nel punteggio</span>'
+        + '<input data-f="excluded_essential_components" placeholder="es. PLC di dosaggio linea A, storico di processo" value="' + esc((cp.excluded_essential_components || []).join(", ")) + '"></label>';
+    }
+    h += '</div><p class="fb" data-fb></p></div>';
+    return h;
+  }
+
+  function domCard(e) {
+    return '<div class="dom' + (e.is_essential ? " ess" : "") + '" data-dom="' + esc(e.domain_id) + '">'
+      + '<h3>' + esc(domLabel(e.domain_id)) + (e.is_essential ? ' <span class="tag">ESSENZIALE</span>' : '') + '</h3>'
+      + '<p class="dsc">' + esc(domDesc(e.domain_id)) + '</p>'
+      + '<div class="prio" data-prio></div>'
+      + DIMS.map(function (d) { return dimBlock(e, d); }).join("")
+      + (e.is_essential ? '<div class="thr-fb" data-thr></div>' : '')
+      + '</div>';
+  }
+
+  function render() {
+    listEl.innerHTML = a.capability_assessment.map(domCard).join("");
+    decorate();
+    summarize();
+  }
+
+  function readGrid() {
+    Array.prototype.forEach.call(listEl.querySelectorAll(".dom"), function (el) {
+      var e = a.capability_assessment.filter(function (x) { return x.domain_id === el.getAttribute("data-dom"); })[0];
+      if (!e) return;
+      Array.prototype.forEach.call(el.querySelectorAll(".dim"), function (dEl) {
+        var d = dEl.getAttribute("data-dim");
+        var cp = e.current_profile[d] || (e.current_profile[d] = {});
+        var lvl = dEl.querySelector('[data-f="level"]');
+        var str = dEl.querySelector('[data-f="evidentiary_strength"]');
+        var nt = dEl.querySelector('[data-f="evidence_notes"]');
+        cp.level = lvl ? Number(lvl.value) : 3;
+        cp.evidentiary_strength = str ? str.value : "non_determinabile";
+        cp.evidence_notes = nt ? nt.value : "";
+        if (d === "estensione") {
+          var ex = dEl.querySelector('[data-f="excluded_essential_components"]');
+          cp.excluded_essential_components = ex && ex.value.trim()
+            ? ex.value.split(",").map(function (s) { return s.trim(); }).filter(Boolean) : [];
+        }
+      });
+    });
+  }
+
+  function decorate() {
+    Array.prototype.forEach.call(listEl.querySelectorAll(".dom"), function (el) {
+      var e = a.capability_assessment.filter(function (x) { return x.domain_id === el.getAttribute("data-dom"); })[0];
+      if (!e) return;
+
+      Array.prototype.forEach.call(el.querySelectorAll(".dim"), function (dEl) {
+        var d = dEl.getAttribute("data-dim");
+        var g = CPF.dimensionGap(e.current_profile[d], e.target_profile[d]);
+        var fb = dEl.querySelector("[data-fb]");
+        var thrDim = e.non_compensable_threshold && e.non_compensable_threshold.dimension === d;
+        if (g.state === "incertezza_probatoria") {
+          fb.className = "fb uncert";
+          fb.textContent = "Incertezza probatoria — il livello non è attribuibile: priorità di verifica, non di intervento.";
+        } else if (g.state === "nessun_obiettivo") {
+          fb.className = "fb"; fb.textContent = "Nessun obiettivo definito per questa dimensione (Step 4a).";
+        } else if (g.gap > 0) {
+          fb.className = "fb gap";
+          fb.textContent = "Divario di " + g.gap + " livell" + (g.gap === 1 ? "o" : "i") + " rispetto all'obiettivo"
+            + (e.current_profile[d].evidentiary_strength === "parziale" ? " — su livello solo parzialmente documentato: verifica prima dell'intervento." : ".");
+        } else {
+          fb.className = "fb ok"; fb.textContent = "Obiettivo raggiunto per questa dimensione.";
+        }
+        if (thrDim) fb.textContent += "  ·  dimensione della soglia non compensabile.";
+      });
+
+      // soglia non compensabile
+      if (e.is_essential) {
+        var thrEl = el.querySelector("[data-thr]");
+        var s = CPF.essentialShortfall(e);
+        var t = e.non_compensable_threshold || {};
+        if (!s) {
+          thrEl.className = "thr-fb ok";
+          thrEl.textContent = t.dimension
+            ? "Soglia non compensabile rispettata: " + SC[t.dimension].label + " ≥ " + t.min_level + "."
+            : "Nessuna soglia non compensabile impostata (Step 4a).";
+        } else if (s.kind === "divario_essenziale") {
+          thrEl.className = "thr-fb short";
+          thrEl.textContent = "DIVARIO ESSENZIALE — anello debole: " + SC[s.dimension].label + " a " + s.have + ", soglia minima " + s.need + ". Non compensabile da altre dimensioni; porta la priorità di intervento ad «alta».";
+        } else {
+          thrEl.className = "thr-fb verify";
+          thrEl.textContent = "Soglia su livello non determinabile (" + SC[s.dimension].label + "): priorità di verifica sulla capacità essenziale, non di intervento.";
+        }
+      }
+
+      // priorità del dominio
+      var p = CPF.domainPriority(e, crit);
+      var prioEl = el.querySelector("[data-prio]");
+      var chips = "";
+      if (p && p.priorita_intervento) chips += '<span class="chip int-' + p.priorita_intervento.band + '">intervento: ' + p.priorita_intervento.band + '</span>';
+      if (p && p.priorita_verifica) chips += '<span class="chip ver">verifica: ' + p.priorita_verifica.band + '</span>';
+      if (!chips) chips = '<span class="chip">nessuna priorità — allineato o senza divari corroborati</span>';
+      prioEl.innerHTML = chips;
+    });
+  }
+
+  function summarize() {
+    var s = $("ed-summary");
+    s.hidden = false;
+    var ranked = CPF.rankDomains(a.capability_assessment, crit);
+    var essShort = a.capability_assessment.filter(function (e) {
+      var x = CPF.essentialShortfall(e); return x && x.kind === "divario_essenziale";
+    });
+    var essVerify = a.capability_assessment.filter(function (e) {
+      var x = CPF.essentialShortfall(e); return x && x.kind === "verifica";
+    });
+    var undet = 0;
+    a.capability_assessment.forEach(function (e) {
+      DIMS.forEach(function (d) { if (e.current_profile[d].evidentiary_strength === "non_determinabile") undet++; });
+    });
+    var topInt = ranked.filter(function (r) { return r.priorita_intervento && r.priorita_intervento.band === "alta"; });
+    s.innerHTML = '<b>' + a.capability_assessment.length + '</b> domini · '
+      + '<span class="' + (essShort.length ? "crit" : "") + '"><b>' + essShort.length + '</b> divari essenziali</span> · '
+      + '<b>' + topInt.length + '</b> a priorità di intervento alta · '
+      + '<b>' + (undet) + '</b> livelli non determinabili'
+      + (essVerify.length ? ' · <b>' + essVerify.length + '</b> soglie da verificare' : '')
+      + (essShort.length ? '<ul>' + essShort.map(function (e) {
+          var x = CPF.essentialShortfall(e);
+          return '<li>' + esc(domLabel(e.domain_id)) + ' — ' + SC[x.dimension].label + ' ' + x.have + '/' + x.need + '</li>';
+        }).join("") + '</ul>' : '')
+      + '<span class="muted" style="font-size:.78rem">L\'ordinamento completo e i grafici sono nella dashboard. L\'aggregato è descrittivo (§3.7): i divari essenziali non vi sono assorbiti.</span>';
+  }
+
+  function save(immediate) {
+    clearTimeout(saveTimer);
+    var doSave = function () {
+      CPF.saveAssessment(a);
+      savedNote.textContent = "salvato automaticamente · " + new Date().toTimeString().slice(0, 8);
+    };
+    if (immediate) doSave(); else saveTimer = setTimeout(doSave, 500);
+  }
+
+  listEl.addEventListener("input", function () { readGrid(); decorate(); summarize(); save(); });
+  listEl.addEventListener("change", function () { readGrid(); decorate(); summarize(); save(); });
+
+  $("next").addEventListener("click", function () {
+    readGrid(); save(true);
+    flash("Valutazione delle capacità salvata");
+    location.href = "dashboard.html?id=" + encodeURIComponent(a.assessment_id);
+  });
+
+  render();
+  save(true); // persiste i profili correnti inizializzati
+})();
+</script>
+<script src="../assets/nav.js"></script>
 <script src="../assets/theme-toggle.js"></script>
 </body>
 </html>

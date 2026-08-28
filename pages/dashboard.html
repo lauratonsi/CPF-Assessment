@@ -6,10 +6,92 @@
 <title>Esito · CPF Assessment</title>
   <link rel="stylesheet" href="../assets/theme.css">
 <script>(function(){try{var t=localStorage.getItem("cpf-theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+<style>
+  .wrap { max-width: 58rem; }
+  .demo-banner { border: 1px solid var(--accent); background: var(--accent-tint); color: var(--accent-ink); border-radius: 8px; padding: 0.7rem 0.95rem; margin: 1rem 0 1.4rem; font-size: 0.86rem; display: flex; gap: 0.8rem; align-items: center; flex-wrap: wrap; }
+  .demo-banner b { font-family: var(--serif); }
+  .demo-banner a { margin-left: auto; }
+
+  .d-sec { margin: 1.8rem 0; }
+  .d-sec > h2 { font-size: 1.1rem; margin: 0 0 0.2rem; }
+  .d-sec > .lead { font-size: 0.83rem; color: var(--muted); margin: 0 0 0.8rem; }
+
+  .fn-head { border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.1rem; background: var(--surface); }
+  .fn-head h2 { margin: 0 0 0.15rem; font-size: 1.15rem; }
+  .fn-head .sub { font-size: 0.82rem; color: var(--muted); }
+  .fn-head dl { margin: 0.7rem 0 0; font-size: 0.85rem; }
+  .fn-head dt { color: var(--muted); font-size: 0.74rem; margin-top: 0.5rem; }
+  .fn-head dd { margin: 0.1rem 0 0; }
+  .crit-badge { font-family: var(--mono); font-size: 0.7rem; border: 1px solid var(--accent); color: var(--accent-ink); background: var(--accent-tint); border-radius: 3px; padding: 0.08rem 0.45rem; }
+
+  .reg-grid { display: grid; gap: 0.6rem; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); }
+  .reg-card { border: 1px solid var(--border); border-radius: 8px; padding: 0.6rem 0.75rem; background: var(--surface); font-size: 0.82rem; }
+  .reg-card h3 { margin: 0 0 0.3rem; font-size: 0.82rem; display: flex; justify-content: space-between; gap: 0.4rem; align-items: baseline; }
+  .reg-card .tag { font-family: var(--mono); font-size: 0.62rem; padding: 0.06rem 0.35rem; border-radius: 3px; border: 1px solid var(--border); flex: none; }
+  .reg-card .tag.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .reg-card .tag.ess { background: var(--danger); border-color: var(--danger); color: #fff; }
+  .reg-card .tag.off { color: var(--faint); }
+  .reg-card p { margin: 0.2rem 0 0; color: var(--muted); font-size: 0.76rem; }
+
+  .panel { border: 1px solid var(--border); border-radius: 8px; padding: 0.7rem 0.9rem; margin-top: 0.7rem; font-size: 0.82rem; background: var(--surface-2); }
+  .panel.warn { border-color: var(--accent); background: var(--accent-tint); color: var(--accent-ink); }
+  .panel h4 { margin: 0 0 0.35rem; font-size: 0.82rem; }
+  .panel ul { margin: 0; padding-left: 1.1rem; }
+  .panel li { margin: 0.2rem 0; }
+
+  .dep-flow { width: 100%; overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); padding: 0.5rem; }
+  .dep-stat { display: flex; gap: 0.5rem; flex-wrap: wrap; font-size: 0.8rem; margin-bottom: 0.6rem; }
+  .dep-stat b { font-family: var(--mono); }
+  .mini-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  .mini-table th, .mini-table td { text-align: left; padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .mini-table th { font-size: 0.7rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+  .mini-table tr.crit td { color: var(--danger); }
+
+  .cap-block { border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem 0.9rem; margin: 0.7rem 0; background: var(--surface); }
+  .cap-block.ess { border-color: var(--danger); }
+  .cap-block h3 { margin: 0 0 0.1rem; font-size: 0.95rem; display: flex; gap: 0.5rem; align-items: baseline; flex-wrap: wrap; }
+  .cap-block .tag { font-family: var(--mono); font-size: 0.6rem; padding: 0.06rem 0.4rem; border-radius: 3px; border: 1px solid var(--danger); color: var(--danger); }
+  .chips { display: flex; gap: 0.35rem; flex-wrap: wrap; margin: 0.3rem 0 0.5rem; }
+  .chip { font-family: var(--mono); font-size: 0.64rem; padding: 0.08rem 0.45rem; border-radius: 3px; border: 1px solid var(--border); color: var(--muted); }
+  .chip.int-alta { border-color: var(--danger); color: var(--danger); }
+  .chip.int-media { border-color: var(--accent); color: var(--accent-ink); }
+  .chip.ver { border-color: var(--accent); color: var(--accent-ink); background: var(--accent-tint); }
+
+  .ess-box { border: 1px solid var(--danger); border-radius: 10px; padding: 0.9rem 1.05rem; background: color-mix(in srgb, var(--danger) 7%, transparent); }
+  .ess-box h2 { color: var(--danger); margin: 0 0 0.3rem; font-size: 1.05rem; }
+  .ess-box ul { margin: 0.4rem 0 0; padding-left: 1.1rem; font-size: 0.86rem; }
+  .ess-box .none { color: var(--ok); font-size: 0.88rem; }
+
+  .prio-cols { display: grid; gap: 0.8rem; grid-template-columns: 1fr; }
+  @media (min-width: 44rem) { .prio-cols { grid-template-columns: 1fr 1fr; } }
+  .prio-col { border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem 0.9rem; background: var(--surface); }
+  .prio-col h3 { margin: 0 0 0.5rem; font-size: 0.9rem; }
+  .prio-col.intervento h3 { color: var(--danger); }
+  .prio-item { border-top: 1px solid var(--border); padding: 0.45rem 0; font-size: 0.84rem; }
+  .prio-item:first-of-type { border-top: 0; }
+  .prio-item .band { font-family: var(--mono); font-size: 0.64rem; padding: 0.05rem 0.35rem; border-radius: 3px; border: 1px solid currentColor; }
+  .prio-item .band.alta { color: var(--danger); }
+  .prio-item .band.media { color: var(--accent-ink); }
+  .prio-item .band.bassa { color: var(--muted); }
+  .prio-item small { display: block; color: var(--muted); font-size: 0.76rem; margin-top: 0.15rem; }
+
+  .cons-item { border: 1px solid var(--border); border-radius: 8px; padding: 0.7rem 0.85rem; margin: 0.6rem 0; background: var(--surface); font-size: 0.85rem; }
+  .cons-item > b { display: block; margin-bottom: 0.3rem; }
+  .cons-item .path { border-left: 2px solid var(--accent-tint); padding-left: 0.7rem; margin: 0.4rem 0; font-size: 0.82rem; color: var(--muted); }
+  .cons-item .path .caps { margin-top: 0.25rem; font-family: var(--mono); font-size: 0.72rem; }
+  .cons-item .path .caps .e { color: var(--danger); }
+
+  .dash-actions { display: flex; gap: 0.7rem; flex-wrap: wrap; margin-top: 1.5rem; }
+  @media print {
+    .stepper, .theme-toggle, .dash-actions, .btn-row { display: none !important; }
+    .wrap { max-width: none; }
+    .cap-block, .reg-card, .fn-head, .panel, .prio-col { break-inside: avoid; }
+  }
+</style>
 </head>
 <body>
 <div class="wrap">
-  <nav class="stepper">
+  <nav class="stepper" data-nav data-step="9">
     <a class="is-done" href="step1-regimi.html">1 · Regimi</a>
     <a class="is-done" href="step2-funzione.html">2 · Funzione</a>
     <a class="is-done" href="step3-dipendenze.html">3 · Dipendenze</a>
@@ -20,17 +102,24 @@
   </nav>
   <header class="masthead">
     <h1>Esito della valutazione</h1>
-    <p class="dek">Profilo corrente vs obiettivo per dominio e dimensione, divari essenziali (anello debole, non assorbiti in medie), priorità di intervento e priorità di verifica distinte.</p>
+    <p class="dek">Profilo corrente rispetto all'obiettivo per dominio e dimensione, divari essenziali tenuti separati (anello debole, non assorbiti in medie), priorità di intervento e priorità di verifica distinte. Riferimento: §3.6-3.7.</p>
   </header>
-  <section class="card"><h2>In costruzione</h2>
-    <p class="muted">Sintesi regimi + grafici (radar per dominio, Sankey dipendenze), tabella gap, elenco divari essenziali e priorità. Export JSON e stampa.</p>
-  </section>
+
+  <div id="demo-banner" class="demo-banner" hidden></div>
+  <div id="out"></div>
+
+  <div class="dash-actions">
+    <button type="button" class="btn" id="export">Esporta JSON</button>
+    <button type="button" class="btn" id="print">Stampa / PDF</button>
+    <a class="btn btn--ghost" href="../index.html">Tutte le valutazioni</a>
+  </div>
+
   <div class="btn-row">
     <a class="btn btn--ghost" href="step4b-capacita.html">← Capacità</a>
-    <a class="btn btn--ghost" href="../index.html">Valutazioni</a>
   </div>
-  <p class="disclaimer">Strumento orientativo, non parere legale.</p>
+  <p class="disclaimer">Strumento orientativo, non parere legale. Un esito verde indica coerenza interna della valutazione con il modello, non conformità. Le designazioni caso per caso e la valutazione integrale di conformità restano fuori dallo strumento.</p>
 </div>
+
 <script src="../data/scope_sectors.js"></script>
 <script src="../data/regime_classifier.js"></script>
 <script src="../data/regime_rules.js"></script>
@@ -39,9 +128,283 @@
 <script src="../data/dependency_taxonomy.js"></script>
 <script src="../data/assessment_schema.js"></script>
 <script src="../data/organization_schema.js"></script>
+<script src="../data/demo_assessment.js"></script>
 <script src="../assets/app.js"></script>
 <script src="../assets/regime-engine.js"></script>
 <script src="../assets/dumbbell.js"></script>
+<script src="../assets/nav.js"></script>
+<script>
+(function () {
+  var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var $ = function (id) { return document.getElementById(id); };
+  var SC = CPF.data.scales.dimensions;
+  var STRLAB = {}; CPF.data.scales.evidentiary_strength.values.forEach(function (s) { STRLAB[s.id] = s.label; });
+  var DIMS = ["consolidamento", "estensione", "efficacia", "prestazione_osservata"];
+  var DOMS = CPF.data.capabilityDomains.domains;
+  var domLabel = function (id) { var d = DOMS.filter(function (x) { return x.id === id; })[0]; return d ? d.label : id; };
+
+  var params = new URLSearchParams(location.search);
+  var a = params.get("id") ? CPF.loadAssessment(params.get("id")) : CPF.getActive();
+  var isDemo = false;
+  if (!a || !a.function || !a.function.name) {
+    a = JSON.parse(JSON.stringify(CPF.data.demoAssessment));
+    isDemo = true;
+  }
+
+  // profilo dei regimi: calcolato dal motore se manca (demo) o incompleto
+  var RP = a.regime_profile;
+  if ((!RP || !RP.nis2) && a._answers) { try { RP = CPF.classifyRegimes(a._answers); } catch (e) { RP = null; } }
+  RP = RP || {};
+
+  var crit = (a.function && typeof a.function.criticality === "number") ? a.function.criticality : null;
+  var CA = Array.isArray(a.capability_assessment) ? a.capability_assessment : [];
+  CA.forEach(function (e) { if (!e.current_profile) e.current_profile = CPF.blankCurrentProfile(); });
+
+  if (isDemo) {
+    $("demo-banner").hidden = false;
+    $("demo-banner").innerHTML = '<b>Esempio dimostrativo</b> — nessuna valutazione attiva. Questi sono i risultati che la piattaforma produce a fine percorso, su una funzione di potabilizzazione.'
+      + '<a class="btn btn--primary" href="step1-regimi.html">Inizia una valutazione</a>';
+  }
+
+  var out = [];
+
+  /* ---------- funzione ---------- */
+  var F = a.function;
+  out.push('<section class="d-sec"><div class="fn-head">'
+    + '<h2>' + esc(F.name) + ' <span class="crit-badge">criticità ' + (crit || "—") + '/4</span></h2>'
+    + '<div class="sub">' + esc(a.organization_name || "organizzazione non collegata")
+    + (isDemo ? "" : " · aggiornata " + String(a.updated_at || "").slice(0, 10)) + '</div>'
+    + '<dl>'
+    + (F.service_description ? '<dt>Risultato da preservare</dt><dd>' + esc(F.service_description) + '</dd>' : '')
+    + (F.physical_process ? '<dt>Processo fisico</dt><dd>' + esc(F.physical_process) + '</dd>' : '')
+    + (F.perimeter ? '<dt>Perimetro</dt><dd>' + esc(F.perimeter) + '</dd>' : '')
+    + (F.criticality_rationale ? '<dt>Perché questa criticità</dt><dd>' + esc(F.criticality_rationale) + '</dd>' : '')
+    + '</dl></div></section>');
+
+  /* ---------- regimi ---------- */
+  var REGN = [["nis2", "NIS2"], ["cer", "CER"], ["dora", "DORA"], ["psnc", "PSNC"], ["cra", "CRA"], ["macchine", "Reg. Macchine"], ["ai_act", "AI Act"]];
+  var relReg = (F.regimes_relevant_to_this_function || []);
+  function regTag(k, r) {
+    if (!r || !r.applicable) return '<span class="tag off">n/d</span>';
+    if (k === "nis2") return '<span class="tag ' + (r.qualification === "essenziale" ? "ess" : "on") + '">' + esc(r.qualification || "applicabile") + '</span>';
+    if (k === "cer") return '<span class="tag ' + (r.designation === "soggetto_critico" ? "ess" : "on") + '">' + esc(String(r.designation || "applicabile").replace(/_/g, " ")) + '</span>';
+    if (k === "ai_act") {
+      if (r.status === "vietato") return '<span class="tag ess">vietato</span>';
+      if (r.high_risk === true) return '<span class="tag ess">alto rischio</span>';
+      if (r.high_risk === "escluso") return '<span class="tag on">alto rischio escluso</span>';
+      if (r.status === "canale_6_1_non_attivato") return '<span class="tag on">da verificare</span>';
+      return '<span class="tag on">applicabile</span>';
+    }
+    if (k === "macchine" && r.notified_body_required) return '<span class="tag ess">org. notificato</span>';
+    return '<span class="tag on">applicabile</span>';
+  }
+  var regCards = REGN.map(function (rg) {
+    var r = RP[rg[0]] || {};
+    var relevant = relReg.indexOf(rg[0]) !== -1;
+    var lastTrace = (r.trace || [])[(r.trace || []).length - 1];
+    return '<div class="reg-card"' + (relevant ? '' : ' style="opacity:.55"') + '>'
+      + '<h3>' + rg[1] + regTag(rg[0], r) + '</h3>'
+      + (r.applicable && lastTrace ? '<p>' + esc(lastTrace.base) + '</p>' : (relevant ? '' : '<p>non rilevante per questa funzione</p>'))
+      + (rg[0] === "ai_act" && r.compliance_deadline ? '<p>applicabilità differita: ' + esc(r.compliance_deadline) + '</p>' : '')
+      + '</div>';
+  }).join("");
+  out.push('<section class="d-sec"><h2>Regimi applicabili</h2>'
+    + '<p class="lead">Profilo dei regimi per questa funzione. In evidenza quelli rilevanti; gli altri sono attenuati.</p>'
+    + '<div class="reg-grid">' + regCards + '</div>'
+    + panel(RP.interactions, "Interazioni tra regimi", function (i) { return '<b>' + esc(i.type) + '</b>: ' + esc(i.text); })
+    + panel(RP.verification_flags, "Priorità di verifica normativa", function (v) { return esc(v); }, "warn")
+    + '</section>');
+
+  function panel(arr, title, fn, cls) {
+    if (!arr || !arr.length) return "";
+    return '<div class="panel ' + (cls || "") + '"><h4>' + esc(title) + '</h4><ul>'
+      + arr.map(function (x) { return '<li>' + fn(x) + '</li>'; }).join("") + '</ul></div>';
+  }
+
+  /* ---------- dipendenze ---------- */
+  var deps = Array.isArray(a.dependencies) ? a.dependencies : [];
+  function depCritical(d) { return d.coupling === "tight" && !d.alternative_available && d.position !== "downstream"; }
+  if (deps.length) {
+    var up = deps.filter(function (d) { return d.position === "upstream"; });
+    var down = deps.filter(function (d) { return d.position === "downstream"; });
+    var intn = deps.filter(function (d) { return d.position === "internal"; });
+    var critDeps = deps.filter(depCritical);
+    out.push('<section class="d-sec"><h2>Dipendenze</h2>'
+      + '<p class="lead">Relazioni orientate B → A (§3.4). In rosso gli anelli critici: accoppiamento stretto e nessuna alternativa.</p>'
+      + '<div class="dep-stat"><span><b>' + deps.length + '</b> totali</span><span><b>' + up.length + '</b> a monte</span>'
+      + '<span><b>' + intn.length + '</b> interne</span><span><b>' + down.length + '</b> a valle</span>'
+      + '<span style="color:var(--danger)"><b>' + critDeps.length + '</b> anelli critici</span></div>'
+      + depFlow(up, down, F.name)
+      + '<table class="mini-table" style="margin-top:0.8rem"><thead><tr><th>B → A</th><th>Risorsa</th><th>Classe</th><th>Accoppiamento</th><th>Alternativa</th></tr></thead><tbody>'
+      + deps.map(function (d) {
+          return '<tr class="' + (depCritical(d) ? "crit" : "") + '"><td>' + esc(d.source) + ' → ' + esc(d.target) + '</td>'
+            + '<td>' + esc(d.resource_or_condition) + '</td><td>' + esc(d.class) + '</td>'
+            + '<td>' + esc(d.coupling === "tight" ? "stretto" : "debole") + '</td>'
+            + '<td>' + (d.alternative_available ? esc(d.alternative_description || "sì") : "—") + '</td></tr>';
+        }).join("")
+      + '</tbody></table></section>');
+  }
+
+  function depFlow(up, down, fnName) {
+    var rows = Math.max(up.length, down.length, 1);
+    var W = 560, colGap = 40, boxH = 26, rowGap = 10, padT = 14;
+    var H = padT * 2 + rows * (boxH + rowGap);
+    var cx = W / 2, lw = 168, cw = 150;
+    var s = ['<svg class="dep-flow" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Diagramma delle dipendenze">'];
+    function box(x, y, w, label, danger) {
+      return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + boxH + '" rx="5" fill="var(--surface)" stroke="' + (danger ? "var(--danger)" : "var(--border)") + '"/>'
+        + '<text x="' + (x + w / 2) + '" y="' + (y + boxH / 2 + 3.5) + '" text-anchor="middle" font-size="9.5" fill="var(--ink)">' + esc(clip(label, 30)) + '</text>';
+    }
+    function line(x1, x2, y1, y2, danger) {
+      return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + (danger ? "var(--danger)" : "var(--faint)") + '" stroke-width="' + (danger ? 1.6 : 1) + '"/>';
+    }
+    var fnY = H / 2 - boxH / 2;
+    s.push('<rect x="' + (cx - cw / 2) + '" y="' + fnY + '" width="' + cw + '" height="' + boxH + '" rx="5" fill="var(--accent-tint)" stroke="var(--accent)"/>');
+    s.push('<text x="' + cx + '" y="' + (fnY + boxH / 2 + 3.5) + '" text-anchor="middle" font-size="10" fill="var(--accent-ink)">' + esc(clip(fnName, 26)) + '</text>');
+    up.forEach(function (d, i) {
+      var y = padT + i * (boxH + rowGap);
+      s.push(line(colGap + lw, cx - cw / 2, y + boxH / 2, fnY + boxH / 2, depCritical(d)));
+      s.push(box(colGap, y, lw, d.source, depCritical(d)));
+    });
+    down.forEach(function (d, i) {
+      var y = padT + i * (boxH + rowGap);
+      s.push(line(cx + cw / 2, W - colGap - lw, fnY + boxH / 2, y + boxH / 2, depCritical(d)));
+      s.push(box(W - colGap - lw, y, lw, d.target, depCritical(d)));
+    });
+    s.push('</svg>');
+    return s.join("");
+  }
+  function clip(s, n) { s = String(s || ""); return s.length > n ? s.slice(0, n - 1) + "…" : s; }
+
+  /* ---------- capacità: dumbbell per dominio ---------- */
+  if (CA.length) {
+    out.push('<section class="d-sec"><h2>Capacità — corrente rispetto all\'obiettivo</h2>'
+      + '<p class="lead">Una riga per dimensione: ● corrente, ○ obiettivo, barra del divario. La forza probatoria è nel marker; la soglia non compensabile è la linea rossa tratteggiata. Nessuna area da leggere a colpo d\'occhio (§3.6-3.7).</p>'
+      + '<div id="dumbbells"></div></section>');
+  }
+
+  /* ---------- tabella gap ---------- */
+  if (CA.length) {
+    var rows = [];
+    CA.forEach(function (e) {
+      DIMS.forEach(function (d) {
+        var c = e.current_profile[d] || {}, t = (e.target_profile || {})[d] || {};
+        var g = CPF.dimensionGap(c, t);
+        var gtxt = g.state === "incertezza_probatoria" ? "—" : (g.state === "ok" ? (g.gap || 0) : "—");
+        rows.push('<tr' + (g.state === "ok" && g.gap > 0 ? ' class="crit"' : '') + '>'
+          + '<td>' + esc(domLabel(e.domain_id)) + (e.is_essential ? ' ⚠' : '') + '</td>'
+          + '<td>' + esc(SC[d].label) + '</td>'
+          + '<td>' + (c.level != null ? c.level : "—") + ' <small style="color:var(--faint)">(' + esc(STRLAB[c.evidentiary_strength] || "—") + ')</small></td>'
+          + '<td>' + (t.level != null ? t.level : "—") + '</td>'
+          + '<td>' + gtxt + '</td></tr>');
+      });
+    });
+    out.push('<section class="d-sec"><h2>Tabella dei divari</h2>'
+      + '<table class="mini-table"><thead><tr><th>Dominio</th><th>Dimensione</th><th>Corrente</th><th>Obiettivo</th><th>Divario</th></tr></thead>'
+      + '<tbody>' + rows.join("") + '</tbody></table>'
+      + '<p class="lead" style="margin-top:.5rem">⚠ = capacità essenziale. «—» nel divario = livello non determinabile: priorità di verifica.</p></section>');
+  }
+
+  /* ---------- divari essenziali ---------- */
+  var essShort = [], essVer = [];
+  CA.forEach(function (e) {
+    var s = CPF.essentialShortfall(e);
+    if (s && s.kind === "divario_essenziale") essShort.push({ e: e, s: s });
+    else if (s && s.kind === "verifica") essVer.push({ e: e, s: s });
+  });
+  out.push('<section class="d-sec"><div class="ess-box"><h2>Divari essenziali — anello debole</h2>'
+    + '<p class="lead" style="margin:0">Sotto la soglia non compensabile: nessuna forza sulle altre dimensioni li compensa. Portano la priorità di intervento ad «alta» a prescindere dall\'aggregato (§3.6).</p>'
+    + (essShort.length
+        ? '<ul>' + essShort.map(function (x) {
+            return '<li><b>' + esc(domLabel(x.e.domain_id)) + '</b> — ' + esc(SC[x.s.dimension].label) + ' a ' + x.s.have + ', soglia minima ' + x.s.need
+              + (x.s.rationale ? '<br><small style="color:var(--muted)">' + esc(x.s.rationale) + '</small>' : '') + '</li>';
+          }).join("") + '</ul>'
+        : '<p class="none">Nessun divario essenziale corroborato.</p>')
+    + (essVer.length ? '<p class="lead" style="margin:.6rem 0 0">Soglie su livello non determinabile (verifica prioritaria, non intervento): '
+        + essVer.map(function (x) { return esc(domLabel(x.e.domain_id)) + " / " + esc(SC[x.s.dimension].label); }).join("; ") + '.</p>' : '')
+    + '</div></section>');
+
+  /* ---------- priorità ---------- */
+  if (CA.length) {
+    var ranked = CPF.rankDomains(CA, crit);
+    var interv = ranked.filter(function (r) { return r.priorita_intervento; });
+    var verif = ranked.filter(function (r) { return r.priorita_verifica; });
+    function prioItem(r, kind) {
+      var p = r[kind === "int" ? "priorita_intervento" : "priorita_verifica"];
+      var dims = kind === "int"
+        ? (p.dimensions || []).map(function (d) { return SC[d.dimension].label + " (gap " + d.gap + ")"; })
+        : (p.items || []).map(function (d) { return SC[d.dimension].label + " — " + d.reason; });
+      return '<div class="prio-item"><span class="band ' + p.band + '">' + p.band + '</span> <b>' + esc(domLabel(r.domain_id)) + '</b>'
+        + (p.essential_shortfall ? ' <span style="color:var(--danger)">· divario essenziale</span>' : '')
+        + (dims.length ? '<small>' + esc(dims.join(" · ")) + '</small>' : '') + '</div>';
+    }
+    out.push('<section class="d-sec"><h2>Priorità</h2>'
+      + '<p class="lead">Due esiti distinti, mai fusi (§3.6). L\'ordinamento è ordinale, non una misura.</p>'
+      + '<div class="prio-cols">'
+      + '<div class="prio-col intervento"><h3>Priorità di intervento</h3>'
+        + (interv.length ? interv.map(function (r) { return prioItem(r, "int"); }).join("") : '<p class="lead" style="margin:0">Nessuna carenza corroborata con divario.</p>') + '</div>'
+      + '<div class="prio-col"><h3>Priorità di verifica</h3>'
+        + (verif.length ? verif.map(function (r) { return prioItem(r, "ver"); }).join("") : '<p class="lead" style="margin:0">Nessuna condizione da chiarire.</p>') + '</div>'
+      + '</div></section>');
+  }
+
+  /* ---------- conseguenze e percorsi ---------- */
+  var cons = Array.isArray(a.intolerable_consequences) ? a.intolerable_consequences : [];
+  if (cons.length) {
+    out.push('<section class="d-sec"><h2>Conseguenze intollerabili e percorsi</h2>'
+      + '<p class="lead">Il punto di partenza (§3.1): l\'esito da escludere, i percorsi che vi arrivano, le capacità che li interrompono.</p>'
+      + cons.map(function (c) {
+          return '<div class="cons-item"><b>' + esc(c.description) + '</b>'
+            + (c.compromise_paths || []).map(function (p) {
+                var reqL = (p.required_capabilities || []).map(function (d) {
+                  var isE = (p.essential_capabilities || []).indexOf(d) !== -1;
+                  return '<span class="' + (isE ? "e" : "") + '">' + esc(domLabel(d)) + (isE ? " *" : "") + '</span>';
+                });
+                return '<div class="path">' + esc(p.description || "(percorso senza descrizione)")
+                  + (reqL.length ? '<div class="caps">capacità: ' + reqL.join(", ") + ' &nbsp; <span class="e">* = essenziale</span></div>' : '')
+                  + '</div>';
+              }).join("")
+            + '</div>';
+        }).join("")
+      + '</section>');
+  }
+
+  $("out").innerHTML = out.join("");
+
+  // dumbbell (SVG, dopo l'inserimento in DOM)
+  var db = $("dumbbells");
+  if (db && CA.length) {
+    CA.forEach(function (e) {
+      var wrap = document.createElement("div");
+      wrap.className = "cap-block" + (e.is_essential ? " ess" : "");
+      var p = CPF.domainPriority(e, crit);
+      var chips = "";
+      if (p && p.priorita_intervento) chips += '<span class="chip int-' + p.priorita_intervento.band + '">intervento: ' + p.priorita_intervento.band + '</span>';
+      if (p && p.priorita_verifica) chips += '<span class="chip ver">verifica: ' + p.priorita_verifica.band + '</span>';
+      if (!chips) chips = '<span class="chip">allineato</span>';
+      wrap.innerHTML = '<h3>' + esc(domLabel(e.domain_id)) + (e.is_essential ? ' <span class="tag">ESSENZIALE</span>' : '') + '</h3>'
+        + '<div class="chips">' + chips + '</div><div class="db-host"></div>';
+      db.appendChild(wrap);
+      CPF.renderDumbbell(wrap.querySelector(".db-host"), e, CPF.data.scales);
+    });
+  }
+
+  /* ---------- azioni ---------- */
+  $("print").addEventListener("click", function () { window.print(); });
+  $("export").addEventListener("click", function () {
+    var payload = JSON.parse(JSON.stringify(a));
+    delete payload._answers; delete payload._demo;
+    payload.regime_profile = RP;
+    var blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement("a");
+    link.href = url;
+    link.download = "cpf-" + (F.name || "valutazione").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + ".json";
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  });
+})();
+</script>
 <script src="../assets/theme-toggle.js"></script>
 </body>
 </html>

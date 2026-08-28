@@ -296,6 +296,21 @@
     var p = root.CPF.domainPriority(mk({ consolidamento: { level: 4, evidentiary_strength: "corroborata" } }, { consolidamento: { level: 4 } }, false, null), 3);
     eq(p.priorita_intervento, null); eq(p.priorita_verifica, null);
   });
+  t("calcs", "blankCurrentProfile", "4 dimensioni, default non determinabile, estensione con esclusioni []", function () {
+    var cp = root.CPF.blankCurrentProfile();
+    eq(Object.keys(cp).sort(), ["consolidamento", "efficacia", "estensione", "prestazione_osservata"]);
+    eq(cp.consolidamento.evidentiary_strength, "non_determinabile");
+    eq(cp.estensione.excluded_essential_components, []);
+  });
+  t("calcs", "integrazione 4a→4b", "target da 4a + corrente da 4b → divario essenziale rilevato e priorità alta", function () {
+    var e = root.CPF.blankCapabilityTarget("segmentazione", true);
+    e.non_compensable_threshold = { dimension: "estensione", min_level: 5, rationale: "x" };
+    e.current_profile = root.CPF.blankCurrentProfile();
+    e.current_profile.estensione = { level: 2, evidentiary_strength: "corroborata", evidence_notes: "", excluded_essential_components: [] };
+    var s = root.CPF.essentialShortfall(e);
+    eq(s.kind, "divario_essenziale"); eq([s.have, s.need], [2, 5]);
+    eq(root.CPF.domainPriority(e, 3).priorita_intervento.band, "alta");
+  });
   t("calcs", "rankDomains", "il dominio con divario essenziale precede quello senza divari", function () {
     var noGap = mk({ consolidamento: { level: 4, evidentiary_strength: "corroborata" } }, { consolidamento: { level: 4 } }, false, null);
     var essShort = mk({ estensione: { level: 2, evidentiary_strength: "corroborata" } }, { estensione: { level: 3 } }, true, { dimension: "estensione", min_level: 5, rationale: "x" });

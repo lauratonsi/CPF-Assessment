@@ -12,6 +12,12 @@
   .item .meta { color: var(--muted); font-size: 0.82rem; }
   .item .acts { margin-top: 0.35rem; font-size: 0.85rem; display: flex; gap: 0.9rem; flex-wrap: wrap; }
   .empty { color: var(--muted); font-size: 0.9rem; }
+
+  .flow { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 1.2rem 0 1.6rem; font-family: var(--mono); font-size: 0.72rem; }
+  .flow span { border: 1px solid var(--border); border-radius: 4px; padding: 0.3rem 0.6rem; background: var(--surface); color: var(--muted); }
+  .flow span::after { content: " →"; color: var(--faint); }
+  .flow span:last-child::after { content: ""; }
+  .try-demo { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; margin-left: 0.5rem; }
 </style>
 </head>
 <body>
@@ -20,6 +26,13 @@
     <h1>CPF Assessment</h1>
     <p class="dek">Valutazione delle capacità cyber-fisiche a livello di funzione: classificazione multi-regime, definizione della funzione, mappatura delle dipendenze, profilo delle capacità corrente e obiettivo. Strumento a supporto del Cap. 4 della tesi. I dati restano nel browser (localStorage).</p>
   </header>
+
+  <div class="flow">
+    <span>1 Regimi</span><span>2 Funzione</span><span>3 Dipendenze</span><span>4a Conseguenze</span><span>4b Capacità</span><span>Esito</span>
+  </div>
+  <p class="muted" style="font-size:.85rem;margin-top:-0.8rem">
+    Non sai da dove partire? <a href="pages/dashboard.html" class="try-demo">Guarda un esito dimostrativo →</a>
+  </p>
 
   <section class="card">
     <h2>Profili organizzazione</h2>
