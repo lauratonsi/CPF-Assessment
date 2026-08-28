@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Step 3 — Dipendenze · CPF Assessment</title>
+<link rel="stylesheet" href="assets/theme.css">
+<script>(function(){try{var t=localStorage.getItem("cpf-theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+<style>
+  .legend h2 { font-size: 1.15rem; margin: 1.6rem 0 0.6rem; }
+  .legend .ref { font-family: var(--mono); font-size: 0.7rem; color: var(--faint); }
+  .legend p { margin: 0.5rem 0; }
+  .legend .sub { color: var(--muted); font-size: 0.88rem; }
+  .tax { display: grid; gap: 0.6rem; margin: 0.8rem 0; }
+  @media (min-width: 44rem) { .tax.two { grid-template-columns: 1fr 1fr; } }
+  .tx { border: 1px solid var(--border); border-radius: 7px; padding: 0.7rem 0.85rem; background: var(--surface); }
+  .tx h3 { font-size: 0.92rem; margin: 0 0 0.3rem; }
+  .tx .def { font-size: 0.85rem; }
+  .tx .ex { font-size: 0.8rem; color: var(--muted); margin-top: 0.4rem; }
+  .tx .ex::before { content: "es. "; font-style: italic; }
+  .tx .role { font-size: 0.8rem; color: var(--accent-ink); background: var(--accent-tint); border-radius: 4px; padding: 0.35rem 0.5rem; margin-top: 0.4rem; }
+  .tx .note-inline { font-size: 0.8rem; color: var(--muted); margin-top: 0.35rem; }
+  .tx code.notation { font-family: var(--mono); background: var(--surface-2); padding: 0.05rem 0.35rem; border-radius: 3px; }
+  .callout { border-left: 3px solid var(--accent); padding: 0.6rem 0.9rem; background: var(--surface-2); border-radius: 0 6px 6px 0; margin: 0.7rem 0; font-size: 0.85rem; }
+  .callout h4 { margin: 0 0 0.3rem; font-size: 0.85rem; }
+  .closing { font-size: 0.83rem; color: var(--muted); font-style: italic; margin-top: 0.5rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="stepper">
+    <a class="is-done" href="step1-regimi.html">1 · Regimi</a>
+    <a class="is-done" href="step2-funzione.html">2 · Funzione</a>
+    <span class="is-current">3 · Dipendenze</span>
+    <a href="step4a-conseguenze.html">4a · Conseguenze</a>
+    <a href="step4b-capacita.html">4b · Capacità</a>
+    <a href="dashboard.html">Esito</a>
+  </nav>
+  <header class="masthead">
+    <h1>Step 3 — Mappatura delle dipendenze</h1>
+    <p class="dek">Ogni dipendenza è una relazione orientata <strong>B → A</strong>. Prima di compilarla, la legenda qui sotto spiega classi, accoppiamento, posizione, tipi di guasto e dimensione temporale. Riferimento: §3.4.</p>
+  </header>
+
+  <div class="legend" id="legend"></div>
+
+  <section class="card" style="margin-top:2rem">
+    <h2>Editor delle dipendenze</h2>
+    <p class="muted">In costruzione. Tabella B→A: per ogni dipendenza — origine/destinazione, risorsa o condizione, classe, posizione, accoppiamento, stato operativo, tipo di guasto, tempo di attivazione tollerabile, alternativa. La visualizzazione Sankey sarà nella dashboard.</p>
+    <p class="muted" id="editor-gate" style="font-size:.85rem"></p>
+  </section>
+
+  <div class="btn-row">
+    <a class="btn btn--ghost" href="step2-funzione.html">← Funzione</a>
+    <a class="btn btn--primary" href="step4a-conseguenze.html">Avanti: Conseguenze →</a>
+  </div>
+</div>
+
+<script src="data/dependency_taxonomy.js"></script>
+<script src="data/dependency_reference.js"></script>
+<script src="data/assessment_schema.js"></script>
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  var D = CPF.data.dependencyReference;
+  var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]; }); };
+  var out = [];
+
+  function sectionHead(o) {
+    out.push('<h2>' + esc(o.title) + (o.thesis_ref ? ' <span class="ref">' + esc(o.thesis_ref) + '</span>' : '') + '</h2>');
+    if (o.subtitle) out.push('<p class="sub">' + esc(o.subtitle) + '</p>');
+    if (o.text) out.push('<p>' + esc(o.text) + '</p>');
+    if (o.source) out.push('<p class="ref">Fonte: ' + esc(o.source) + '</p>');
+  }
+  function card(it) {
+    var h = '<div class="tx"><h3>' + esc(it.label) + '</h3>';
+    if (it.notation) h += '<p><code class="notation">' + esc(it.notation) + '</code> ' + esc(it.notation_explanation || "") + '</p>';
+    h += '<p class="def">' + esc(it.definition) + '</p>';
+    if (it.implication) h += '<p class="note-inline">' + esc(it.implication) + '</p>';
+    if (it.caveat) h += '<p class="note-inline">' + esc(it.caveat) + '</p>';
+    if (it.model_role) h += '<p class="role">Nel modello: ' + esc(it.model_role) + '</p>';
+    if (it.example) h += '<p class="ex">' + esc(it.example) + '</p>';
+    return h + '</div>';
+  }
+  function grid(items, two) {
+    out.push('<div class="tax' + (two ? ' two' : '') + '">' + items.map(card).join("") + '</div>');
+  }
+  function callout(o) {
+    out.push('<div class="callout"><h4>' + esc(o.title) + (o.thesis_ref ? ' <span class="ref">' + esc(o.thesis_ref) + '</span>' : '') + '</h4><p>' + esc(o.text) + '</p>' + (o.example ? '<p class="ex">' + esc(o.example) + '</p>' : '') + '</div>');
+  }
+
+  // intro
+  sectionHead(D.intro);
+
+  // classi
+  sectionHead(D.classes);
+  grid(D.classes.items, true);
+  out.push('<p class="closing">' + esc(D.classes.closing_note) + '</p>');
+
+  // accoppiamento
+  sectionHead(D.coupling);
+  grid(D.coupling.items, true);
+  out.push('<p class="closing">' + esc(D.coupling.dynamic_note) + '</p>');
+  callout(D.coupling.complexity_note);
+
+  // posizione
+  sectionHead(D.positions);
+  grid(D.positions.items, false);
+  out.push('<p class="closing">' + esc(D.positions.important_distinction) + '</p>');
+
+  // tipi di guasto
+  sectionHead(D.failure_types);
+  grid(D.failure_types.items, false);
+
+  // dimensione temporale
+  sectionHead(D.temporal_dimension);
+  out.push('<p>' + esc(D.temporal_dimension.model_extension) + '</p>');
+  callout({ title: "Il punto chiave", text: D.temporal_dimension.key_point });
+
+  // radicamento empirico
+  sectionHead(D.empirical_grounding);
+  out.push('<p class="ex">' + esc(D.empirical_grounding.example) + '</p>');
+  out.push('<p>' + esc(D.empirical_grounding.tool_implication) + '</p>');
+
+  document.getElementById("legend").innerHTML = out.join("");
+
+  // gate verso l'editor: serve una funzione definita nello Step 2
+  var params = new URLSearchParams(location.search);
+  var a = params.get("id") ? CPF.loadAssessment(params.get("id")) : CPF.getActive();
+  var gate = document.getElementById("editor-gate");
+  if (!a || !a.function || !a.function.name) {
+    gate.textContent = "Definisci prima la funzione (Step 2): l'editor delle dipendenze si aggancia al perimetro della funzione.";
+  } else {
+    gate.textContent = "Funzione collegata: " + a.function.name + ".";
+  }
+})();
+</script>
+</body>
+</html>

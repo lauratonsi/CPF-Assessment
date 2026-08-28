@@ -1,0 +1,13 @@
+.DS_Store
+*.log
+node_modules/
+.venv/
+
+# materiale di lavoro, non parte del tool
+TESI_LAURA TONSI.pdf
+*.pdf
+
+# graphify: ignore working state and cache, keep the real outputs
+graphify-out/.graphify_*
+graphify-out/cache/
+graphify-out/.needs_update

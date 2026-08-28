@@ -1,0 +1,86 @@
+{
+  "assets/app.js": {
+    "mtime": 1787933088.1679056,
+    "seen": 1787933427.148355,
+    "ast_hash": "aca9c046a6e1bca6507139ee8a9828e6",
+    "semantic_hash": "aca9c046a6e1bca6507139ee8a9828e6"
+  },
+  "data/assessment_schema.js": {
+    "mtime": 1787911588.223029,
+    "seen": 1787933427.14836,
+    "ast_hash": "23adefb2e0371e50d019f605a771efd0",
+    "semantic_hash": "23adefb2e0371e50d019f605a771efd0"
+  },
+  "data/capability_domains.js": {
+    "mtime": 1787911532.1527438,
+    "seen": 1787933427.148362,
+    "ast_hash": "69ac4f5b1e2609aad8e0d9d84be881dc",
+    "semantic_hash": "69ac4f5b1e2609aad8e0d9d84be881dc"
+  },
+  "data/dependency_taxonomy.js": {
+    "mtime": 1787911562.709342,
+    "seen": 1787933427.148363,
+    "ast_hash": "8cd3a3ec9b1ecb37125140f175d183cb",
+    "semantic_hash": "8cd3a3ec9b1ecb37125140f175d183cb"
+  },
+  "data/regime_classifier.js": {
+    "mtime": 1787911634.350993,
+    "seen": 1787933427.148364,
+    "ast_hash": "7ea931e9f8c30c1d512df76fdaa4dcfa",
+    "semantic_hash": "7ea931e9f8c30c1d512df76fdaa4dcfa"
+  },
+  "data/scales.js": {
+    "mtime": 1787911551.9784226,
+    "seen": 1787933427.148366,
+    "ast_hash": "6446fd12d49f541f1edef78f23fc2846",
+    "semantic_hash": "6446fd12d49f541f1edef78f23fc2846"
+  },
+  "data/scope_sectors.js": {
+    "mtime": 1787911630.1822462,
+    "seen": 1787933427.1483672,
+    "ast_hash": "7445bfcffca2a8d203a54300ded155d3",
+    "semantic_hash": "7445bfcffca2a8d203a54300ded155d3"
+  },
+  "README.md": {
+    "mtime": 1787933117.8976092,
+    "seen": 1787933427.1483672,
+    "ast_hash": "56224dc8a3f187c1f23cc8a55a5a189f",
+    "semantic_hash": "56224dc8a3f187c1f23cc8a55a5a189f"
+  },
+  "dashboard.html": {
+    "mtime": 1787933037.3746445,
+    "seen": 1787933427.148368,
+    "ast_hash": "601abc641534ad945eec7aad90d1a9c2",
+    "semantic_hash": "601abc641534ad945eec7aad90d1a9c2"
+  },
+  "index.html": {
+    "mtime": 1787911712.8848112,
+    "seen": 1787933427.1483688,
+    "ast_hash": "b78b0ce001ffff4b115f0fbcbb7567a3",
+    "semantic_hash": "b78b0ce001ffff4b115f0fbcbb7567a3"
+  },
+  "step1-regimi.html": {
+    "mtime": 1787932956.5377877,
+    "seen": 1787933427.14837,
+    "ast_hash": "401bc9896d2aa1f166d2941597dba86f",
+    "semantic_hash": "401bc9896d2aa1f166d2941597dba86f"
+  },
+  "step2-funzione.html": {
+    "mtime": 1787932980.6428044,
+    "seen": 1787933427.148371,
+    "ast_hash": "e225a6a89b0d8e9b827dac82c83b17bb",
+    "semantic_hash": "e225a6a89b0d8e9b827dac82c83b17bb"
+  },
+  "step3-dipendenze.html": {
+    "mtime": 1787932990.8895655,
+    "seen": 1787933427.148372,
+    "ast_hash": "180366f34760b8326bead9c7ccd86ee0",
+    "semantic_hash": "180366f34760b8326bead9c7ccd86ee0"
+  },
+  "TESI_LAURA TONSI.pdf": {
+    "mtime": 1787911901.629499,
+    "seen": 1787933427.148373,
+    "ast_hash": "8a94ec60ba725158c6457b00bfa738fb",
+    "semantic_hash": "8a94ec60ba725158c6457b00bfa738fb"
+  }
+}

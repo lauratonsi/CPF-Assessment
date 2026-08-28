@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Step 1 — Regimi applicabili · CPF Assessment</title>
+<link rel="stylesheet" href="assets/theme.css">
+<script>(function(){try{var t=localStorage.getItem("cpf-theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+<style>
+  .layout { display: grid; grid-template-columns: 1fr; gap: 1.4rem; }
+  @media (min-width: 62rem) { .layout { grid-template-columns: 1fr 21rem; align-items: start; } .result { position: sticky; top: 1rem; } }
+
+  fieldset { border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.1rem 1.2rem; margin: 0 0 0.9rem; background: var(--surface); }
+  legend { font-family: var(--serif); font-weight: 600; font-size: 1rem; padding: 0 0.4rem; }
+  .q { margin-top: 0.9rem; }
+  .q:first-of-type { margin-top: 0.3rem; }
+  .q > .lbl { display: block; font-size: 0.88rem; margin-bottom: 0.35rem; }
+  .hint { font-size: 0.78rem; color: var(--faint); margin: 0.2rem 0 0; }
+  .row3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+  .checks label { display: flex; gap: 0.5rem; align-items: flex-start; font-size: 0.86rem; padding: 0.28rem 0; cursor: pointer; }
+  .checks input { margin-top: 0.2rem; flex: none; }
+  details { margin-top: 0.5rem; font-size: 0.8rem; color: var(--muted); }
+  details ul { margin: 0.4rem 0 0; padding-left: 1.1rem; }
+  .reveal[hidden] { display: none; }
+  .reveal { border-left: 2px solid var(--accent-tint); padding-left: 0.8rem; margin-top: 0.7rem; }
+
+  .result .rc { border: 1px solid var(--border); border-radius: 7px; padding: 0.7rem 0.8rem; margin-bottom: 0.55rem; background: var(--surface); }
+  .result .rc h3 { font-size: 0.9rem; margin: 0 0 0.35rem; display: flex; justify-content: space-between; align-items: baseline; gap: 0.4rem; }
+  .result .rc .tag { font-family: var(--mono); font-size: 0.66rem; padding: 0.08rem 0.4rem; border-radius: 3px; border: 1px solid var(--border); flex: none; }
+  .tag.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .tag.ess { background: var(--danger); border-color: var(--danger); color: #fff; }
+  .tag.off { color: var(--faint); }
+  .result .rc ul.trace { margin: 0.3rem 0 0; padding: 0; list-style: none; font-size: 0.76rem; color: var(--muted); }
+  .result .rc ul.trace li { margin: 0.25rem 0; }
+  .result .rc ul.trace b { color: var(--ink); font-weight: 600; }
+  .panel { border: 1px solid var(--border); border-radius: 7px; padding: 0.7rem 0.8rem; margin-bottom: 0.55rem; font-size: 0.8rem; }
+  .panel.verify { border-color: var(--accent); background: var(--accent-tint); color: var(--accent-ink); }
+  .panel h4 { margin: 0 0 0.3rem; font-size: 0.8rem; }
+  .panel ul { margin: 0; padding-left: 1.1rem; }
+  .toast { position: fixed; left: 50%; bottom: 1.4rem; transform: translateX(-50%); background: var(--ink); color: var(--paper); font-size: 0.85rem; padding: 0.6rem 1rem; border-radius: 6px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast.show { opacity: 0.95; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="stepper">
+    <span class="is-current">1 · Regimi</span>
+    <a href="step2-funzione.html">2 · Funzione</a>
+    <a href="step3-dipendenze.html">3 · Dipendenze</a>
+    <a href="step4a-conseguenze.html">4a · Conseguenze</a>
+    <a href="step4b-capacita.html">4b · Capacità</a>
+    <a href="dashboard.html">Esito</a>
+  </nav>
+  <header class="masthead">
+    <h1>Step 1 — Regimi applicabili</h1>
+    <p class="dek">Classificatore multi-regime a livello di organizzazione. Le risposte determinano quali atti europei (NIS2, CER, DORA, CRA, Regolamento Macchine, AI Act) si applicano e con quale qualificazione. Il risultato si aggiorna a ogni modifica ed è motivato voce per voce (§2 della tesi). Questo profilo è riutilizzabile: ogni valutazione di funzione ne clona il risultato.</p>
+  </header>
+
+  <div class="layout">
+    <form id="f" autocomplete="off">
+
+      <fieldset>
+        <legend>Profilo organizzazione</legend>
+        <div class="q">
+          <label class="lbl" for="org_name">Nome dell'organizzazione</label>
+          <input class="field" type="text" id="org_name" placeholder="es. AcquaCittà S.p.A.">
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Settore e dimensione</legend>
+        <div class="q">
+          <label class="lbl" for="sector">Settore (Allegati I-II della NIS2)</label>
+          <select class="field" id="sector"><option value="">— nessuno / fuori dagli Allegati —</option></select>
+          <p class="hint">Alimenta NIS2 e la verifica del settore CER.</p>
+        </div>
+        <div class="q">
+          <span class="lbl">Dimensione dell'impresa (Racc. 2003/361/CE)</span>
+          <div class="row3">
+            <input class="field" type="number" min="0" id="employees" placeholder="dipendenti">
+            <input class="field" type="number" min="0" step="0.1" id="turnover" placeholder="fatturato M€">
+            <input class="field" type="number" min="0" step="0.1" id="balance" placeholder="bilancio M€">
+          </div>
+          <p class="hint">Classe calcolata: <b id="sizeout">—</b>. La size-cap rule porta nel perimetro NIS2 le imprese medie e grandi.</p>
+        </div>
+        <div class="q">
+          <label class="lbl" for="ms_designation">Designazione discrezionale dello Stato membro</label>
+          <select class="field" id="ms_designation">
+            <option value="">— nessuna —</option>
+            <option value="essenziale">Designato essenziale</option>
+            <option value="importante">Designato importante</option>
+          </select>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Casi speciali NIS2</legend>
+        <p class="hint">Categorie nel perimetro a prescindere dalla dimensione (art. 2, par. 2).</p>
+        <div class="checks" id="special_cases"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>CER — resilienza dei soggetti critici</legend>
+        <div class="q">
+          <label class="lbl" for="cer_sector">Settore CER del servizio essenziale erogato</label>
+          <select class="field" id="cer_sector"><option value="">— nessuno —</option></select>
+        </div>
+        <div class="q checks">
+          <label><input type="checkbox" id="cer_formally_designated"> L'organizzazione è stata <b>designata formalmente</b> soggetto critico (D.Lgs. 134/2024)</label>
+        </div>
+        <div class="q reveal" id="cer_sig_wrap">
+          <span class="lbl">Criteri di impatto significativo (artt. 6-7 Dir. 2022/2557) — nessuno decisivo da solo</span>
+          <div class="checks" id="cer_significance"></div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>DORA — resilienza operativa digitale (settore finanziario)</legend>
+        <div class="checks">
+          <label><input type="checkbox" id="dora_financial_entity"> È un'<b>entità finanziaria</b> rientrante nell'art. 2, par. 1, del Reg. 2022/2554</label>
+          <label><input type="checkbox" id="dora_ict_tpp_critical"> È un <b>fornitore terzo di servizi TIC</b> del settore finanziario designabile come critico (art. 31)</label>
+        </div>
+        <details><summary>Le 20 categorie di entità finanziarie</summary><ul id="dora_cats"></ul></details>
+      </fieldset>
+
+      <fieldset>
+        <legend>CRA — prodotti con elementi digitali</legend>
+        <div class="checks">
+          <label><input type="checkbox" id="cra_places_product"> Immette sul mercato UE un <b>prodotto con elementi digitali</b> (connessione dati logica o fisica)</label>
+        </div>
+        <div class="reveal" id="cra_wrap" hidden>
+          <div class="q">
+            <label class="lbl" for="cra_role">Ruolo</label>
+            <select class="field" id="cra_role">
+              <option value="fabbricante">Fabbricante</option>
+              <option value="importatore_distributore">Importatore / distributore</option>
+            </select>
+          </div>
+          <div class="q">
+            <label class="lbl" for="cra_category">Categoria del prodotto (funzionalità principale)</label>
+            <select class="field" id="cra_category"><option value="">— da determinare —</option></select>
+          </div>
+          <details><summary>Allegato III (Classe I / Classe II) e Allegato IV</summary>
+            <div><b>Classe I</b><ul id="cra_c1"></ul><b>Classe II</b><ul id="cra_c2"></ul><b>Allegato IV — critici</b><ul id="cra_c4"></ul></div>
+            <p id="cra_ics_note" class="hint"></p>
+          </details>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Regolamento Macchine</legend>
+        <span class="lbl">Ruolo rispetto a una macchina (Reg. 2023/1230)</span>
+        <div class="checks" id="macchine_roles"></div>
+        <div class="q">
+          <span class="lbl">Componenti che incidono sulla funzione di sicurezza</span>
+          <div class="checks" id="macchine_flags"></div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>AI Act</legend>
+        <div class="checks">
+          <label><input type="checkbox" id="ai_system"> L'organizzazione <b>sviluppa o impiega</b> un sistema di IA</label>
+        </div>
+        <div class="reveal" id="ai_wrap" hidden>
+          <div class="checks">
+            <label><input type="checkbox" id="ai_channel1"> <b>Canale art. 6.1</b> — l'IA è componente di sicurezza di (o è) un prodotto coperto dalla normativa di armonizzazione Allegato I, soggetto a valutazione di conformità di terzi</label>
+            <label><input type="checkbox" id="ai_channel2"> <b>Canale art. 6.2</b> — l'IA rientra in un uso dell'Allegato III (incl. gestione di infrastrutture digitali critiche, acqua, gas, riscaldamento, elettricità)</label>
+          </div>
+          <div class="reveal" id="ai_excl_wrap" hidden>
+            <span class="lbl">Condizioni di esclusione dall'alto rischio (art. 6.3) — solo canale 6.2</span>
+            <div class="checks" id="ai_exclusions"></div>
+            <div class="checks">
+              <label><input type="checkbox" id="ai_profiling"> Il sistema effettua <b>profilazione di persone fisiche</b> (l'esclusione non opera)</label>
+            </div>
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="btn-row">
+        <a class="btn btn--ghost" href="index.html">← Valutazioni</a>
+        <span>
+          <button type="button" class="btn" id="save">Salva profilo</button>
+          <button type="button" class="btn btn--primary" id="next">Avanti: Funzione →</button>
+        </span>
+      </div>
+    </form>
+
+    <aside class="result" id="result" aria-live="polite"></aside>
+  </div>
+
+  <p class="disclaimer" id="disclaimer"></p>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="data/scope_sectors.js"></script>
+<script src="data/regime_classifier.js"></script>
+<script src="data/regime_rules.js"></script>
+<script src="data/scales.js"></script>
+<script src="data/assessment_schema.js"></script>
+<script src="data/organization_schema.js"></script>
+<script src="assets/app.js"></script>
+<script src="assets/regime-engine.js"></script>
+<script>
+(function () {
+  var D = CPF.data, R = D.regimeRules;
+  var params = new URLSearchParams(location.search);
+  var org = (params.get("org") && CPF.loadOrganization(params.get("org"))) || CPF.blankOrganization();
+  var A = org.answers;
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* ---------- popolamento liste ---------- */
+  var sectorSel = $("sector");
+  [["annex_i", "Allegato I — alta criticità"], ["annex_ii", "Allegato II — altri settori critici"]].forEach(function (grp) {
+    var og = document.createElement("optgroup"); og.label = grp[1];
+    (D.scopeSectors[grp[0]] || []).forEach(function (s) {
+      var o = document.createElement("option");
+      o.value = grp[0] + "::" + s.id; o.textContent = s.sector;
+      og.appendChild(o);
+    });
+    sectorSel.appendChild(og);
+  });
+
+  function checkList(container, items, name) {
+    container.innerHTML = "";
+    items.forEach(function (it) {
+      var l = document.createElement("label");
+      l.innerHTML = '<input type="checkbox" value="' + it.id + '" data-group="' + name + '"> <span>' + it.label + '</span>';
+      container.appendChild(l);
+    });
+  }
+  checkList($("special_cases"), R.nis2.special_cases, "nis2_special_cases");
+  checkList($("cer_significance"), R.cer.significance_criteria, "cer_significance");
+  checkList($("macchine_roles"), R.macchine.roles, "macchine_roles");
+  checkList($("macchine_flags"), R.macchine.annex_i_part_a_flags, "macchine_annex_i_part_a_flags");
+  checkList($("ai_exclusions"), R.ai_act.exclusion_conditions_art6_3, "ai_exclusion_conditions");
+
+  R.cer.sectors.forEach(function (s) {
+    var o = document.createElement("option"); o.value = s.id; o.textContent = s.label; $("cer_sector").appendChild(o);
+  });
+  R.cra.categories.forEach(function (c) {
+    var o = document.createElement("option"); o.value = c.id; o.textContent = c.label; $("cra_category").appendChild(o);
+  });
+  function ul(id, arr) { $(id).innerHTML = arr.map(function (x) { return "<li>" + x + "</li>"; }).join(""); }
+  ul("dora_cats", R.dora.financial_entity_categories);
+  ul("cra_c1", R.cra.annex_iii_class_1);
+  ul("cra_c2", R.cra.annex_iii_class_2);
+  ul("cra_c4", R.cra.annex_iv_critical);
+  $("cra_ics_note").textContent = R.cra.ics_note;
+
+  /* ---------- form <-> answers ---------- */
+  function groupVals(name) {
+    return Array.prototype.slice.call(document.querySelectorAll('[data-group="' + name + '"]:checked')).map(function (e) { return e.value; });
+  }
+  function setGroup(name, vals) {
+    (vals || []).forEach(function (v) {
+      var el = document.querySelector('[data-group="' + name + '"][value="' + v + '"]');
+      if (el) el.checked = true;
+    });
+  }
+  function num(id) { var v = parseFloat($(id).value); return isNaN(v) ? null : v; }
+
+  function fillForm() {
+    $("org_name").value = org.name || "";
+    if (A.sector_annex && A.sector_nis2) sectorSel.value = A.sector_annex + "::" + A.sector_nis2;
+    if (A.size) { $("employees").value = A.size.employees ?? ""; $("turnover").value = A.size.turnover_meur ?? ""; $("balance").value = A.size.balance_meur ?? ""; }
+    $("ms_designation").value = A.ms_designation || "";
+    setGroup("nis2_special_cases", A.nis2_special_cases);
+    $("cer_sector").value = A.cer_sector || "";
+    $("cer_formally_designated").checked = !!A.cer_formally_designated;
+    setGroup("cer_significance", A.cer_significance);
+    $("dora_financial_entity").checked = !!A.dora_financial_entity;
+    $("dora_ict_tpp_critical").checked = !!A.dora_ict_tpp_critical;
+    $("cra_places_product").checked = !!A.cra_places_product;
+    $("cra_role").value = A.cra_role || "fabbricante";
+    $("cra_category").value = A.cra_category || "";
+    setGroup("macchine_roles", A.macchine_roles);
+    setGroup("macchine_annex_i_part_a_flags", A.macchine_annex_i_part_a_flags);
+    $("ai_system").checked = !!A.ai_system;
+    $("ai_channel1").checked = !!A.ai_channel1;
+    $("ai_channel2").checked = !!A.ai_channel2;
+    setGroup("ai_exclusion_conditions", A.ai_exclusion_conditions);
+    $("ai_profiling").checked = !!A.ai_profiling;
+  }
+
+  function readForm() {
+    org.name = $("org_name").value.trim();
+    var sv = sectorSel.value ? sectorSel.value.split("::") : [null, null];
+    A.sector_annex = sv[0]; A.sector_nis2 = sv[1];
+    A.size = { employees: num("employees"), turnover_meur: num("turnover"), balance_meur: num("balance") };
+    A.size_class = null;
+    A.ms_designation = $("ms_designation").value || null;
+    A.nis2_special_cases = groupVals("nis2_special_cases");
+    A.cer_sector = $("cer_sector").value || null;
+    A.cer_formally_designated = $("cer_formally_designated").checked;
+    A.cer_significance = groupVals("cer_significance");
+    A.dora_financial_entity = $("dora_financial_entity").checked;
+    A.dora_ict_tpp_critical = $("dora_ict_tpp_critical").checked;
+    A.cra_places_product = $("cra_places_product").checked;
+    A.cra_role = $("cra_role").value || null;
+    A.cra_category = $("cra_category").value || null;
+    A.macchine_roles = groupVals("macchine_roles");
+    A.macchine_annex_i_part_a_flags = groupVals("macchine_annex_i_part_a_flags");
+    A.ai_system = $("ai_system").checked;
+    A.ai_channel1 = $("ai_channel1").checked;
+    A.ai_channel2 = $("ai_channel2").checked;
+    A.ai_exclusion_conditions = groupVals("ai_exclusion_conditions");
+    A.ai_profiling = $("ai_profiling").checked;
+
+    // reveal condizionali
+    $("cra_wrap").hidden = !A.cra_places_product;
+    $("ai_wrap").hidden = !A.ai_system;
+    $("ai_excl_wrap").hidden = !(A.ai_system && A.ai_channel2);
+    $("cer_sig_wrap").style.opacity = A.cer_formally_designated ? 0.5 : 1;
+  }
+
+  /* ---------- rendering risultato ---------- */
+  var REG = [
+    ["nis2", "NIS2"], ["cer", "CER"], ["dora", "DORA"],
+    ["cra", "CRA"], ["macchine", "Reg. Macchine"], ["ai_act", "AI Act"]
+  ];
+  function tagFor(key, r) {
+    if (!r.applicable) return '<span class="tag off">non applicabile</span>';
+    if (key === "nis2") return '<span class="tag ' + (r.qualification === "essenziale" ? "ess" : "on") + '">' + r.qualification + '</span>';
+    if (key === "cer") return '<span class="tag ' + (r.designation === "soggetto_critico" ? "ess" : "on") + '">' + (r.designation || "applicabile").replace(/_/g, " ") + '</span>';
+    if (key === "cra") return '<span class="tag on">' + (r.category || "").replace(/_/g, " ") + '</span>';
+    if (key === "ai_act") {
+      if (r.high_risk === true) return '<span class="tag ess">alto rischio</span>';
+      if (r.high_risk === "escluso") return '<span class="tag on">alto rischio escluso</span>';
+      return '<span class="tag on">applicabile</span>';
+    }
+    if (key === "macchine" && r.notified_body_required) return '<span class="tag ess">organismo notificato</span>';
+    return '<span class="tag on">applicabile</span>';
+  }
+  function esc(s) { return String(s).replace(/[&<>]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]; }); }
+
+  function renderResult(p) {
+    var out = "";
+    REG.forEach(function (rg) {
+      var r = p[rg[0]] || {};
+      out += '<div class="rc"><h3>' + rg[1] + tagFor(rg[0], r) + '</h3>';
+      out += '<ul class="trace">' + (r.trace || []).map(function (t) {
+        return '<li><b>' + esc(t.esito) + '</b> — ' + esc(t.base) + '</li>';
+      }).join("") + '</ul></div>';
+    });
+    if (p.interactions && p.interactions.length) {
+      out += '<div class="panel"><h4>Interazioni tra regimi applicabili</h4><ul>' +
+        p.interactions.map(function (i) { return '<li><b>' + esc(i.type) + '</b>: ' + esc(i.text) + '</li>'; }).join("") + '</ul></div>';
+    }
+    if (p.verification_flags && p.verification_flags.length) {
+      out += '<div class="panel verify"><h4>Priorità di verifica</h4><ul>' +
+        p.verification_flags.map(function (v) { return '<li>' + esc(v) + '</li>'; }).join("") + '</ul></div>';
+    }
+    if (p.notes && p.notes.length) {
+      out += '<div class="panel"><h4>Note</h4><ul>' + p.notes.map(function (n) { return '<li>' + esc(n) + '</li>'; }).join("") + '</ul></div>';
+    }
+    $("result").innerHTML = out;
+    $("sizeout").textContent = CPF.sizeClass(A.size) || "—";
+    $("disclaimer").textContent = p._disclaimer || "";
+  }
+
+  function recompute() {
+    readForm();
+    org.answers = A;
+    try { renderResult(CPF.classifyRegimes(A)); }
+    catch (e) { $("result").textContent = "Errore: " + e.message; }
+  }
+
+  /* ---------- azioni ---------- */
+  var toast = $("toast");
+  function flash(msg) { toast.textContent = msg; toast.classList.add("show"); setTimeout(function () { toast.classList.remove("show"); }, 1800); }
+
+  function persist() {
+    CPF.saveOrganization(org);
+    if (params.get("org") !== org.organization_id) {
+      params.set("org", org.organization_id);
+      history.replaceState(null, "", location.pathname + "?" + params.toString());
+    }
+  }
+  $("save").onclick = function () { recompute(); persist(); flash("Profilo organizzazione salvato"); };
+  $("next").onclick = function () {
+    recompute(); persist();
+    var a = CPF.newAssessmentFromOrg(org);
+    location.href = "step2-funzione.html?id=" + encodeURIComponent(a.assessment_id);
+  };
+
+  document.getElementById("f").addEventListener("input", recompute);
+  document.getElementById("f").addEventListener("change", recompute);
+
+  fillForm();
+  recompute();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Esito · CPF Assessment</title>
+<link rel="stylesheet" href="assets/theme.css">
+<script>(function(){try{var t=localStorage.getItem("cpf-theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="wrap">
+  <nav class="stepper">
+    <a class="is-done" href="step1-regimi.html">1 · Regimi</a>
+    <a class="is-done" href="step2-funzione.html">2 · Funzione</a>
+    <a class="is-done" href="step3-dipendenze.html">3 · Dipendenze</a>
+    <a class="is-done" href="step4a-conseguenze.html">4a · Conseguenze</a>
+    <a class="is-done" href="step4b-capacita.html">4b · Capacità</a>
+    <span class="is-current">Esito</span>
+  </nav>
+  <header class="masthead">
+    <h1>Esito della valutazione</h1>
+    <p class="dek">Profilo corrente vs obiettivo per dominio e dimensione, divari essenziali (anello debole, non assorbiti in medie), priorità di intervento e priorità di verifica distinte.</p>
+  </header>
+  <section class="card"><h2>In costruzione</h2>
+    <p class="muted">Sintesi regimi + grafici (radar per dominio, Sankey dipendenze), tabella gap, elenco divari essenziali e priorità. Export JSON e stampa.</p>
+  </section>
+  <div class="btn-row">
+    <a class="btn btn--ghost" href="step4b-capacita.html">← Capacità</a>
+    <a class="btn btn--ghost" href="index.html">Valutazioni</a>
+  </div>
+  <p class="disclaimer">Strumento orientativo, non parere legale.</p>
+</div>
+<script src="data/scope_sectors.js"></script>
+<script src="data/regime_classifier.js"></script>
+<script src="data/regime_rules.js"></script>
+<script src="data/capability_domains.js"></script>
+<script src="data/scales.js"></script>
+<script src="data/dependency_taxonomy.js"></script>
+<script src="data/assessment_schema.js"></script>
+<script src="data/organization_schema.js"></script>
+<script src="assets/app.js"></script>
+<script src="assets/regime-engine.js"></script>
+<script src="assets/dumbbell.js"></script>
+</body>
+</html>
