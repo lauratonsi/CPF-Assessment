@@ -302,4 +302,59 @@
     essShort.domain_id = "vulnerabilita";
     eq(root.CPF.rankDomains([noGap, essShort], 3)[0].domain_id, "vulnerabilita");
   });
+
+  /* ================================================================
+     SUITE "review" — controllo di coerenza della funzione (Step 2)
+     CPF.reviewFunction: euristiche di aiuto, non validazione giuridica.
+     ================================================================ */
+  var rv = function (fn, rp) { return root.CPF.reviewFunction({ function: fn, regime_profile: rp || {} }); };
+  var hasFinding = function (findings, field, level) {
+    return findings.some(function (x) { return x.field === field && (!level || x.level === level); });
+  };
+  // funzione ben definita, usata come riferimento "pulito"
+  var goodFn = {
+    name: "Potabilizzazione — linea A",
+    service_description: "Erogazione continua di acqua potabile a circa 45.000 abitazioni e a due ospedali del bacino nord.",
+    physical_process: "Filtrazione e dosaggio del disinfettante su una linea da 320 l/s; PLC che regola pompe e valvole; stato sicuro = chiusura linea.",
+    perimeter: "Impianto, SCADA di stabilimento, telecontrollo dei serbatoi di proprietà. Fuori: rete di distribuzione a valle e media tensione.",
+    criticality: 3,
+    criticality_rationale: "Ampio numero di utenti dipendenti e utenze sensibili; impatto esteso e prolungato; alternativa parziale attivabile solo in ore.",
+    regimes_relevant_to_this_function: ["nis2", "cer"]
+  };
+
+  t("review", "reviewFunction", "funzione vuota → 'da fare' su nome, risultato, perimetro, criticità", function () {
+    var f = rv({});
+    ok(hasFinding(f, "name", "todo"), "name todo");
+    ok(hasFinding(f, "service_description", "todo"), "service todo");
+    ok(hasFinding(f, "perimeter", "todo"), "perimeter todo");
+    ok(hasFinding(f, "criticality", "todo"), "criticality todo");
+  });
+  t("review", "reviewFunction", "funzione ben definita → nessuna segnalazione", function () {
+    eq(rv(goodFn, { nis2: { qualification: "essenziale" } }), []);
+  });
+  t("review", "reviewFunction", "il nome sembra l'organizzazione → verifica sul nome", function () {
+    var f = rv({ name: "AcquaCittà S.p.A." });
+    ok(hasFinding(f, "name", "warn"), "warn sul nome");
+  });
+  t("review", "reviewFunction", "risultato e processo fisico identici → verifica sul processo", function () {
+    var f = rv({ name: "X", service_description: "Erogazione di acqua potabile alla città", physical_process: "Erogazione di acqua potabile alla città", perimeter: "y", criticality: 2, criticality_rationale: "z" });
+    ok(hasFinding(f, "physical_process", "warn"), "warn processo == risultato");
+  });
+  t("review", "reviewFunction", "criticità alta con motivazione che non cita i criteri CER → verifica", function () {
+    var f = rv({ name: "Dispacciamento", service_description: "Bilanciamento della rete elettrica di distribuzione locale.", physical_process: "Regolazione tensione/frequenza in cabina primaria.", perimeter: "cabina + telecontrollo", criticality: 4, criticality_rationale: "È molto importante per noi.", regimes_relevant_to_this_function: ["nis2"] });
+    ok(hasFinding(f, "criticality_rationale", "warn"), "motivazione debole");
+  });
+  t("review", "reviewFunction", "criticità 4 senza NIS2 né CER tra i regimi rilevanti → verifica", function () {
+    var g = JSON.parse(JSON.stringify(goodFn));
+    g.criticality = 4; g.regimes_relevant_to_this_function = ["macchine"];
+    ok(hasFinding(rv(g), "criticality", "warn"), "incoerenza criticità/resilienza");
+  });
+  t("review", "reviewFunction", "organizzazione essenziale ma funzione a criticità bassa → verifica", function () {
+    var g = JSON.parse(JSON.stringify(goodFn)); g.criticality = 2;
+    ok(hasFinding(rv(g, { nis2: { qualification: "essenziale" } }), "criticality", "warn"), "warn coerenza org/funzione");
+  });
+  t("review", "reviewFunction", "scostamento (override) senza motivazione → 'da fare'", function () {
+    var f = rv(goodFn, { nis2: { qualification: "essenziale", overridden_from_org_profile: true, override_reason: "" } });
+    ok(hasFinding(f, "regimes", "todo"), "override senza motivo");
+  });
 })(typeof window !== "undefined" ? window : this);

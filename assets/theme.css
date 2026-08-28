@@ -200,3 +200,10 @@ textarea.field { min-height: 5rem; resize: vertical; }
 .tr-list li.ko .tr-badge { color: var(--danger); }
 .tr-name { flex: 1; min-width: 12rem; }
 .tr-msg { width: 100%; font-family: var(--mono); font-size: 0.76rem; color: var(--danger); padding-left: 3.2rem; }
+.tr-det { flex: 1; min-width: 12rem; }
+.tr-det > summary { cursor: pointer; }
+.tr-src {
+  margin: 0.45rem 0 0.1rem; padding: 0.6rem 0.8rem; overflow-x: auto;
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px;
+  font-family: var(--mono); font-size: 0.74rem; line-height: 1.5; color: var(--ink); white-space: pre;
+}

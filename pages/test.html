@@ -16,9 +16,18 @@
   .cov span { color: var(--muted); }
 
   .rerun { font-family: var(--mono); font-size: 0.72rem; }
+  .rerun label { margin-left: 1rem; color: var(--muted); cursor: pointer; }
   .suite-h { font-family: var(--serif); font-size: 1.15rem; margin: 2rem 0 0.2rem; padding-top: 1rem; border-top: 1px solid var(--border); }
   .suite-h + p { margin-top: 0.2rem; font-size: 0.85rem; color: var(--muted); }
   code { font-family: var(--mono); font-size: 0.82rem; }
+
+  .howto { border: 1px solid var(--border); border-radius: 8px; background: var(--surface); padding: 0.9rem 1.1rem; margin: 1.4rem 0; }
+  .howto > summary { font-family: var(--serif); font-weight: 600; cursor: pointer; }
+  .howto[open] > summary { margin-bottom: 0.6rem; }
+  .howto ol { margin: 0.4rem 0; padding-left: 1.3rem; font-size: 0.88rem; }
+  .howto li { margin: 0.35rem 0; }
+  .howto pre { background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; padding: 0.7rem 0.9rem; overflow-x: auto; font-family: var(--mono); font-size: 0.76rem; line-height: 1.5; white-space: pre; }
+  .howto .k { font-family: var(--mono); font-size: 0.82rem; color: var(--accent-ink); background: var(--accent-tint); padding: 0.03rem 0.3rem; border-radius: 3px; }
 </style>
 </head>
 <body>
@@ -41,8 +50,25 @@
   <div class="lead">
     <p>Il modello del Capitolo 3 chiede che <b>ogni classificazione sia motivata e verificabile</b>, non semplicemente mostrata. Questa pagina è la contropartita operativa di quel requisito: ciascun caso fissa un input, l'esito atteso e la regola normativa che lo giustifica, così che una modifica al motore che rompa una regola sia visibile immediatamente.</p>
     <p>I casi vivono in un unico file (<code>tests/cases.js</code>) e non dipendono dall'interfaccia: girano identici qui, nelle pagine tecniche <a href="../tests/engine.html">engine</a> e <a href="../tests/calcs.html">calcs</a>, e a riga di comando senza browser. La stessa proprietà — un input, un output atteso, una fonte — vale come esempio di trasparenza metodologica per il Capitolo 4.</p>
-    <p>La suite <b>engine</b> copre la classificazione multi-regime (Capitolo 2); la suite <b>calcs</b> copre i calcoli derivati del §3.6 (divari per dimensione, anello debole non compensabile, priorità di intervento tenuta distinta dalla priorità di verifica).</p>
+    <p>La suite <b>engine</b> copre la classificazione multi-regime (Capitolo 2); <b>calcs</b> copre i calcoli derivati del §3.6 (divari per dimensione, anello debole non compensabile, priorità di intervento distinta da quella di verifica); <b>review</b> copre le euristiche di aiuto alla compilazione dello Step 2.</p>
   </div>
+
+  <details class="howto">
+    <summary>Come funziona questa verifica</summary>
+    <p style="font-size:.9rem;margin:.3rem 0">Ogni caso è una funzione minima: prepara un <b>input</b>, chiama il motore, e confronta il risultato con l'<b>esito atteso</b>. Se il confronto fallisce, la funzione solleva un'eccezione e la riga diventa rossa con il motivo. Non c'è stato condiviso tra i casi: ognuno riparte da zero.</p>
+    <ol>
+      <li>Un caso della suite <span class="k">engine</span> chiama <span class="k">CPF.classifyRegimes(input)</span> e verifica una proprietà del profilo restituito (qualificazione NIS2, canale AI Act, presenza di un flag di verifica…).</li>
+      <li>Un caso della suite <span class="k">calcs</span> chiama una funzione del §3.6 (<span class="k">dimensionGap</span>, <span class="k">essentialShortfall</span>, <span class="k">domainPriority</span>, <span class="k">rankDomains</span>) e verifica il valore derivato.</li>
+      <li>Il confronto è fatto con <span class="k">eq(ottenuto, atteso)</span>: uguaglianza strutturale (JSON). Altri aiutanti: <span class="k">has(lista, /regex/)</span> per cercare un testo in un elenco, <span class="k">traceHas(regime, /regex/)</span> per cercare una motivazione nel <i>trace</i>.</li>
+    </ol>
+    <p style="font-size:.9rem;margin:.3rem 0">Esempio — «canale 6.1 senza finalità di sicurezza non è ad alto rischio» (Reg. UE 2026/1744):</p>
+    <pre>t("engine", "AI Act", "…canale 6.1 SENZA finalità di sicurezza → non alto rischio", function () {
+  var p = C({ ai_system: true, ai_channel1: true });
+  eq(p.ai_act.high_risk, false, "high_risk");
+  eq(p.ai_act.status, "canale_6_1_non_attivato", "status");
+});</pre>
+    <p style="font-size:.9rem;margin:.5rem 0 0">Attiva <b>«mostra il codice di ogni caso»</b> qui sotto per vedere l'input e l'asserzione esatti di ciascuna riga, espandendola.</p>
+  </details>
 
   <div class="grid">
     <div class="cov"><b>NIS2</b><span>catena di precedenza: designazione CER, casi speciali, telco, size-cap rule, designazione dello Stato membro, qualifica ACN.</span></div>
@@ -53,10 +79,12 @@
     <div class="cov"><b>Reg. Macchine</b><span>organismo notificato (Allegato I Parte A), modifica sostanziale, RESS 1.1.9 / 1.2.1.</span></div>
     <div class="cov"><b>AI Act + Reg. (UE) 2026/1744</b><span>doppio canale dell'art. 6; restringimento del componente di sicurezza; calendario differito a date fisse; esclusione art. 6.3 e profilazione; requisiti art. 14/15; art. 437-bis c.p. e limite epistemico OT.</span></div>
     <div class="cov"><b>Calcoli §3.6</b><span>gap per dimensione, incertezza probatoria, divario essenziale, priorità di intervento vs verifica, ordinamento dei domini.</span></div>
+    <div class="cov"><b>Coerenza funzione (Step 2)</b><span>euristiche di aiuto: campi mancanti, nome che sembra l'organizzazione, risultato ≡ processo, criticità non motivata o incoerente con i regimi.</span></div>
   </div>
 
   <div id="sum" class="tr-sum">esecuzione…</div>
-  <p class="rerun"><a href="#" id="rerun">↻ riesegui</a></p>
+  <p class="rerun"><a href="#" id="rerun">↻ riesegui</a>
+    <label><input type="checkbox" id="show-src"> mostra il codice di ogni caso</label></p>
 
   <h2 class="suite-h">Suite <code>engine</code> — classificazione multi-regime</h2>
   <p>Riferimento: Capitolo 2 della tesi; <code>data/regime_rules.js</code> + <code>assets/regime-engine.js</code>.</p>
@@ -65,6 +93,10 @@
   <h2 class="suite-h">Suite <code>calcs</code> — calcoli derivati §3.6</h2>
   <p>Riferimento: §3.6; <code>assets/app.js</code>.</p>
   <div id="out-calcs"></div>
+
+  <h2 class="suite-h">Suite <code>review</code> — controllo di coerenza della funzione</h2>
+  <p>Le euristiche di aiuto dello Step 2 (<code>CPF.reviewFunction</code>): non una validazione giuridica, ma controlli che segnalano campi mancanti e incoerenze interne.</p>
+  <div id="out-review"></div>
 
   <p class="disclaimer">Un esito verde indica coerenza interna del motore con le regole codificate, non una validazione giuridica. Le designazioni caso per caso, le esclusioni per sicurezza nazionale e la valutazione integrale di conformità restano fuori dallo strumento.</p>
 </div>
@@ -83,20 +115,24 @@
 <script src="../tests/runner.js"></script>
 <script>
 (function () {
+  var showSrc = document.getElementById("show-src");
   function run() {
-    var e = CPF.runTests({ suites: ["engine"], mount: document.getElementById("out-engine") });
-    var c = CPF.runTests({ suites: ["calcs"], mount: document.getElementById("out-calcs") });
-    var total = e.total + c.total, pass = e.pass + c.pass, fail = e.fail + c.fail;
+    var src = showSrc.checked;
+    var e = CPF.runTests({ suites: ["engine"], mount: document.getElementById("out-engine"), source: src });
+    var c = CPF.runTests({ suites: ["calcs"], mount: document.getElementById("out-calcs"), source: src });
+    var v = CPF.runTests({ suites: ["review"], mount: document.getElementById("out-review"), source: src });
+    var total = e.total + c.total + v.total, pass = e.pass + c.pass + v.pass, fail = e.fail + c.fail + v.fail;
     var pct = total ? Math.round((pass / total) * 100) : 0;
     var sum = document.getElementById("sum");
     sum.className = "tr-sum " + (fail ? "ko" : "ok");
     sum.innerHTML =
       '<div class="tr-sum-line"><b>' + pass + ' / ' + total + '</b> test superati'
       + (fail ? ' &nbsp;·&nbsp; <span class="tr-sum-fail">' + fail + ' falliti</span>' : ' &nbsp;·&nbsp; tutto verde')
-      + ' &nbsp;·&nbsp; engine ' + e.pass + '/' + e.total + ', calcs ' + c.pass + '/' + c.total + '</div>'
+      + ' &nbsp;·&nbsp; engine ' + e.pass + '/' + e.total + ', calcs ' + c.pass + '/' + c.total + ', review ' + v.pass + '/' + v.total + '</div>'
       + '<div class="tr-progress"><span style="width:' + pct + '%"></span></div>';
   }
   document.getElementById("rerun").addEventListener("click", function (ev) { ev.preventDefault(); run(); });
+  showSrc.addEventListener("change", run);
   run();
 })();
 </script>

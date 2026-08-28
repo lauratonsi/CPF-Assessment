@@ -6,6 +6,68 @@
 <title>Step 4a — Conseguenze e percorsi · CPF Assessment</title>
   <link rel="stylesheet" href="../assets/theme.css">
 <script>(function(){try{var t=localStorage.getItem("cpf-theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+<style>
+  .intro { font-size: 0.88rem; color: var(--muted); margin: 0.2rem 0 1.2rem; }
+  h2.sec { font-size: 1.15rem; margin: 2rem 0 0.3rem; }
+  h2.sec .ref { font-family: var(--mono); font-size: 0.62em; color: var(--faint); }
+
+  .cons { border: 1px solid var(--border); border-radius: 8px; padding: 0.85rem 0.95rem; margin: 0.8rem 0; background: var(--surface); }
+  .cons-head { display: flex; gap: 0.6rem; align-items: baseline; }
+  .cons-head .lbl { font-family: var(--mono); font-size: 0.72rem; color: var(--faint); flex: none; padding-top: 0.5rem; }
+  .cons textarea, .path textarea {
+    width: 100%; font: inherit; font-size: 0.88rem; padding: 0.45rem 0.55rem;
+    border: 1px solid var(--border); border-radius: 6px; background: var(--paper); color: var(--ink);
+    min-height: 2.6rem; resize: vertical;
+  }
+  .x-btn { font: inherit; font-size: 0.74rem; padding: 0.22rem 0.5rem; border: 1px solid var(--border); border-radius: 5px; background: transparent; color: var(--muted); cursor: pointer; flex: none; }
+  .x-btn:hover { border-color: var(--danger); color: var(--danger); }
+  .add-btn { font: inherit; font-size: 0.82rem; padding: 0.35rem 0.7rem; border: 1px dashed var(--border); border-radius: 6px; background: transparent; color: var(--accent-ink); cursor: pointer; }
+  .add-btn:hover { border-color: var(--accent); }
+
+  .paths { margin: 0.6rem 0 0 0.2rem; padding-left: 0.8rem; border-left: 2px solid var(--accent-tint); }
+  .path { margin: 0.6rem 0; }
+  .path-head { display: flex; gap: 0.5rem; align-items: baseline; }
+  .path-head .lbl { font-family: var(--mono); font-size: 0.68rem; color: var(--faint); flex: none; padding-top: 0.5rem; }
+
+  .caps { margin-top: 0.5rem; }
+  .caps > .lbl { font-size: 0.76rem; color: var(--muted); display: block; margin-bottom: 0.25rem; }
+  .cap-row { display: flex; align-items: baseline; gap: 0.6rem; padding: 0.22rem 0; font-size: 0.84rem; border-top: 1px solid var(--border); }
+  .cap-row:first-of-type { border-top: 0; }
+  .cap-row .name { flex: 1; }
+  .cap-row .name small { color: var(--faint); font-size: 0.76rem; }
+  .cap-row label { display: flex; align-items: center; gap: 0.3rem; font-size: 0.76rem; color: var(--muted); flex: none; cursor: pointer; }
+  .cap-row label.ess { color: var(--danger); }
+  .cap-row input[disabled] + span { opacity: 0.35; }
+
+  .tgt { border: 1px solid var(--border); border-radius: 8px; padding: 0.85rem 0.95rem; margin: 0.7rem 0; background: var(--surface); }
+  .tgt.ess { border-color: var(--danger); }
+  .tgt h3 { font-size: 0.95rem; margin: 0 0 0.15rem; display: flex; gap: 0.5rem; align-items: baseline; flex-wrap: wrap; }
+  .tgt h3 .tag { font-family: var(--mono); font-size: 0.62rem; padding: 0.06rem 0.4rem; border-radius: 3px; border: 1px solid var(--danger); color: var(--danger); }
+  .tgt .dsc { font-size: 0.78rem; color: var(--muted); margin: 0 0 0.6rem; }
+  .dim { display: grid; grid-template-columns: 1fr; gap: 0.3rem; padding: 0.5rem 0; border-top: 1px solid var(--border); }
+  @media (min-width: 42rem) { .dim { grid-template-columns: 9rem 1fr; align-items: start; } }
+  .dim > .dname { font-size: 0.82rem; font-weight: 600; }
+  .dim > .dname small { display: block; font-weight: 400; color: var(--faint); font-size: 0.72rem; }
+  .dim select, .dim input {
+    width: 100%; font: inherit; font-size: 0.84rem; padding: 0.38rem 0.5rem;
+    border: 1px solid var(--border); border-radius: 5px; background: var(--paper); color: var(--ink);
+  }
+  .dim .rat { margin-top: 0.25rem; }
+  .dim .rat.todo { border-color: var(--accent); }
+  .thr { margin-top: 0.7rem; padding: 0.6rem 0.7rem; border: 1px solid var(--danger); border-radius: 6px; background: color-mix(in srgb, var(--danger) 7%, transparent); }
+  .thr .lbl { font-size: 0.78rem; color: var(--danger); font-weight: 600; display: block; margin-bottom: 0.3rem; }
+  .thr-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .thr-row select { flex: 1; min-width: 8rem; font: inherit; font-size: 0.82rem; padding: 0.35rem 0.45rem; border: 1px solid var(--border); border-radius: 5px; background: var(--paper); color: var(--ink); }
+  .thr textarea { width: 100%; margin-top: 0.4rem; font: inherit; font-size: 0.82rem; padding: 0.4rem 0.5rem; border: 1px solid var(--border); border-radius: 5px; background: var(--paper); color: var(--ink); min-height: 2.2rem; resize: vertical; }
+
+  .ed-summary { border: 1px solid var(--border); border-radius: 7px; padding: 0.7rem 0.85rem; margin-top: 1rem; font-size: 0.82rem; background: var(--surface-2); }
+  .ed-summary b { font-family: var(--mono); }
+  .ed-summary .crit { color: var(--danger); }
+  .empty { font-size: 0.88rem; color: var(--muted); padding: 0.8rem 0; }
+  .saved-note { font-family: var(--mono); font-size: 0.72rem; color: var(--faint); margin-top: 0.5rem; min-height: 1em; }
+  .toast { position: fixed; left: 50%; bottom: 1.4rem; transform: translateX(-50%); background: var(--ink); color: var(--paper); font-size: 0.85rem; padding: 0.6rem 1rem; border-radius: 6px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast.show { opacity: 0.95; }
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -22,17 +84,338 @@
     <h1>Step 4a — Conseguenze intollerabili e percorsi di compromissione</h1>
     <p class="dek">Logica CCE (Bochman &amp; Freeman 2021): si parte dalla conseguenza da evitare, si ricostruiscono a ritroso i percorsi di compromissione, si individuano le capacità richieste e quelle essenziali. Questo passo genera il <strong>profilo obiettivo</strong> e l'elenco delle <strong>capacità essenziali</strong> usati nello Step 4b. Riferimento: §3.1, §3.6.</p>
   </header>
-  <section class="card"><h2>In costruzione</h2>
-    <p class="muted">Editor: conseguenze intollerabili → per ciascuna i percorsi di compromissione → selezione di <code>required_capabilities</code> ed <code>essential_capabilities</code> dai 6-7 domini. Il profilo obiettivo per dimensione va motivato manualmente (a priori, non adattato alle capacità già presenti — §3.6).</p>
+
+  <section class="card" id="gate-card" hidden>
+    <h2>Prima definisci la funzione</h2>
+    <p class="muted" id="gate-msg"></p>
+    <div class="btn-row" style="justify-content:flex-start; margin-top:1rem">
+      <a class="btn btn--primary" href="step2-funzione.html">Vai allo Step 2</a>
+    </div>
   </section>
+
+  <div id="editor" hidden>
+    <p class="intro" id="ed-fn"></p>
+
+    <h2 class="sec">1 · Conseguenze intollerabili <span class="ref">§3.1</span></h2>
+    <p class="intro">Ciò che non deve accadere alla funzione, indipendentemente da come ci si arrivi: perdita di controllo del processo, danno agli operatori o all'ambiente, interruzione prolungata di un servizio essenziale. Non è un elenco di minacce: è un elenco di esiti.</p>
+    <div id="cons-list"></div>
+    <button type="button" class="add-btn" id="add-cons">+ Aggiungi conseguenza</button>
+
+    <h2 class="sec">2 · Profilo obiettivo <span class="ref">§3.6</span></h2>
+    <p class="intro">Derivato dalle capacità richieste dai percorsi qui sopra. Il livello obiettivo per dimensione va motivato <b>a priori</b> — dalla conseguenza da evitare, non adattandolo alle capacità già presenti. Le capacità marcate <b>essenziali</b> hanno una soglia non compensabile: un anello debole che non viene mai assorbito in una media.</p>
+    <div id="tgt-list"></div>
+
+    <div class="ed-summary" id="ed-summary" hidden></div>
+    <p class="saved-note" id="saved-note"></p>
+  </div>
+
   <div class="btn-row">
     <a class="btn btn--ghost" href="step3-dipendenze.html">← Dipendenze</a>
-    <a class="btn btn--primary" href="step4b-capacita.html">Avanti: Capacità →</a>
+    <button type="button" class="btn btn--primary" id="next">Avanti: Capacità →</button>
   </div>
 </div>
+<div class="toast" id="toast"></div>
+
 <script src="../data/capability_domains.js"></script>
+<script src="../data/scales.js"></script>
 <script src="../data/assessment_schema.js"></script>
 <script src="../assets/app.js"></script>
+<script>
+(function () {
+  var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var $ = function (id) { return document.getElementById(id); };
+
+  var DOMS = CPF.data.capabilityDomains.domains;
+  var SC = CPF.data.scales.dimensions;
+  var DIMS = ["consolidamento", "estensione", "efficacia", "prestazione_osservata"];
+
+  var params = new URLSearchParams(location.search);
+  var a = params.get("id") ? CPF.loadAssessment(params.get("id")) : CPF.getActive();
+
+  if (!a || !a.function || !a.function.name) {
+    $("gate-card").hidden = false;
+    $("gate-msg").textContent = "Lo Step 4a parte dalla funzione definita nello Step 2: le conseguenze intollerabili sono conseguenze per quella funzione.";
+    $("next").addEventListener("click", function () { location.href = "step4b-capacita.html"; });
+    return;
+  }
+  CPF.setActive(a.assessment_id);
+  if (!Array.isArray(a.intolerable_consequences)) a.intolerable_consequences = [];
+  if (!Array.isArray(a.capability_assessment)) a.capability_assessment = [];
+
+  $("editor").hidden = false;
+  $("ed-fn").innerHTML = "Funzione: <b>" + esc(a.function.name) + "</b>"
+    + (a.function.criticality ? " · criticità " + a.function.criticality + "/4" : "")
+    + (a.function.physical_process ? " · processo: " + esc(a.function.physical_process) : "");
+
+  var consList = $("cons-list"), tgtList = $("tgt-list");
+  var toast = $("toast"), savedNote = $("saved-note");
+  var lastSig = null, saveTimer = null;
+  function flash(m) { toast.textContent = m; toast.classList.add("show"); setTimeout(function () { toast.classList.remove("show"); }, 1500); }
+
+  /* ---------------- sezione 1: conseguenze e percorsi ---------------- */
+  function capRow(path, dom) {
+    var req = path.required_capabilities.indexOf(dom.id) !== -1;
+    var ess = path.essential_capabilities.indexOf(dom.id) !== -1;
+    return '<div class="cap-row" data-dom="' + dom.id + '">'
+      + '<span class="name">' + esc(dom.label) + '<br><small>' + esc(dom.description) + '</small></span>'
+      + '<label><input type="checkbox" data-role="required"' + (req ? " checked" : "") + '><span>richiesta</span></label>'
+      + '<label class="ess"><input type="checkbox" data-role="essential"' + (ess ? " checked" : "") + (req ? "" : " disabled") + '><span>essenziale</span></label>'
+      + '</div>';
+  }
+  function pathCard(cons, path, i) {
+    return '<div class="path" data-id="' + esc(path.id) + '">'
+      + '<div class="path-head"><span class="lbl">P' + (i + 1) + '</span>'
+      + '<textarea data-f="description" placeholder="come si arriva alla conseguenza: passo per passo (accesso iniziale → movimento → azione sul processo)">' + esc(path.description) + '</textarea>'
+      + '<button type="button" class="x-btn" data-del-path>rimuovi</button></div>'
+      + '<div class="caps"><span class="lbl">Capacità necessarie a interrompere questo percorso — marca «essenziale» quelle senza cui il percorso non è arrestabile</span>'
+      + DOMS.map(function (d) { return capRow(path, d); }).join("")
+      + '</div></div>';
+  }
+  function consCard(cons, ci) {
+    return '<div class="cons" data-id="' + esc(cons.id) + '">'
+      + '<div class="cons-head"><span class="lbl">C' + (ci + 1) + '</span>'
+      + '<textarea data-f="description" placeholder="es. perdita del controllo del processo con rischio per la sicurezza degli operatori">' + esc(cons.description) + '</textarea>'
+      + '<button type="button" class="x-btn" data-del-cons>rimuovi</button></div>'
+      + '<div class="paths">'
+      + (cons.compromise_paths.length ? cons.compromise_paths.map(function (p, i) { return pathCard(cons, p, i); }).join("") : '<p class="empty">Nessun percorso. Aggiungine almeno uno per collegare la conseguenza alle capacità.</p>')
+      + '<button type="button" class="add-btn" data-add-path>+ percorso</button>'
+      + '</div></div>';
+  }
+  function renderConsequences() {
+    consList.innerHTML = a.intolerable_consequences.length
+      ? a.intolerable_consequences.map(consCard).join("")
+      : '<p class="empty">Nessuna conseguenza. Comincia dall\'esito che la valutazione deve escludere.</p>';
+  }
+
+  function readConsequences() {
+    var out = [];
+    Array.prototype.forEach.call(consList.querySelectorAll(".cons"), function (cEl) {
+      var cons = { id: cEl.getAttribute("data-id"), description: "", compromise_paths: [] };
+      var cd = cEl.querySelector('.cons-head textarea[data-f="description"]');
+      cons.description = cd ? cd.value : "";
+      Array.prototype.forEach.call(cEl.querySelectorAll(".path"), function (pEl) {
+        var path = { id: pEl.getAttribute("data-id"), description: "", required_capabilities: [], essential_capabilities: [] };
+        var pd = pEl.querySelector('textarea[data-f="description"]');
+        path.description = pd ? pd.value : "";
+        Array.prototype.forEach.call(pEl.querySelectorAll(".cap-row"), function (row) {
+          var dom = row.getAttribute("data-dom");
+          var reqCb = row.querySelector('[data-role="required"]');
+          var essCb = row.querySelector('[data-role="essential"]');
+          if (reqCb && reqCb.checked) {
+            path.required_capabilities.push(dom);
+            if (essCb && essCb.checked) path.essential_capabilities.push(dom);
+          }
+        });
+        cons.compromise_paths.push(path);
+      });
+      out.push(cons);
+    });
+    a.intolerable_consequences = out;
+  }
+
+  /* ---------------- sezione 2: profilo obiettivo (derivato) ---------------- */
+  function requiredDomains() {
+    var req = {}, ess = {};
+    a.intolerable_consequences.forEach(function (c) {
+      c.compromise_paths.forEach(function (p) {
+        (p.required_capabilities || []).forEach(function (d) { req[d] = true; });
+        (p.essential_capabilities || []).forEach(function (d) { ess[d] = true; });
+      });
+    });
+    return { req: req, ess: ess };
+  }
+
+  function reconcileTargets() {
+    var r = requiredDomains();
+    var domOrder = DOMS.map(function (d) { return d.id; }).filter(function (id) { return r.req[id]; });
+    var byId = {};
+    a.capability_assessment.forEach(function (e) { byId[e.domain_id] = e; });
+    var next = domOrder.map(function (id) {
+      var e = byId[id] || CPF.blankCapabilityTarget(id, !!r.ess[id]);
+      e.is_essential = !!r.ess[id];
+      if (e.is_essential && !e.non_compensable_threshold) e.non_compensable_threshold = { dimension: "estensione", min_level: 4, rationale: "" };
+      if (!e.is_essential) e.non_compensable_threshold = null;
+      return e;
+    });
+    // conserva eventuali profili correnti (Step 4b) per domini non più richiesti? no: si ricreano se rientrano.
+    a.capability_assessment = next;
+    return domOrder.join("|") + "##" + Object.keys(r.ess).sort().join("|");
+  }
+
+  function levelOptions(dim, cur) {
+    return SC[dim].levels.map(function (l) {
+      return '<option value="' + l.value + '"' + (Number(cur) === l.value ? " selected" : "") + '>' + l.value + " — " + esc(l.label) + '</option>';
+    }).join("");
+  }
+  function tgtCard(e) {
+    var dom = DOMS.filter(function (d) { return d.id === e.domain_id; })[0] || { label: e.domain_id, description: "" };
+    var h = '<div class="tgt' + (e.is_essential ? " ess" : "") + '" data-dom="' + esc(e.domain_id) + '">'
+      + '<h3>' + esc(dom.label) + (e.is_essential ? ' <span class="tag">ESSENZIALE</span>' : '') + '</h3>'
+      + '<p class="dsc">' + esc(dom.description) + '</p>';
+    DIMS.forEach(function (d) {
+      var tp = e.target_profile[d] || { level: 3, rationale: "" };
+      var lv = SC[d].levels.filter(function (x) { return x.value === Number(tp.level); })[0];
+      h += '<div class="dim" data-dim="' + d + '">'
+        + '<div class="dname">' + esc(SC[d].label) + '<small>' + esc(lv ? lv.descriptor : "") + '</small></div>'
+        + '<div><select data-f="level">' + levelOptions(d, tp.level) + '</select>'
+        + '<input class="rat' + (tp.rationale ? "" : " todo") + '" data-f="rationale" placeholder="perché questo livello obiettivo (a priori, dalla conseguenza)" value="' + esc(tp.rationale) + '"></div>'
+        + '</div>';
+    });
+    if (e.is_essential) {
+      var thr = e.non_compensable_threshold || { dimension: "estensione", min_level: 4, rationale: "" };
+      h += '<div class="thr"><span class="lbl">Soglia non compensabile (anello debole, §3.6) — sotto questo livello la capacità non è adeguata, e nessuna forza sulle altre dimensioni compensa</span>'
+        + '<div class="thr-row">'
+        + '<select data-f="thr_dimension">' + DIMS.map(function (d) { return '<option value="' + d + '"' + (thr.dimension === d ? " selected" : "") + '>' + esc(SC[d].label) + '</option>'; }).join("") + '</select>'
+        + '<select data-f="thr_min_level">' + [1, 2, 3, 4, 5].map(function (n) { return '<option value="' + n + '"' + (Number(thr.min_level) === n ? " selected" : "") + '>livello minimo ' + n + '</option>'; }).join("") + '</select>'
+        + '</div>'
+        + '<textarea data-f="thr_rationale" placeholder="collega conseguenza + percorso + capacità: perché questa dimensione, a questo livello, è la condizione minima">' + esc(thr.rationale) + '</textarea>'
+        + '</div>';
+    }
+    return h + '</div>';
+  }
+  function renderTargets() {
+    tgtList.innerHTML = a.capability_assessment.length
+      ? a.capability_assessment.map(tgtCard).join("")
+      : '<p class="empty">Nessuna capacità richiesta ancora. Marca le capacità nei percorsi qui sopra: il profilo obiettivo si costruisce da lì.</p>';
+  }
+
+  function readTargets() {
+    Array.prototype.forEach.call(tgtList.querySelectorAll(".tgt"), function (el) {
+      var e = a.capability_assessment.filter(function (x) { return x.domain_id === el.getAttribute("data-dom"); })[0];
+      if (!e) return;
+      Array.prototype.forEach.call(el.querySelectorAll(".dim"), function (dEl) {
+        var d = dEl.getAttribute("data-dim");
+        var lvl = dEl.querySelector('[data-f="level"]');
+        var rat = dEl.querySelector('[data-f="rationale"]');
+        e.target_profile[d] = { level: lvl ? Number(lvl.value) : 3, rationale: rat ? rat.value : "" };
+      });
+      if (e.is_essential) {
+        var dim = el.querySelector('[data-f="thr_dimension"]');
+        var ml = el.querySelector('[data-f="thr_min_level"]');
+        var tr = el.querySelector('[data-f="thr_rationale"]');
+        e.non_compensable_threshold = {
+          dimension: dim ? dim.value : "estensione",
+          min_level: ml ? Number(ml.value) : 4,
+          rationale: tr ? tr.value : ""
+        };
+      }
+    });
+  }
+
+  /* ---------------- riepilogo + persistenza ---------------- */
+  function summarize() {
+    var s = $("ed-summary");
+    var nCons = a.intolerable_consequences.length;
+    var nPaths = a.intolerable_consequences.reduce(function (n, c) { return n + c.compromise_paths.length; }, 0);
+    if (!nCons) { s.hidden = true; return; }
+    s.hidden = false;
+    var nReq = a.capability_assessment.length;
+    var nEss = a.capability_assessment.filter(function (e) { return e.is_essential; }).length;
+    var todo = a.capability_assessment.reduce(function (n, e) {
+      return n + DIMS.filter(function (d) { return !(e.target_profile[d] && e.target_profile[d].rationale); }).length;
+    }, 0);
+    var pathNoCap = a.intolerable_consequences.reduce(function (n, c) {
+      return n + c.compromise_paths.filter(function (p) { return !p.required_capabilities.length; }).length;
+    }, 0);
+    s.innerHTML = '<b>' + nCons + '</b> conseguenze · <b>' + nPaths + '</b> percorsi · <b>' + nReq + '</b> capacità richieste · <span class="' + (nEss ? "crit" : "") + '"><b>' + nEss + '</b> essenziali</span>'
+      + (pathNoCap ? ' · <span class="crit"><b>' + pathNoCap + '</b> percorsi senza capacità</span>' : '')
+      + (todo ? ' · <b>' + todo + '</b> livelli obiettivo da motivare' : '')
+      + '<br><span class="muted" style="font-size:.78rem">Profilo obiettivo e capacità essenziali passano allo Step 4b e alla dashboard (divari, anello debole, priorità).</span>';
+  }
+
+  function save(immediate) {
+    clearTimeout(saveTimer);
+    var doSave = function () {
+      CPF.saveAssessment(a);
+      savedNote.textContent = "salvato automaticamente · " + new Date().toTimeString().slice(0, 8);
+    };
+    if (immediate) doSave(); else saveTimer = setTimeout(doSave, 500);
+  }
+
+  // legge tutto dal DOM, ricalcola i domini richiesti, ridisegna la sezione 2 solo se cambia la struttura
+  function sync(opts) {
+    opts = opts || {};
+    readConsequences();
+    if (!opts.skipTargetsRead) readTargets();
+    var sig = reconcileTargets();
+    if (sig !== lastSig) { renderTargets(); lastSig = sig; }
+    summarize();
+    save(opts.immediate);
+  }
+
+  /* ---------------- eventi ---------------- */
+  consList.addEventListener("input", function () { sync(); });
+  consList.addEventListener("change", function (ev) {
+    var t = ev.target;
+    if (t && t.getAttribute && t.getAttribute("data-role") === "required") {
+      var essCb = t.closest(".cap-row").querySelector('[data-role="essential"]');
+      if (essCb) { essCb.disabled = !t.checked; if (!t.checked) essCb.checked = false; }
+    }
+    sync();
+  });
+  consList.addEventListener("click", function (ev) {
+    var t = ev.target;
+    if (t.closest("[data-del-cons]")) {
+      var id = t.closest(".cons").getAttribute("data-id");
+      readConsequences();
+      a.intolerable_consequences = a.intolerable_consequences.filter(function (c) { return c.id !== id; });
+      renderConsequences(); sync({ immediate: true });
+    } else if (t.closest("[data-add-path]")) {
+      var cid = t.closest(".cons").getAttribute("data-id");
+      readConsequences();
+      var cons = a.intolerable_consequences.filter(function (c) { return c.id === cid; })[0];
+      if (cons) cons.compromise_paths.push(CPF.blankPath());
+      renderConsequences(); sync({ immediate: true });
+    } else if (t.closest("[data-del-path]")) {
+      var pid = t.closest(".path").getAttribute("data-id");
+      readConsequences();
+      a.intolerable_consequences.forEach(function (c) {
+        c.compromise_paths = c.compromise_paths.filter(function (p) { return p.id !== pid; });
+      });
+      renderConsequences(); sync({ immediate: true });
+    }
+  });
+
+  $("add-cons").addEventListener("click", function () {
+    readConsequences();
+    a.intolerable_consequences.push(CPF.blankConsequence());
+    renderConsequences(); sync({ immediate: true });
+    var cards = consList.querySelectorAll(".cons");
+    var last = cards[cards.length - 1];
+    if (last) { last.scrollIntoView({ behavior: "smooth", block: "center" }); last.querySelector("textarea").focus(); }
+  });
+
+  tgtList.addEventListener("input", function () { readTargets(); refreshTargetHints(); save(); summarize(); });
+  tgtList.addEventListener("change", function () { readTargets(); refreshTargetHints(); save(); summarize(); });
+
+  function refreshTargetHints() {
+    Array.prototype.forEach.call(tgtList.querySelectorAll(".dim"), function (dEl) {
+      var rat = dEl.querySelector('[data-f="rationale"]');
+      var sel = dEl.querySelector('[data-f="level"]');
+      if (rat) rat.classList.toggle("todo", !rat.value);
+      if (sel) {
+        var lv = SC[dEl.getAttribute("data-dim")].levels.filter(function (x) { return x.value === Number(sel.value); })[0];
+        var small = dEl.querySelector(".dname small");
+        if (small && lv) small.textContent = lv.descriptor;
+      }
+    });
+  }
+
+  $("next").addEventListener("click", function () {
+    sync({ immediate: true });
+    flash("Conseguenze e profilo obiettivo salvati");
+    location.href = "step4b-capacita.html?id=" + encodeURIComponent(a.assessment_id);
+  });
+
+  /* ---------------- avvio ---------------- */
+  renderConsequences();
+  lastSig = reconcileTargets();
+  renderTargets();
+  refreshTargetHints();
+  summarize();
+  if (a.intolerable_consequences.length) save(true); // persiste il profilo obiettivo derivato
+})();
+</script>
 <script src="../assets/theme-toggle.js"></script>
 </body>
 </html>

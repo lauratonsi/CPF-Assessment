@@ -238,4 +238,92 @@
       });
   };
 
+  /* ----------------------------------------------------------------------
+     Revisione assistita della definizione di funzione (Step 2).
+     NON è una validazione giuridica: sono euristiche che aiutano l'utente
+     a notare campi sottili, incoerenze interne e scostamenti dal profilo
+     dell'organizzazione. Ogni esito ha:
+       level: "todo"  -> manca qualcosa di necessario a proseguire con senso
+              "warn"  -> possibile incoerenza o motivazione debole
+       field:  campo del form a cui l'esito si riferisce
+       message: cosa guardare, in una riga
+     Funzione pura e testabile (vedi tests/cases.js, gruppo "reviewFunction").
+     ---------------------------------------------------------------------- */
+  function _norm(s) {
+    return String(s == null ? "" : s).toLowerCase().replace(/[\s\W_]+/g, " ").trim();
+  }
+  function _words(s) {
+    return String(s == null ? "" : s).trim().split(/\s+/).filter(Boolean).length;
+  }
+
+  CPF.reviewFunction = function (assessment) {
+    var a = assessment || {};
+    var F = a.function || {};
+    var RP = a.regime_profile || {};
+    var out = [];
+    function add(level, field, message) { out.push({ level: level, field: field, message: message }); }
+
+    // --- nome ---
+    if (!F.name) {
+      add("todo", "name", "Dai un nome alla funzione: un'attività o un servizio operativo (es. «Potabilizzazione — linea A»), non l'organizzazione.");
+    } else if (/\b(s\.?p\.?a|s\.?r\.?l|s\.?c\.?a\.?r\.?l|comune di|az(ienda)?|societ|ente|gruppo|holding|utility|multiutility)\b/i.test(F.name)) {
+      add("warn", "name", "«" + F.name + "» sembra il nome dell'organizzazione. La funzione è un'attività (potabilizzazione, dispacciamento, telecontrollo…), non il soggetto.");
+    }
+
+    // --- risultato / servizio ---
+    if (!F.service_description) {
+      add("todo", "service_description", "Descrivi il risultato operativo da preservare: cosa produce o mantiene la funzione, e per chi.");
+    } else if (_words(F.service_description) < 6) {
+      add("warn", "service_description", "Il risultato è molto sintetico: precisa cosa si ottiene e chi ne dipende.");
+    }
+
+    // --- processo fisico ---
+    if (!F.physical_process) {
+      add("warn", "physical_process", "Nessun processo fisico indicato. Una funzione cyber-fisica ne governa uno; se davvero non c'è, verifica di non stare valutando un servizio puramente IT (§3.2).");
+    } else if (F.service_description && _norm(F.physical_process) === _norm(F.service_description)) {
+      add("warn", "physical_process", "Risultato e processo fisico coincidono. Il risultato è cosa ottieni; il processo è cosa controlli fisicamente (portata, pressione, tensione, temperatura…).");
+    }
+
+    // --- perimetro ---
+    if (!F.perimeter) {
+      add("todo", "perimeter", "Delimita il perimetro osservabile: ciò che l'organizzazione può conoscere, monitorare, governare o coprire con misure di continuità.");
+    }
+
+    // --- criticità ---
+    if (!F.criticality) {
+      add("todo", "criticality", "Scegli un livello di criticità (1-4). In sua assenza il calcolo delle priorità (§3.6) usa 2 come valore neutro.");
+    } else {
+      if (!F.criticality_rationale) {
+        add("todo", "criticality_rationale", "Hai scelto criticità " + F.criticality + " ma non l'hai motivata: la motivazione è ciò che rende la scelta ripetibile.");
+      } else if (F.criticality >= 3 && !/(utent|settor|durat|estensione|geograf|alternativ|propagazion|ambient|sicurezza pubblic|incolumit|dipenden)/i.test(F.criticality_rationale)) {
+        add("warn", "criticality_rationale", "Criticità alta ma la motivazione non richiama i criteri CER (utenti e settori dipendenti, durata ed estensione, alternative, propagazione): argomentala meglio.");
+      }
+    }
+
+    // --- regimi rilevanti ---
+    var rel = F.regimes_relevant_to_this_function || [];
+    if (!rel.length) {
+      add("warn", "regimes", "Nessun regime rilevante per la funzione: possibile, ma raro per una funzione cyber-fisica in un settore regolato.");
+    }
+    var hasResilience = rel.indexOf("nis2") !== -1 || rel.indexOf("cer") !== -1;
+    if (F.criticality === 4 && !hasResilience) {
+      add("warn", "criticality", "Criticità «molto alta» ma né NIS2 né CER tra i regimi rilevanti: incoerenza da chiarire.");
+    }
+
+    // --- coerenza con il profilo dell'organizzazione ---
+    var orgEssential = (RP.nis2 && RP.nis2.qualification === "essenziale") ||
+                       (RP.cer && RP.cer.designation === "soggetto_critico");
+    if (orgEssential && F.criticality && F.criticality <= 2) {
+      add("warn", "criticality", "L'organizzazione è soggetto essenziale/critico ma questa funzione ha criticità " + F.criticality + ": plausibile solo se è marginale rispetto al servizio essenziale.");
+    }
+    ["nis2", "cer", "dora", "cra", "macchine", "ai_act"].forEach(function (k) {
+      var r = RP[k];
+      if (r && r.overridden_from_org_profile && !r.override_reason) {
+        add("todo", "regimes", "Scostamento su " + k.toUpperCase().replace("_", " ") + " senza motivazione: spiega perché differisce dal profilo dell'organizzazione.");
+      }
+    });
+
+    return out;
+  };
+
 })(window);

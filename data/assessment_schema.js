@@ -125,6 +125,47 @@
     };
   };
 
+  function rid(pfx) { return pfx + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+  /* Conseguenza intollerabile e percorso di compromissione (Step 4a, logica CCE, §3.1/§3.6). */
+  root.CPF.blankConsequence = function () {
+    return { id: rid("cons-"), description: "", compromise_paths: [] };
+  };
+  root.CPF.blankPath = function () {
+    // essential_capabilities ⊆ required_capabilities
+    return { id: rid("path-"), description: "", required_capabilities: [], essential_capabilities: [] };
+  };
+
+  /* Profilo corrente di un dominio (Step 4b): quattro dimensioni indipendenti,
+     ciascuna con livello 1-5, forza probatoria e note di evidenza. Il default
+     è "non determinabile": in assenza di evidenze il livello non è attribuibile
+     (§3.6 — assenza di prova ≠ prova dell'assenza). */
+  root.CPF.blankCurrentProfile = function () {
+    var cp = {};
+    ["consolidamento", "estensione", "efficacia", "prestazione_osservata"].forEach(function (d) {
+      cp[d] = { level: 3, evidentiary_strength: "non_determinabile", evidence_notes: "" };
+    });
+    cp.estensione.excluded_essential_components = [];
+    return cp;
+  };
+
+  /* Voce del profilo obiettivo per un dominio di capacità (Step 4a → Step 4b).
+     target_profile.<dimensione> = { level 1-5, rationale } — motivato a priori (§3.6). */
+  root.CPF.blankCapabilityTarget = function (domainId, isEssential) {
+    var tp = {};
+    ["consolidamento", "estensione", "efficacia", "prestazione_osservata"].forEach(function (d) {
+      tp[d] = { level: 3, rationale: "" };
+    });
+    return {
+      domain_id: domainId,
+      target_profile: tp,
+      is_essential: !!isEssential,
+      non_compensable_threshold: isEssential
+        ? { dimension: "estensione", min_level: 4, rationale: "" }
+        : null
+    };
+  };
+
   root.CPF.blankAssessment = function (id) {
     var now = new Date().toISOString();
     return {

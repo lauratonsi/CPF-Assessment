@@ -27,6 +27,14 @@
     catch (e) { return { ok: false, msg: e && e.message ? e.message : String(e) }; }
   }
 
+  function dedent(src) {
+    var lines = String(src).replace(/\t/g, "  ").split("\n");
+    var indents = lines.slice(1).filter(function (l) { return l.trim(); })
+      .map(function (l) { return l.match(/^ */)[0].length; });
+    var min = indents.length ? Math.min.apply(null, indents) : 0;
+    return lines.map(function (l, i) { return i === 0 ? l : l.slice(min); }).join("\n");
+  }
+
   root.CPF.runTests = function (opts) {
     opts = opts || {};
     var cases = (root.CPF_TEST_CASES || []).filter(function (tc) {
@@ -47,9 +55,13 @@
         var r = runOne(tc);
         total++; n++;
         if (r.ok) { pass++; g0++; }
+        var nameCell = opts.source
+          ? '<details class="tr-det"><summary class="tr-name">' + esc(tc.name) + '</summary>'
+            + '<pre class="tr-src">' + esc(dedent(tc.fn.toString())) + '</pre></details>'
+          : '<span class="tr-name">' + esc(tc.name) + '</span>';
         items += '<li class="' + (r.ok ? "ok" : "ko") + '">'
           + '<span class="tr-badge">' + (r.ok ? "PASS" : "FAIL") + '</span>'
-          + '<span class="tr-name">' + esc(tc.name) + '</span>'
+          + nameCell
           + (r.ok ? "" : '<span class="tr-msg">' + esc(r.msg) + '</span>')
           + '</li>';
       });
