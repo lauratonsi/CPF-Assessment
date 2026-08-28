@@ -243,20 +243,21 @@
         useLabel = (AIR.annex_iii_uses.filter(function (u) { return u.id === a.ai_annex_iii_use; })[0] || {}).label || a.ai_annex_iii_use;
       }
 
-      if (a.ai_channel1) {
+      // Reg. (UE) 2026/1744: il canale 6.1 (componente di sicurezza) si attiva
+      // solo se la finalità è prevenire/attenuare rischi per salute e sicurezza
+      // (o se il malfunzionamento li metterebbe in pericolo). Se il canale 6.1
+      // dichiarato non si attiva, il sistema va comunque valutato sul canale 6.2.
+      var ch1Active = a.ai_channel1 && a.ai_channel1_safety_purpose;
+      if (a.ai_channel1 && !a.ai_channel1_safety_purpose) {
+        ai.trace.push(step("Canale art. 6.1 non attivato", "Dopo il Reg. (UE) 2026/1744 l'IA integrata in un prodotto regolato è ad alto rischio solo se ha finalità di sicurezza (prevenire/attenuare rischi per salute e sicurezza) o se il suo malfunzionamento li metterebbe in pericolo. Usi di sola assistenza, ottimizzazione, efficienza o comodità sono esclusi."));
+        verification.push("AI Act (art. 6.1, come modificato dal Reg. 2026/1744): confermare caso per caso se la finalità del sistema sia di sicurezza; se sì, resta ad alto rischio.");
+        if (!a.ai_channel2) ai.status = "canale_6_1_non_attivato";
+      }
+
+      if (ch1Active) {
         ai.channel = "art6_1";
-        // Reg. (UE) 2026/1744: componente di sicurezza solo se la finalità è
-        // prevenire/attenuare rischi per salute e sicurezza (o se il
-        // malfunzionamento li metterebbe in pericolo).
-        if (a.ai_channel1_safety_purpose) {
-          ai.high_risk = true;
-          ai.trace.push(step("Alto rischio — canale art. 6.1", "Componente di sicurezza di un prodotto coperto dalla normativa di armonizzazione dell'Allegato I (incl. Regolamento Macchine), soggetto a valutazione di conformità di terzi, con finalità di sicurezza. La clausola di esclusione dell'art. 6.3 non è invocabile per questo canale."));
-        } else {
-          ai.high_risk = false;
-          ai.status = "canale_6_1_non_attivato";
-          ai.trace.push(step("Canale art. 6.1 non attivato", "Dopo il Reg. (UE) 2026/1744 l'IA integrata in un prodotto regolato è ad alto rischio solo se ha finalità di sicurezza (prevenire/attenuare rischi per salute e sicurezza) o se il suo malfunzionamento li metterebbe in pericolo. Usi di sola assistenza, ottimizzazione, efficienza o comodità sono esclusi."));
-          verification.push("AI Act (art. 6.1, come modificato dal Reg. 2026/1744): confermare caso per caso se la finalità del sistema sia di sicurezza; se sì, resta ad alto rischio.");
-        }
+        ai.high_risk = true;
+        ai.trace.push(step("Alto rischio — canale art. 6.1", "Componente di sicurezza di un prodotto coperto dalla normativa di armonizzazione dell'Allegato I (incl. Regolamento Macchine), soggetto a valutazione di conformità di terzi, con finalità di sicurezza. La clausola di esclusione dell'art. 6.3 non è invocabile per questo canale."));
       } else if (a.ai_channel2) {
         ai.channel = "art6_2";
         if (useLabel) ai.trace.push(step("Uso dell'Allegato III", useLabel));
@@ -272,7 +273,7 @@
           ai.high_risk = true;
           ai.trace.push(step("Alto rischio — canale art. 6.2", "Uso dell'Allegato III, nessuna condizione di esclusione dell'art. 6.3."));
         }
-      } else {
+      } else if (!a.ai_channel1) {
         ai.trace.push(step("Non ad alto rischio", "Il sistema non ricade in nessuno dei due canali dell'art. 6."));
         notes.push("AI Act: " + AIR.transparency_note);
       }

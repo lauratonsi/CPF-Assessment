@@ -141,6 +141,11 @@
     var p = CPF.classifyRegimes({ ai_system: true, ai_channel1: true });
     eq(p.ai_act.high_risk, false, "high_risk"); eq(p.ai_act.status, "canale_6_1_non_attivato", "status");
   });
+  t("AI Act (Reg. 2026/1744): canale 6.1 non attivato ma uso Allegato III → alto rischio per il canale 6.2", function () {
+    var p = CPF.classifyRegimes({ ai_system: true, ai_channel1: true, ai_channel2: true });
+    eq(p.ai_act.high_risk, true, "high_risk"); eq(p.ai_act.channel, "art6_2", "channel");
+    eq(p.ai_act.compliance_deadline, "2027-12-02", "deadline");
+  });
   t("AI Act (Reg. 2026/1744): calendario differito — canale 6.2 → 2027-12-02, canale 6.1 → 2028-08-02", function () {
     eq(CPF.classifyRegimes({ ai_system: true, ai_channel2: true }).ai_act.compliance_deadline, "2027-12-02");
     eq(CPF.classifyRegimes({ ai_system: true, ai_channel1: true, ai_channel1_safety_purpose: true }).ai_act.compliance_deadline, "2028-08-02");

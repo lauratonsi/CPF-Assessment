@@ -199,7 +199,7 @@
           <div class="checks">
             <label><input type="checkbox" id="ai_prohibited"> Il sistema rientra in una <b>pratica vietata</b> (art. 5 — rischio inaccettabile; il Reg. 2026/1744 vi aggiunge, dal 2 dic 2026, materiale intimo non consensuale e materiale di abuso su minori)</label>
           </div>
-          <div class="reveal" id="ai_hr_wrap">
+          <div class="reveal" id="ai_hr_wrap" hidden>
             <div class="checks">
               <label><input type="checkbox" id="ai_channel1"> <b>Canale art. 6.1</b> — l'IA è componente di sicurezza di (o è) un prodotto coperto dalla normativa di armonizzazione Allegato I (incl. Regolamento Macchine), soggetto a valutazione di conformità di terzi</label>
             </div>
@@ -216,12 +216,14 @@
               <label class="lbl" for="ai_annex_iii_use">Uso dell'Allegato III</label>
               <select class="field" id="ai_annex_iii_use"><option value="">— seleziona —</option></select>
             </div>
+            <div class="reveal" id="ai_profiling_wrap" hidden>
+              <div class="checks">
+                <label><input type="checkbox" id="ai_profiling"> Il sistema effettua <b>profilazione di persone fisiche</b> (l'esclusione dall'alto rischio non opera)</label>
+              </div>
+            </div>
             <div class="reveal" id="ai_excl_wrap" hidden>
               <span class="lbl">Condizioni di esclusione dall'alto rischio (art. 6.3) — solo canale 6.2</span>
               <div class="checks" id="ai_exclusions"></div>
-              <div class="checks">
-                <label><input type="checkbox" id="ai_profiling"> Il sistema effettua <b>profilazione di persone fisiche</b> (l'esclusione non opera)</label>
-              </div>
             </div>
             <div class="reveal" id="ai_hr_req_wrap" hidden>
               <span class="lbl">Requisiti dei sistemi ad alto rischio (§2.6.2)</span>
@@ -399,9 +401,11 @@
     $("ai_hr_wrap").hidden = !aiHR;
     $("ai_ch1_purpose_wrap").hidden = !(aiHR && A.ai_channel1);
     $("ai_use_wrap").hidden = !(aiHR && A.ai_channel2);
+    $("ai_profiling_wrap").hidden = !(aiHR && A.ai_channel2);
     $("ai_excl_wrap").hidden = !(aiHR && A.ai_channel2 && !A.ai_profiling);
     $("ai_hr_req_wrap").hidden = !(aiHR && (ch1HighRisk || ch2HighRisk));
     $("cer_sig_wrap").style.opacity = A.cer_formally_designated ? 0.5 : 1;
+    $("cer_sig_wrap").style.pointerEvents = A.cer_formally_designated ? "none" : "";
   }
 
   /* ---------- rendering risultato ---------- */
@@ -435,12 +439,11 @@
         return '<li><b>' + esc(t.esito) + '</b> — ' + esc(t.base) + '</li>';
       }).join("") + '</ul>';
       out += '</div>';
-
-      if (rg[0] === "macchine" && p.verification_flags && p.verification_flags.length) {
-        out += '<div class="panel verify"><h4>Priorità di verifica</h4><ul>' +
-          p.verification_flags.map(function (v) { return '<li>' + esc(v) + '</li>'; }).join("") + '</ul></div>';
-      }
     });
+    if (p.verification_flags && p.verification_flags.length) {
+      out += '<div class="panel verify"><h4>Priorità di verifica</h4><ul>' +
+        p.verification_flags.map(function (v) { return '<li>' + esc(v) + '</li>'; }).join("") + '</ul></div>';
+    }
     if (p.interactions && p.interactions.length) {
       out += '<div class="panel"><h4>Interazioni tra regimi applicabili</h4><ul>' +
         p.interactions.map(function (i) { return '<li><b>' + esc(i.type) + '</b>: ' + esc(i.text) + '</li>'; }).join("") + '</ul></div>';
@@ -485,5 +488,6 @@
   recompute();
 })();
 </script>
+<script src="../assets/theme-toggle.js"></script>
 </body>
 </html>

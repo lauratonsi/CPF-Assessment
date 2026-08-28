@@ -81,7 +81,7 @@
         e.preventDefault();
         var org = CPF.loadOrganization(b.dataset.newassess);
         var a = CPF.newAssessmentFromOrg(org);
-        location.href = "step2-funzione.html?id=" + encodeURIComponent(a.assessment_id);
+        location.href = "pages/step2-funzione.html?id=" + encodeURIComponent(a.assessment_id);
       };
     });
     el.querySelectorAll("[data-delorg]").forEach(function (b) {
@@ -125,5 +125,6 @@
   renderAssessments();
 })();
 </script>
+<script src="assets/theme-toggle.js"></script>
 </body>
 </html>
