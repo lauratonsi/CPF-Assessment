@@ -2,6 +2,7 @@
 *.log
 node_modules/
 .venv/
+.vscode/
 
 # materiale di lavoro, non parte del tool
 TESI_LAURA TONSI.pdf

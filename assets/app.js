@@ -160,10 +160,82 @@
     return null;
   };
 
-  // Priorità: intervento vs verifica a seconda della forza probatoria.
-  CPF.domainPriority = function (domainAssessment, functionCriticality) {
-    // TODO: definire f(criticità_funzione, is_essential, gap) dopo il flusso UI.
-    return { type: "todo", note: "da implementare" };
+  var DIMS = ["consolidamento", "estensione", "efficacia", "prestazione_osservata"];
+  function band(score, hi, mid) { return score >= hi ? "alta" : score >= mid ? "media" : "bassa"; }
+
+  // Priorità di un dominio (§3.6). Due esiti DISTINTI, mai fusi:
+  //  - priorita_intervento: per le carenze corroborate. Ordinamento da
+  //    f(criticità funzione, essenzialità capacità, natura/ampiezza del divario).
+  //  - priorita_verifica:   per le condizioni non determinabili o solo
+  //    parzialmente documentate. Non si traduce in intervento diretto.
+  // L'ordinamento è ORDINALE, non cardinale (§3.7): è un indicatore descrittivo
+  // di priorità, non una misura. Il divario essenziale (anello debole) non è
+  // mai assorbito: porta l'intervento ad "alta" a prescindere dal resto.
+  CPF.domainPriority = function (da, functionCriticality) {
+    if (!da) return null;
+    var crit = (typeof functionCriticality === "number") ? functionCriticality : null;
+    var essential = !!da.is_essential;
+    var cur = da.current_profile || {}, tgt = da.target_profile || {};
+
+    var intervento = [], verifica = [], maxGap = 0;
+    DIMS.forEach(function (dim) {
+      var c = cur[dim], t = tgt[dim];
+      if (!c) return;
+      var g = CPF.dimensionGap(c, t);
+      if (g.state === "incertezza_probatoria") {
+        verifica.push({ dimension: dim, reason: "livello non determinabile" });
+      } else if (c.evidentiary_strength === "parziale" && g.state === "ok" && g.gap > 0) {
+        verifica.push({ dimension: dim, gap: g.gap, reason: "divario su livello solo parzialmente documentato" });
+      } else if (g.state === "ok" && g.gap > 0) {
+        intervento.push({ dimension: dim, gap: g.gap });
+        if (g.gap > maxGap) maxGap = g.gap;
+      }
+    });
+
+    var shortfall = CPF.essentialShortfall(da);
+    var essShort = shortfall && shortfall.kind === "divario_essenziale" ? shortfall : null;
+    var essUncert = shortfall && shortfall.kind === "verifica" ? shortfall : null;
+
+    // composito ordinale: criticità (1-4, default 2) + essenzialità (+1) + ampiezza del divario
+    var base = (crit || 2) + (essential ? 1 : 0) + maxGap;
+
+    var out = {
+      domain_id: da.domain_id || null,
+      priorita_intervento: null,
+      priorita_verifica: null,
+      _ordinale: true,
+      _note: "Ordinamento ordinale, non cardinale (§3.7): indicatore descrittivo di priorità."
+    };
+
+    if (essShort) {
+      out.priorita_intervento = { band: "alta", reason: "divario essenziale su soglia non compensabile", dimensions: intervento, essential_shortfall: essShort };
+    } else if (intervento.length) {
+      out.priorita_intervento = { band: band(base, 7, 4), dimensions: intervento };
+    }
+
+    if (verifica.length || essUncert) {
+      // urgenza di chiarire l'incertezza: più alta se funzione critica o capacità essenziale
+      var vbase = (crit || 2) + (essential ? 1 : 0) + (essUncert ? 2 : 0) + verifica.length;
+      out.priorita_verifica = { band: band(vbase, 6, 3), items: verifica, essential_uncertainty: essUncert };
+    }
+
+    return out;
+  };
+
+  // Ordina un elenco di domini per priorità sostanziale (per la dashboard).
+  CPF.rankDomains = function (capabilityAssessment, functionCriticality) {
+    var order = { alta: 3, media: 2, bassa: 1 };
+    return (capabilityAssessment || [])
+      .map(function (da) { return CPF.domainPriority(da, functionCriticality); })
+      .filter(Boolean)
+      .sort(function (a, b) {
+        var ai = a.priorita_intervento ? order[a.priorita_intervento.band] : 0;
+        var bi = b.priorita_intervento ? order[b.priorita_intervento.band] : 0;
+        if (bi !== ai) return bi - ai;
+        var av = a.priorita_verifica ? order[a.priorita_verifica.band] : 0;
+        var bv = b.priorita_verifica ? order[b.priorita_verifica.band] : 0;
+        return bv - av;
+      });
   };
 
 })(window);
