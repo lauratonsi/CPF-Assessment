@@ -124,9 +124,10 @@
       },
       function: {
         name: "",
-        service_description: "",
-        physical_process: "",
-        criticality: null,            // scala 1-4 (§3.2), raccolta nello Step 2
+        service_description: "",        // il risultato operativo / servizio da preservare
+        physical_process: "",           // il processo fisico governato
+        perimeter: "",                  // ciò che l'organizzazione può ragionevolmente conoscere/monitorare/governare (§3.2)
+        criticality: null,              // scala 1-4 (§3.2), raccolta nello Step 2
         criticality_rationale: "",
         regimes_relevant_to_this_function: []
       },

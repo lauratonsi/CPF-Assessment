@@ -6,6 +6,32 @@
 <title>Step 2 — Funzione cyber-fisica · CPF Assessment</title>
 <link rel="stylesheet" href="assets/theme.css">
 <script>(function(){try{var t=localStorage.getItem("cpf-theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+<style>
+  fieldset { border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.1rem 1.2rem; margin: 0 0 0.9rem; background: var(--surface); }
+  legend { font-family: var(--serif); font-weight: 600; font-size: 1rem; padding: 0 0.4rem; }
+  .q { margin-top: 0.9rem; }
+  .q:first-of-type { margin-top: 0.3rem; }
+  .q > .lbl { display: block; font-size: 0.88rem; margin-bottom: 0.35rem; }
+  .hint { font-size: 0.78rem; color: var(--faint); margin: 0.25rem 0 0; }
+  .crit label { display: block; border: 1px solid var(--border); border-radius: 6px; padding: 0.55rem 0.7rem; margin: 0.35rem 0; cursor: pointer; font-size: 0.85rem; }
+  .crit label:hover { border-color: var(--accent); }
+  .crit input { margin-right: 0.5rem; }
+  .crit .k { font-weight: 600; }
+  .crit input:checked + .k { color: var(--accent-ink); }
+  .reg { display: flex; align-items: flex-start; gap: 0.55rem; padding: 0.4rem 0; font-size: 0.88rem; border-bottom: 1px solid var(--border); }
+  .reg:last-child { border-bottom: 0; }
+  .reg input { margin-top: 0.25rem; }
+  .reg .meta { font-size: 0.76rem; color: var(--faint); }
+  .reg .ovr { font-family: var(--mono); font-size: 0.64rem; border: 1px solid var(--accent); color: var(--accent-ink); background: var(--accent-tint); border-radius: 3px; padding: 0.05rem 0.35rem; margin-left: 0.4rem; }
+  .reg .why { width: 100%; margin-top: 0.3rem; font-size: 0.8rem; padding: 0.35rem 0.5rem; }
+  .reg .why[hidden] { display: none; }
+  .panel { border: 1px solid var(--border); border-radius: 7px; padding: 0.7rem 0.85rem; margin-top: 0.7rem; font-size: 0.82rem; background: var(--surface-2); }
+  .panel h4 { margin: 0 0 0.35rem; font-size: 0.82rem; }
+  .panel ul { margin: 0; padding-left: 1.1rem; }
+  .toast { position: fixed; left: 50%; bottom: 1.4rem; transform: translateX(-50%); background: var(--ink); color: var(--paper); font-size: 0.85rem; padding: 0.6rem 1rem; border-radius: 6px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast.show { opacity: 0.95; }
+  .nofn { text-align: center; padding: 2rem 1rem; }
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -19,21 +45,167 @@
   </nav>
   <header class="masthead">
     <h1>Step 2 — Definizione della funzione cyber-fisica</h1>
-    <p class="dek">Nome, servizio erogato, processo fisico governato e sottoinsieme dei regimi rilevanti per questa funzione (non per l'intera organizzazione). Riferimento: §3.2.</p>
+    <p class="dek">L'unità di analisi. Insieme coordinato di processi, persone, risorse digitali, componenti fisici e dipendenze con cui l'organizzazione produce un risultato operativo o mantiene un servizio, e la cui compromissione può incidere sul processo fisico, sulla continuità, sulla safety o sull'ambiente. Logica top-down: si parte dal risultato da preservare. Riferimento: §3.2.</p>
   </header>
-  <section class="card"><h2>In costruzione</h2>
-    <p class="muted">Form di definizione della funzione. I regimi selezionabili derivano dal <code>regime_profile</code> dello Step 1.</p>
-  </section>
-  <p class="muted" style="font-size:.85rem">I regimi selezionabili per questa funzione derivano dal profilo dell'organizzazione (Step 1). Puoi restringerli o, se una funzione specifica ricade in un regime che non riguarda l'organizzazione nel suo complesso, aggiungerlo marcandolo <code>overridden_from_org_profile</code>.</p>
-  <div class="btn-row">
-    <a class="btn btn--ghost" href="step1-regimi.html">← Regimi</a>
-    <a class="btn btn--primary" href="step3-dipendenze.html">Avanti: Dipendenze →</a>
-  </div>
+
+  <div id="app"></div>
 </div>
+<div class="toast" id="toast"></div>
+
+<script src="data/scope_sectors.js"></script>
 <script src="data/regime_classifier.js"></script>
+<script src="data/regime_rules.js"></script>
+<script src="data/scales.js"></script>
+<script src="data/dependency_taxonomy.js"></script>
+<script src="data/capability_domains.js"></script>
 <script src="data/assessment_schema.js"></script>
 <script src="data/organization_schema.js"></script>
 <script src="assets/app.js"></script>
 <script src="assets/regime-engine.js"></script>
+<script>
+(function () {
+  var params = new URLSearchParams(location.search);
+  var id = params.get("id");
+  var a = id ? CPF.loadAssessment(id) : CPF.getActive();
+  var app = document.getElementById("app");
+  var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]; }); };
+
+  if (!a) {
+    app.innerHTML = '<div class="card nofn"><h2>Nessuna valutazione attiva</h2>'
+      + '<p class="muted">Lo Step 2 lavora su una valutazione creata a partire da un profilo organizzazione.</p>'
+      + '<div class="btn-row" style="justify-content:center"><a class="btn btn--primary" href="step1-regimi.html">Vai allo Step 1</a></div></div>';
+    return;
+  }
+  CPF.setActive(a.assessment_id);
+  var F = a.function;
+  var RP = a.regime_profile || {};
+  var REG = [["nis2", "NIS2"], ["cer", "CER"], ["dora", "DORA"], ["cra", "CRA"], ["macchine", "Reg. Macchine"], ["ai_act", "AI Act"]];
+  var scales = CPF.data.scales;
+
+  // default: se la lista dei regimi rilevanti è vuota, la inizializza con quelli applicabili
+  if (!F.regimes_relevant_to_this_function || !F.regimes_relevant_to_this_function.length) {
+    F.regimes_relevant_to_this_function = REG.filter(function (r) { return RP[r[0]] && RP[r[0]].applicable; }).map(function (r) { return r[0]; });
+  }
+
+  function regState(key) {
+    return F.regimes_relevant_to_this_function.indexOf(key) !== -1;
+  }
+  function applicable(key) { return !!(RP[key] && RP[key].applicable); }
+  function badge(key) {
+    var r = RP[key]; if (!r || !r.applicable) return '<span class="meta">non applicabile all\'organizzazione</span>';
+    if (key === "nis2") return '<span class="meta">' + (r.qualification || "applicabile") + '</span>';
+    if (key === "cer") return '<span class="meta">' + String(r.designation || "applicabile").replace(/_/g, " ") + '</span>';
+    if (key === "cra") return '<span class="meta">' + String(r.category || "applicabile").replace(/_/g, " ") + '</span>';
+    if (key === "ai_act") return '<span class="meta">' + (r.high_risk === true ? "alto rischio" : r.high_risk === "escluso" ? "alto rischio escluso" : "applicabile") + '</span>';
+    return '<span class="meta">applicabile</span>';
+  }
+
+  app.innerHTML =
+    '<form id="f" autocomplete="off">'
+    + '<fieldset><legend>Identità della funzione</legend>'
+    + '<div class="q"><label class="lbl" for="fn_name">Nome della funzione</label><input class="field" id="fn_name" placeholder="es. Potabilizzazione — linea A"></div>'
+    + '<div class="q"><label class="lbl" for="fn_service">Risultato operativo / servizio da preservare</label><textarea class="field" id="fn_service" placeholder="Cosa produce o mantiene questa funzione, e per chi."></textarea></div>'
+    + '<div class="q"><label class="lbl" for="fn_process">Processo fisico governato</label><textarea class="field" id="fn_process" placeholder="Il processo fisico controllato e le condizioni di safety rilevanti."></textarea></div>'
+    + '<div class="q"><label class="lbl" for="fn_perimeter">Perimetro osservabile</label><textarea class="field" id="fn_perimeter" placeholder="Ciò che l\'organizzazione può ragionevolmente conoscere, monitorare, governare o affrontare con misure di continuità (§3.2)."></textarea></div>'
+    + '</fieldset>'
+
+    + '<fieldset><legend>Regimi rilevanti per questa funzione</legend>'
+    + '<p class="hint">Sottoinsieme del profilo dell\'organizzazione. Puoi escludere un regime che non tocca questa funzione, o includerne uno non applicabile all\'organizzazione ma attivato da questa funzione specifica (es. CRA per un singolo prodotto digitale). Ogni scostamento è marcato <b>override</b>.</p>'
+    + '<div id="regs"></div>'
+    + '<div class="panel" id="interpanel" hidden></div>'
+    + '</fieldset>'
+
+    + '<fieldset><legend>Criticità della funzione</legend>'
+    + '<p class="hint">' + esc(scales.function_criticality.note) + ' Criteri CER artt. 6-7, integrati con vincoli di processo, condizioni di safety, protezioni indipendenti, dipendenze operative e rapidità di propagazione. La criticità <b>contestualizza</b> la valutazione ma non determina automaticamente i livelli obiettivo (§3.2).</p>'
+    + '<div class="crit" id="crit"></div>'
+    + '<div class="q"><label class="lbl" for="crit_why">Motivazione</label><textarea class="field" id="crit_why" placeholder="Perché questo livello: utenti e settori dipendenti, durata/estensione dell\'impatto, alternative, propagazione."></textarea></div>'
+    + '</fieldset>'
+
+    + '<div class="btn-row"><a class="btn btn--ghost" href="step1-regimi.html' + (RP._source_organization_id ? "?org=" + encodeURIComponent(RP._source_organization_id) : "") + '">← Regimi</a>'
+    + '<span><button type="button" class="btn" id="save">Salva</button> <button type="button" class="btn btn--primary" id="next">Avanti: Dipendenze →</button></span></div>'
+    + '</form>';
+
+  // ---- regimi
+  var regsEl = document.getElementById("regs");
+  regsEl.innerHTML = REG.map(function (r) {
+    return '<div class="reg"><input type="checkbox" data-reg="' + r[0] + '" id="reg_' + r[0] + '">'
+      + '<div style="flex:1"><label for="reg_' + r[0] + '"><b>' + r[1] + '</b></label> ' + badge(r[0])
+      + '<span class="ovr" data-ovr="' + r[0] + '" hidden>override</span>'
+      + '<input class="why field" data-why="' + r[0] + '" placeholder="motiva lo scostamento" hidden></div></div>';
+  }).join("");
+
+  // ---- criticità
+  document.getElementById("crit").innerHTML = scales.function_criticality.levels.map(function (l) {
+    return '<label><input type="radio" name="crit" value="' + l.value + '"><span class="k">' + l.value + ' — ' + esc(l.label) + '</span><br><span class="meta" style="font-size:.78rem;color:var(--muted)">' + esc(l.descriptor) + '</span></label>';
+  }).join("");
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  function fill() {
+    $("fn_name").value = F.name || "";
+    $("fn_service").value = F.service_description || "";
+    $("fn_process").value = F.physical_process || "";
+    $("fn_perimeter").value = F.perimeter || "";
+    $("crit_why").value = F.criticality_rationale || "";
+    if (F.criticality) { var r = document.querySelector('input[name="crit"][value="' + F.criticality + '"]'); if (r) r.checked = true; }
+    REG.forEach(function (rg) { $("reg_" + rg[0]).checked = regState(rg[0]); });
+    syncOverrides();
+  }
+
+  function syncOverrides() {
+    REG.forEach(function (rg) {
+      var k = rg[0];
+      var rel = $("reg_" + k).checked;
+      var over = rel !== applicable(k);
+      document.querySelector('[data-ovr="' + k + '"]').hidden = !over;
+      var why = document.querySelector('[data-why="' + k + '"]');
+      why.hidden = !over;
+      if (RP[k]) RP[k].overridden_from_org_profile = over;
+      if (over && RP[k]) { RP[k].override_reason = why.value || ""; }
+    });
+  }
+
+  function relevantInteractions() {
+    var rel = {};
+    REG.forEach(function (rg) { if ($("reg_" + rg[0]).checked) rel[rg[0]] = true; });
+    return (CPF.data.regimeRules.interactions || []).filter(function (it) {
+      return rel[it.pair[0]] && rel[it.pair[1]];
+    });
+  }
+  function renderInteractions() {
+    var its = relevantInteractions();
+    var p = $("interpanel");
+    if (!its.length) { p.hidden = true; return; }
+    p.hidden = false;
+    p.innerHTML = '<h4>Interazioni tra i regimi rilevanti</h4><ul>' +
+      its.map(function (i) { return '<li><b>' + esc(i.type) + '</b>: ' + esc(i.text) + '</li>'; }).join("") + '</ul>';
+  }
+
+  function read() {
+    F.name = $("fn_name").value.trim();
+    F.service_description = $("fn_service").value.trim();
+    F.physical_process = $("fn_process").value.trim();
+    F.perimeter = $("fn_perimeter").value.trim();
+    F.criticality_rationale = $("crit_why").value.trim();
+    var cr = document.querySelector('input[name="crit"]:checked');
+    F.criticality = cr ? parseInt(cr.value, 10) : null;
+    F.regimes_relevant_to_this_function = REG.filter(function (rg) { return $("reg_" + rg[0]).checked; }).map(function (rg) { return rg[0]; });
+    syncOverrides();
+    renderInteractions();
+  }
+
+  var toast = $("toast");
+  function flash(m) { toast.textContent = m; toast.classList.add("show"); setTimeout(function () { toast.classList.remove("show"); }, 1600); }
+  function persist() { read(); a.function = F; a.regime_profile = RP; CPF.saveAssessment(a); }
+
+  document.getElementById("f").addEventListener("input", function () { read(); });
+  document.getElementById("f").addEventListener("change", function () { read(); });
+  $("save").onclick = function () { persist(); flash("Funzione salvata"); };
+  $("next").onclick = function () { persist(); location.href = "step3-dipendenze.html?id=" + encodeURIComponent(a.assessment_id); };
+
+  fill();
+  renderInteractions();
+})();
+</script>
 </body>
 </html>
