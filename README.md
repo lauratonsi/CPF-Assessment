@@ -13,13 +13,14 @@ App **statica client-side**, nessun server, nessun build step. Si apre
 `localStorage` ed esportabili/importabili come JSON.
 
 ```
-index.html               elenco valutazioni, nuova / importa
-step1-regimi.html         classificatore multi-regime (NIS2/CER/DORA/CRA/Macchine/AI Act) → profilo organizzazione
-step2-funzione.html       definizione della funzione cyber-fisica (§3.2)
-step3-dipendenze.html     mappatura dipendenze B→A (§3.4)
-step4a-conseguenze.html   conseguenze intollerabili → percorsi di compromissione → capacità richieste/essenziali (CCE, §3.1/§3.6)
-step4b-capacita.html      profilo capacità corrente/obiettivo, 4 dimensioni × 6-7 domini (§3.5-3.6)
-dashboard.html            esito: gap, divari essenziali, priorità, grafici
+index.html               ingresso: elenco valutazioni, nuova / importa
+pages/                    pagine del flusso di assessment
+  step1-regimi.html       classificatore multi-regime (NIS2/CER/DORA/CRA/Macchine/AI Act) → profilo organizzazione
+  step2-funzione.html     definizione della funzione cyber-fisica (§3.2)
+  step3-dipendenze.html   mappatura dipendenze B→A (§3.4)
+  step4a-conseguenze.html conseguenze intollerabili → percorsi di compromissione → capacità richieste/essenziali (CCE, §3.1/§3.6)
+  step4b-capacita.html    profilo capacità corrente/obiettivo, 4 dimensioni × 6-7 domini (§3.5-3.6)
+  dashboard.html           esito: gap, divari essenziali, priorità, grafici
 
 data/                     configurazione fissa, caricata come <script> (popola window.CPF.data)
   regime_classifier.js    le 11 domande dello Step 1
@@ -38,6 +39,9 @@ assets/
   regime-engine.js        CPF.classifyRegimes(answers) → regime_profile (funzione pura, testabile)
   dumbbell.js             grafico gap a manubrio per dominio (sostituisce il radar, §3.6-3.7)
   vendor/                 librerie vendorizzate (d3-sankey per le dipendenze) — da aggiungere
+
+tests/                    pagine HTML per i test manuali del motore e dei calcoli
+docs/                     documentazione di riferimento, inclusa la tesi PDF
 ```
 
 **Profilo organizzazione riutilizzabile:** lo Step 1 produce un `organizations/<id>.json` (localStorage, chiave `cpf-org-<id>`). Ogni nuova valutazione ne clona il `regime_profile` con `CPF.cloneRegimeProfile()`; il clone resta modificabile per singola valutazione, con un flag `overridden_from_org_profile` per campo (una funzione può ricadere in un regime che non riguarda l'organizzazione nel suo complesso — es. CRA per un singolo prodotto digitale).

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CPF Assessment</title>
-  <link rel="stylesheet" href="assets/theme.css">
+  <link rel="stylesheet" href="../assets/theme.css">
 <script>(function(){try{var t=localStorage.getItem("cpf-theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
 <style>
   .item { border: 1px solid var(--border); border-radius: 7px; padding: 0.7rem 0.9rem; margin: 0.5rem 0; background: var(--surface); }
@@ -26,7 +26,7 @@
     <p class="muted" style="font-size:.85rem;margin-top:0">Lo Step 1 produce un profilo dei regimi applicabili all'organizzazione. Ogni valutazione di funzione ne clona il risultato (modificabile per singola funzione).</p>
     <div id="org-list"></div>
     <div class="btn-row">
-      <a class="btn btn--primary" href="pages/step1-regimi.html">Nuovo profilo organizzazione</a>
+      <a class="btn btn--primary" href="step1-regimi.html">Nuovo profilo organizzazione</a>
     </div>
   </section>
 
@@ -41,16 +41,16 @@
   <p class="disclaimer">Strumento orientativo, non parere legale. Non codifica designazioni caso per caso di CER, esclusioni per sicurezza nazionale/difesa, né la valutazione integrale di conformità AI Act.</p>
 </div>
 
-<script src="data/scope_sectors.js"></script>
-<script src="data/regime_classifier.js"></script>
-<script src="data/regime_rules.js"></script>
-<script src="data/capability_domains.js"></script>
-<script src="data/scales.js"></script>
-<script src="data/dependency_taxonomy.js"></script>
-<script src="data/assessment_schema.js"></script>
-<script src="data/organization_schema.js"></script>
-<script src="assets/app.js"></script>
-<script src="assets/regime-engine.js"></script>
+<script src="../data/scope_sectors.js"></script>
+<script src="../data/regime_classifier.js"></script>
+<script src="../data/regime_rules.js"></script>
+<script src="../data/capability_domains.js"></script>
+<script src="../data/scales.js"></script>
+<script src="../data/dependency_taxonomy.js"></script>
+<script src="../data/assessment_schema.js"></script>
+<script src="../data/organization_schema.js"></script>
+<script src="../assets/app.js"></script>
+<script src="../assets/regime-engine.js"></script>
 <script>
 (function () {
   function fmtDate(s) { return (s || "").slice(0, 10); }
@@ -71,7 +71,7 @@
       return '<div class="item"><strong>' + (o.name || "(senza nome)") + '</strong> '
         + '<span class="meta">— ' + applicableRegimes(org) + ' · agg. ' + fmtDate(o.updated_at) + '</span>'
         + '<div class="acts">'
-        + '<a href="pages/step1-regimi.html?org=' + encodeURIComponent(o.id) + '">modifica</a>'
+        + '<a href="step1-regimi.html?org=' + encodeURIComponent(o.id) + '">modifica</a>'
         + '<a href="#" data-newassess="' + o.id + '">nuova valutazione da questo profilo</a>'
         + '<a href="#" data-delorg="' + o.id + '">elimina</a>'
         + '</div></div>';
@@ -98,9 +98,9 @@
       return '<div class="item"><strong>' + a.name + '</strong> '
         + '<span class="meta">— ' + (full.organization_name || "organizzazione non collegata") + ' · agg. ' + fmtDate(a.updated_at) + '</span>'
         + '<div class="acts">'
-        + '<a href="pages/step1-regimi.html' + (full.organization_id ? "?org=" + encodeURIComponent(full.organization_id) : "") + '">apri</a>'
-        + '<a href="pages/step2-funzione.html?id=' + encodeURIComponent(a.id) + '">funzione</a>'
-        + '<a href="pages/dashboard.html?id=' + encodeURIComponent(a.id) + '">esito</a>'
+        + '<a href="step1-regimi.html' + (full.organization_id ? "?org=" + encodeURIComponent(full.organization_id) : "") + '">apri</a>'
+        + '<a href="step2-funzione.html?id=' + encodeURIComponent(a.id) + '">funzione</a>'
+        + '<a href="dashboard.html?id=' + encodeURIComponent(a.id) + '">esito</a>'
         + '<a href="#" data-export="' + a.id + '">esporta</a>'
         + '<a href="#" data-del="' + a.id + '">elimina</a>'
         + '</div></div>';

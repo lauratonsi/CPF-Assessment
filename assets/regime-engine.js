@@ -64,6 +64,13 @@
         cer.designation = "non_designato";
         cer.trace.push(step("Non designato", "Settore CER '" + cerSectorLabel + "' ma nessun criterio di impatto significativo selezionato."));
       }
+      cer.trace.push(step("Valutazione qualitativa e sistemica", R.cer.risk_assessment_note));
+      if (a.cer_resilience_plan_adopted) {
+        cer.trace.push(step("Piano di Resilienza indicato", R.cer.resilience_plan_note));
+      } else {
+        verification.push("CER: verificare l'adozione e l'aggiornamento del Piano di Resilienza, includendo protezione fisica, personale, filiera e ripristino.");
+      }
+      notes.push("CER: la resilienza riguarda la capacità di prevenire, resistere, assorbire, mitigare, adattarsi e ripristinare le capacità operative; la continuità va valutata anche rispetto a minacce ibride e interdipendenze.");
     } else {
       cer.trace.push(step("Non applicabile", "L'organizzazione non eroga un servizio essenziale in un settore dell'Allegato CER."));
     }
@@ -129,6 +136,29 @@
       nis2.trace.push(step("Fuori perimetro", why));
     }
 
+    if (a.acn_formal_qualification === "essenziale" || a.acn_formal_qualification === "importante") {
+      nis2.applicable = true;
+      nis2.qualification = a.acn_formal_qualification;
+      nis2.formal_acn_qualification = true;
+      nis2.trace.push(step("Qualificazione formalmente notificata dall'ACN", "Il D.Lgs. 138/2024 centralizza presso l'ACN l'identificazione dei soggetti NIS2 e la notifica della qualifica di soggetto essenziale o importante; questo dato prevale sul calcolo orientativo dei criteri di settore e dimensione."));
+    } else if (a.acn_platform_registered) {
+      nis2.trace.push(step("Registrazione ACN indicata", "Registrazione sulla piattaforma digitale ACN dichiarata, ma nessuna qualificazione formale essenziale/importante è stata selezionata."));
+      verification.push("NIS2/ACN: verificare la qualificazione formalmente notificata dall'ACN; la registrazione sulla piattaforma non equivale da sola alla qualifica.");
+    }
+
+    /* Il PSNC opera come eccezione di ambito sugli asset, non come
+       classificazione alternativa dell'organizzazione. */
+    var psnc = { applicable: !!a.psnc_assets, trace: [] };
+    if (psnc.applicable) {
+      psnc.trace.push(step("Applicabile agli asset indicati", R.psnc.note));
+      nis2.psnc_exclusion = true;
+      nis2.trace.push(step("PSNC: prevalenza nazionale per ambito", R.nis2.lex_specialis_note));
+      notes.push("PSNC: per le reti e i sistemi informativi già inclusi nel Perimetro, applicare il framework nazionale in via esclusiva per gli obblighi relativi a tali asset; la verifica è distinta dalla qualificazione NIS2 dell'organizzazione.");
+      verification.push("PSNC: verificare quali reti e sistemi informativi siano effettivamente inclusi nel Perimetro e il raccordo con autorità competenti, CSIRT e obblighi NIS2.");
+    } else {
+      psnc.trace.push(step("Non indicato", "Nessuna rete o sistema informativo è stato indicato come già incluso nel PSNC."));
+    }
+
     /* ---------------- DORA ---------------- */
     var dora = { applicable: false, note: null, trace: [] };
     if (a.dora_financial_entity) {
@@ -136,10 +166,12 @@
       dora.note = R.dora.lex_specialis_note;
       dora.trace.push(step("Applicabile", "Entità finanziaria rientrante nell'art. 2, par. 1, del Reg. 2022/2554."));
       dora.trace.push(step("Lex specialis", "Per gestione del rischio TIC e notifica degli incidenti, DORA si applica in luogo delle corrispondenti disposizioni NIS2 (art. 4 NIS2)."));
+      verification.push("DORA: verificare le dipendenze da fornitori TIC critici e il rischio di concentrazione tecnologica sul modello di servizio finanziario.");
     } else if (a.dora_ict_tpp_critical) {
       dora.applicable = true;
       dora.note = R.dora.ict_tpp_note;
       dora.trace.push(step("Applicabile (fornitore TIC)", "Fornitore terzo di servizi TIC del settore finanziario designabile come critico: sorveglianza europea diretta (art. 31)."));
+      verification.push("DORA: verificare la vigilanza diretta sui provider critici e la profondità delle dipendenze tecnologiche della filiera finanziaria.");
     } else {
       dora.trace.push(step("Non applicabile", "Non è un'entità finanziaria né un fornitore terzo TIC critico del settore finanziario."));
     }
@@ -151,12 +183,14 @@
       cra.category = a.cra_category || "ordinario";
       var catLabel = (R.cra.categories.filter(function (c) { return c.id === cra.category; })[0] || {}).label || cra.category;
       cra.trace.push(step("Applicabile", "Immette sul mercato UE un prodotto con elementi digitali (connessione dati logica o fisica) — Reg. 2024/2847, artt. 2-3."));
+      cra.trace.push(step("Security by design", "Il prodotto deve rispettare i requisiti essenziali del CRA: sicurezza per progettazione, configurazione sicura, SBOM e separazione delle patch di sicurezza da quelle funzionali."));
       cra.trace.push(step("Categoria: " + catLabel, a.cra_category
         ? "Classificazione in base alla funzionalità principale del prodotto (Allegati III-IV; PLC/SCADA/IIoT valutati caso per caso, §2.4.1)."
         : "Categoria non ancora determinata: assunto 'ordinario' in via prudenziale."));
       if (!a.cra_category) {
         verification.push("CRA: determinare la categoria del prodotto (ordinario / importante Classe I-II / critico) rispetto agli Allegati III e IV.");
       }
+      verification.push("CRA: documentare la SBOM del prodotto, separare patch di sicurezza da patch funzionali e valutare caso per caso asset OT/industriali (PLC, DCS, CNC, SCADA, IIoT). ");
       if (a.cra_role === "importatore_distributore") {
         cra.trace.push(step("Ruolo: importatore/distributore", "Obblighi ridotti rispetto al fabbricante."));
       }
@@ -170,6 +204,10 @@
       macchine.applicable = true;
       var roleLabels = R.macchine.roles.filter(function (r) { return macchine.roles.indexOf(r.id) !== -1; }).map(function (r) { return r.label; });
       macchine.trace.push(step("Applicabile", roleLabels.join("; ") + " (Reg. 2023/1230)."));
+      macchine.trace.push(step("Cybersecurity rilevante per la safety", "I requisiti RESS 1.1.9 (protezione dall'alterazione) e 1.2.1 (sicurezza e affidabilità dei sistemi di comando) richiedono di valutare connessioni esterne, accesso remoto, software e configurazioni nella misura in cui possono introdurre o aumentare un rischio per persone, macchina, ambiente o processo (Allegato III)."));
+      if (a.macchine_digital_connection) {
+        verification.push("Regolamento Macchine: documentare la valutazione avversariale delle connessioni, dell'accesso remoto e delle modifiche software/configurative rispetto ai RESS 1.1.9 e 1.2.1.");
+      }
       if (macchine.roles.indexOf("modifica_sostanziale") !== -1) {
         macchine.trace.push(step("Modifica sostanziale", "Equiparazione al fabbricante e nuova valutazione di conformità (art. 3 p. 16, art. 18)."));
         notes.push("Regolamento Macchine: la modifica sostanziale (retrofit, aggiornamento software, connessione remota che altera il profilo di rischio) impone una nuova valutazione di conformità.");
@@ -183,34 +221,87 @@
       macchine.trace.push(step("Non applicabile", "Non fabbrica, integra o modifica sostanzialmente una macchina ai sensi del Reg. 2023/1230."));
     }
 
-    /* ---------------- AI Act ---------------- */
-    // canale 1 (art. 6.1): NON ammette la clausola di esclusione dell'art. 6.3
-    // canale 2 (art. 6.2, Allegato III): esclusione ammessa salvo profilazione di persone fisiche
-    var ai = { applicable: false, high_risk: false, channel: null, trace: [] };
-    if (a.ai_system) {
+    /* ---------------- AI Act ---------------- (§2.6)
+       canale 1 (art. 6.1): NON ammette la clausola di esclusione dell'art. 6.3
+       canale 2 (art. 6.2, Allegato III): esclusione ammessa salvo profilazione di persone fisiche */
+    var AIR = R.ai_act;
+    var DO = AIR.digital_omnibus || {};
+    var ai = { applicable: false, status: null, high_risk: false, channel: null, annex_iii_use: null, open_requirements: [], compliance_deadline: null, trace: [] };
+    if (!a.ai_system) {
+      ai.trace.push(step("Non applicabile", "L'organizzazione non sviluppa né impiega un sistema di IA. La disciplina resta un riferimento per la governance dell'automazione intelligente in ambito OT."));
+    } else if (a.ai_prohibited) {
       ai.applicable = true;
+      ai.status = "vietato";
+      ai.trace.push(step("Pratica vietata (art. 5)", AIR.prohibited_note));
+      notes.push("AI Act: il sistema rientra tra le pratiche vietate (art. 5) e non può essere immesso sul mercato né messo in servizio.");
+    } else {
+      ai.applicable = true;
+      ai.status = "in_ambito";
+      var useLabel = null;
+      if (a.ai_annex_iii_use) {
+        ai.annex_iii_use = a.ai_annex_iii_use;
+        useLabel = (AIR.annex_iii_uses.filter(function (u) { return u.id === a.ai_annex_iii_use; })[0] || {}).label || a.ai_annex_iii_use;
+      }
+
       if (a.ai_channel1) {
-        ai.high_risk = true;
         ai.channel = "art6_1";
-        ai.trace.push(step("Alto rischio (canale art. 6.1)", "Componente di sicurezza di (o è) un prodotto coperto dalla normativa di armonizzazione Allegato I, soggetto a valutazione di conformità di terzi. La clausola di esclusione dell'art. 6.3 NON opera per questo canale."));
+        // Reg. (UE) 2026/1744: componente di sicurezza solo se la finalità è
+        // prevenire/attenuare rischi per salute e sicurezza (o se il
+        // malfunzionamento li metterebbe in pericolo).
+        if (a.ai_channel1_safety_purpose) {
+          ai.high_risk = true;
+          ai.trace.push(step("Alto rischio — canale art. 6.1", "Componente di sicurezza di un prodotto coperto dalla normativa di armonizzazione dell'Allegato I (incl. Regolamento Macchine), soggetto a valutazione di conformità di terzi, con finalità di sicurezza. La clausola di esclusione dell'art. 6.3 non è invocabile per questo canale."));
+        } else {
+          ai.high_risk = false;
+          ai.status = "canale_6_1_non_attivato";
+          ai.trace.push(step("Canale art. 6.1 non attivato", "Dopo il Reg. (UE) 2026/1744 l'IA integrata in un prodotto regolato è ad alto rischio solo se ha finalità di sicurezza (prevenire/attenuare rischi per salute e sicurezza) o se il suo malfunzionamento li metterebbe in pericolo. Usi di sola assistenza, ottimizzazione, efficienza o comodità sono esclusi."));
+          verification.push("AI Act (art. 6.1, come modificato dal Reg. 2026/1744): confermare caso per caso se la finalità del sistema sia di sicurezza; se sì, resta ad alto rischio.");
+        }
       } else if (a.ai_channel2) {
         ai.channel = "art6_2";
+        if (useLabel) ai.trace.push(step("Uso dell'Allegato III", useLabel));
         if (a.ai_profiling) {
           ai.high_risk = true;
-          ai.trace.push(step("Alto rischio (canale art. 6.2)", "Uso elencato nell'Allegato III con profilazione di persone fisiche: la clausola di esclusione dell'art. 6.3 non opera (art. 6, parr. 3-4)."));
+          ai.trace.push(step("Alto rischio — canale art. 6.2", "Uso dell'Allegato III con profilazione di persone fisiche: l'esclusione dell'art. 6.3 non opera (art. 6, parr. 3-4)."));
         } else if ((a.ai_exclusion_conditions || []).length > 0) {
           ai.high_risk = "escluso";
-          ai.trace.push(step("Alto rischio escluso (art. 6.3)", "Uso Allegato III, ma ricorre almeno una condizione di esclusione (compito procedurale ristretto / non influenza materialmente la decisione / rilevamento di schemi / compito preparatorio) e nessuna profilazione. La valutazione va documentata prima dell'immissione sul mercato."));
-          verification.push("AI Act: esclusione dall'alto rischio invocata (art. 6.3). Documentare la valutazione prima dell'immissione sul mercato o della messa in servizio.");
+          var exLabels = AIR.exclusion_conditions_art6_3.filter(function (c) { return a.ai_exclusion_conditions.indexOf(c.id) !== -1; }).map(function (c) { return c.label; });
+          ai.trace.push(step("Alto rischio escludibile (art. 6.3)", "Ricorre: " + exLabels.join("; ") + ". Nessuna profilazione. " + AIR.exclusion_override));
+          verification.push("AI Act: esclusione dall'alto rischio invocata (art. 6.3). Formalizzare e documentare la valutazione prima dell'immissione sul mercato o della messa in servizio.");
         } else {
           ai.high_risk = true;
-          ai.trace.push(step("Alto rischio (canale art. 6.2)", "Uso elencato nell'Allegato III (incl. componente di sicurezza nella gestione di infrastrutture digitali critiche, acqua, gas, riscaldamento, elettricità) e nessuna condizione di esclusione."));
+          ai.trace.push(step("Alto rischio — canale art. 6.2", "Uso dell'Allegato III, nessuna condizione di esclusione dell'art. 6.3."));
         }
       } else {
-        ai.trace.push(step("Non ad alto rischio", "Sistema di IA che non ricade in nessuno dei due canali dell'art. 6. Possibili obblighi di trasparenza (art. 50)."));
+        ai.trace.push(step("Non ad alto rischio", "Il sistema non ricade in nessuno dei due canali dell'art. 6."));
+        notes.push("AI Act: " + AIR.transparency_note);
       }
-    } else {
-      ai.trace.push(step("Non applicabile", "L'organizzazione non sviluppa né impiega un sistema di IA."));
+
+      // Requisiti dei sistemi ad alto rischio (§2.6.2) — rilevanti per la convergenza cyber-fisica
+      if (ai.high_risk === true) {
+        // Calendario differito dal Digital Omnibus (Reg. 2026/1744), date fisse.
+        var dl = DO.deadlines || {};
+        if (ai.channel === "art6_1" && dl.annex_i_embedded) {
+          ai.compliance_deadline = dl.annex_i_embedded.date;
+          ai.trace.push(step("Applicabilità differita", dl.annex_i_embedded.label + " (Reg. 2026/1744, data fissa)."));
+        } else if (ai.channel === "art6_2" && dl.annex_iii_standalone) {
+          ai.compliance_deadline = dl.annex_iii_standalone.date;
+          ai.trace.push(step("Applicabilità differita", dl.annex_iii_standalone.label + " (Reg. 2026/1744, data fissa)."));
+        }
+        if (!a.ai_oversight_ready) {
+          ai.open_requirements.push("oversight");
+          verification.push("AI Act (art. 14): predisporre la supervisione umana — monitoraggio, comprensione dei limiti, rilevamento anomalie, override e arresto in stato sicuro (si salda col fail-safe d'impianto).");
+        }
+        if (!a.ai_robustness_ready) {
+          ai.open_requirements.push("robustness");
+          verification.push("AI Act (art. 15): predisporre le misure di accuratezza, robustezza e cybersecurity, incluse quelle contro le vulnerabilità proprie dell'IA — data/model poisoning, adversarial examples (art. 15, par. 5).");
+        }
+        if (a.ai_ot_field_data) {
+          notes.push("AI Act: " + AIR.art_437bis_note);
+          ai.trace.push(step("Contesto OT — limite epistemico", AIR.ot_epistemic_note));
+          verification.push("AI Act / OT: valutare la protezione della catena di sensori e telemetria di campo (protocolli come Modbus/OPC): un adversarial example iniettato via man-in-the-middle può vanificare la conformità formale del modello.");
+        }
+      }
     }
 
     /* ---------------- interazioni tra regimi ---------------- */
@@ -221,6 +312,7 @@
     if (cra.applicable) applicableSet.cra = true;
     if (macchine.applicable) applicableSet.macchine = true;
     if (ai.applicable) applicableSet.ai_act = true;
+    if (psnc.applicable) applicableSet.psnc = true;
     var interactions = R.interactions.filter(function (it) {
       return applicableSet[it.pair[0]] && applicableSet[it.pair[1]];
     });
@@ -232,6 +324,7 @@
       cra: cra,
       macchine: macchine,
       ai_act: ai,
+      psnc: psnc,
       interactions: interactions,
       notes: notes,
       verification_flags: verification,

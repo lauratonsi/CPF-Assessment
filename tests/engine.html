@@ -89,12 +89,34 @@
     eq(p.cer.designation, "potenziale_soggetto_critico", "designation");
     eq(p.verification_flags.length > 0, true, "verification flag presente");
   });
+  t("CER: Piano di Resilienza adottato → traccia di attuazione presente", function () {
+    var p = CPF.classifyRegimes({ cer_sector: "acqua_potabile", cer_formally_designated: true, cer_resilience_plan_adopted: true });
+    eq(p.cer.trace.some(function (t) { return /Piano di Resilienza indicato/.test(t.esito); }), true, "piano di resilienza");
+  });
 
   /* ---- DORA ---- */
   t("DORA: entità finanziaria → applicabile con nota lex specialis", function () {
     var p = CPF.classifyRegimes({ dora_financial_entity: true });
     eq(p.dora.applicable, true, "applicable");
     eq(/lex specialis|luogo delle corrispondenti/i.test(p.dora.note || ""), true, "nota lex specialis");
+  });
+
+  t("NIS2/ACN: qualifica formalmente notificata → prevale sul calcolo orientativo", function () {
+    var p = CPF.classifyRegimes({ acn_formal_qualification: "essenziale" });
+    eq(p.nis2.applicable, true, "applicable");
+    eq(p.nis2.qualification, "essenziale", "qualification");
+    eq(p.nis2.formal_acn_qualification, true, "formal qualification");
+  });
+
+  /* ---- PSNC / lex specialis nazionale ---- */
+  t("PSNC: asset incluso + NIS2 applicabile → prevalenza per ambito e verifica", function () {
+    var p = CPF.classifyRegimes({ sector_annex: "annex_i", sector_nis2: "energia", size: { employees: 600, turnover_meur: 900, balance_meur: 800 }, psnc_assets: true });
+    eq(p.psnc.applicable, true, "psnc");
+    eq(p.nis2.psnc_exclusion, true, "nis2.psnc_exclusion");
+    eq(p.interactions.some(function (i) { return i.type === "lex specialis nazionale"; }), true, "interazione PSNC");
+  });
+  t("PSNC: nessun asset indicato → non applicabile", function () {
+    eq(CPF.classifyRegimes({}).psnc.applicable, false);
   });
 
   /* ---- CRA ---- */
@@ -111,9 +133,17 @@
   });
 
   /* ---- AI Act: la chiave delicata ---- */
-  t("AI Act: canale 6.1 → alto rischio, esclusione NON applicabile anche con condizioni selezionate", function () {
-    var p = CPF.classifyRegimes({ ai_system: true, ai_channel1: true, ai_exclusion_conditions: ["procedurale"] });
+  t("AI Act: canale 6.1 con finalità di sicurezza → alto rischio, esclusione NON applicabile", function () {
+    var p = CPF.classifyRegimes({ ai_system: true, ai_channel1: true, ai_channel1_safety_purpose: true, ai_exclusion_conditions: ["procedurale"] });
     eq(p.ai_act.high_risk, true, "high_risk"); eq(p.ai_act.channel, "art6_1", "channel");
+  });
+  t("AI Act (Reg. 2026/1744): canale 6.1 SENZA finalità di sicurezza → non alto rischio, da verificare", function () {
+    var p = CPF.classifyRegimes({ ai_system: true, ai_channel1: true });
+    eq(p.ai_act.high_risk, false, "high_risk"); eq(p.ai_act.status, "canale_6_1_non_attivato", "status");
+  });
+  t("AI Act (Reg. 2026/1744): calendario differito — canale 6.2 → 2027-12-02, canale 6.1 → 2028-08-02", function () {
+    eq(CPF.classifyRegimes({ ai_system: true, ai_channel2: true }).ai_act.compliance_deadline, "2027-12-02");
+    eq(CPF.classifyRegimes({ ai_system: true, ai_channel1: true, ai_channel1_safety_purpose: true }).ai_act.compliance_deadline, "2028-08-02");
   });
   t("AI Act: canale 6.2 + condizione di esclusione + no profilazione → escluso", function () {
     var p = CPF.classifyRegimes({ ai_system: true, ai_channel2: true, ai_exclusion_conditions: ["procedurale"], ai_profiling: false });

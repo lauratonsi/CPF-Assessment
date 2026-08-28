@@ -27,10 +27,14 @@
         size_class: null,            // opzionale, se inserito direttamente
         nis2_special_cases: [],
         ms_designation: null,        // "essenziale" | "importante" | null
+        acn_platform_registered: false,
+        acn_formal_qualification: null, // "essenziale" | "importante" | null
+        psnc_assets: false,          // asset già inclusi nel Perimetro di Sicurezza Nazionale Cibernetica
 
         cer_sector: null,
         cer_formally_designated: false,
         cer_significance: [],
+        cer_resilience_plan_adopted: false,
 
         dora_financial_entity: false,
         dora_ict_tpp_critical: false,
@@ -41,12 +45,19 @@
 
         macchine_roles: [],
         macchine_annex_i_part_a_flags: [],
+        macchine_digital_connection: false,
 
         ai_system: false,
+        ai_prohibited: false,           // pratica vietata art. 5
         ai_channel1: false,
+        ai_channel1_safety_purpose: false, // finalità di sicurezza (Reg. 2026/1744)
         ai_channel2: false,
+        ai_annex_iii_use: null,         // quale uso dell'Allegato III
         ai_exclusion_conditions: [],
-        ai_profiling: false
+        ai_profiling: false,
+        ai_oversight_ready: false,      // art. 14 supervisione umana
+        ai_robustness_ready: false,     // art. 15 accuratezza/robustezza/cybersecurity
+        ai_ot_field_data: false         // sistema in ambiente OT alimentato da sensori di campo
       },
 
       // output di CPF.classifyRegimes(answers) — ricalcolato a ogni modifica delle answers
@@ -70,6 +81,7 @@
       nis2:     wrap(rp.nis2     || { applicable: false, qualification: "fuori_perimetro" }),
       cer:      wrap(rp.cer      || { applicable: false, designation: null }),
       dora:     wrap(rp.dora     || { applicable: false, note: null }),
+      psnc:     wrap(rp.psnc     || { applicable: false, trace: [] }),
       cra:      wrap(rp.cra      || { applicable: false, category: null, role: null }),
       macchine: wrap(rp.macchine || { applicable: false, roles: [], notified_body_required: false }),
       ai_act:   wrap(rp.ai_act   || { applicable: false, high_risk: false, channel: null }),

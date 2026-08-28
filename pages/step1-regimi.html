@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Step 1 — Regimi applicabili · CPF Assessment</title>
-<link rel="stylesheet" href="assets/theme.css">
+  <link rel="stylesheet" href="../assets/theme.css">
 <script>(function(){try{var t=localStorage.getItem("cpf-theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
 <style>
   .layout { display: grid; grid-template-columns: 1fr; gap: 1.4rem; }
@@ -33,6 +33,7 @@
   .result .rc ul.trace { margin: 0.3rem 0 0; padding: 0; list-style: none; font-size: 0.76rem; color: var(--muted); }
   .result .rc ul.trace li { margin: 0.25rem 0; }
   .result .rc ul.trace b { color: var(--ink); font-weight: 600; }
+  .result .rc .summary { font-size: 0.73rem; line-height: 1.45; color: var(--muted); margin-top: 0.5rem; }
   .panel { border: 1px solid var(--border); border-radius: 7px; padding: 0.7rem 0.8rem; margin-bottom: 0.55rem; font-size: 0.8rem; }
   .panel.verify { border-color: var(--accent); background: var(--accent-tint); color: var(--accent-ink); }
   .panel h4 { margin: 0 0 0.3rem; font-size: 0.8rem; }
@@ -94,9 +95,33 @@
       </fieldset>
 
       <fieldset>
+        <legend>Recepimento italiano — ACN</legend>
+        <div class="checks">
+          <label><input type="checkbox" id="acn_platform_registered"> Il soggetto è registrato sulla piattaforma digitale dell'ACN</label>
+        </div>
+        <div class="q">
+          <label class="lbl" for="acn_formal_qualification">Qualificazione NIS2 formalmente notificata dall'ACN</label>
+          <select class="field" id="acn_formal_qualification">
+            <option value="">— non comunicata / da verificare —</option>
+            <option value="essenziale">Soggetto essenziale</option>
+            <option value="importante">Soggetto importante</option>
+          </select>
+        </div>
+        <p class="hint">Il D.Lgs. 138/2024 affida all'ACN l'identificazione centralizzata, la gestione dell'elenco e la notifica della qualificazione. La qualifica notificata prevale sul calcolo orientativo; la registrazione, da sola, non costituisce qualificazione.</p>
+      </fieldset>
+
+      <fieldset>
         <legend>Casi speciali NIS2</legend>
         <p class="hint">Categorie nel perimetro a prescindere dalla dimensione (art. 2, par. 2).</p>
         <div class="checks" id="special_cases"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>PSNC — Perimetro nazionale</legend>
+        <div class="checks">
+          <label><input type="checkbox" id="psnc_assets"> Una o più reti o sistemi informativi dell'organizzazione sono già inclusi nel Perimetro di Sicurezza Nazionale Cibernetica (PSNC)</label>
+        </div>
+        <p class="hint">Per gli asset inclusi, gli obblighi di gestione del rischio e notifica sono disciplinati dal framework del Perimetro ai sensi dell'art. 33 del D.Lgs. 138/2024. La qualificazione NIS2 dell'organizzazione resta distinta.</p>
       </fieldset>
 
       <fieldset>
@@ -106,19 +131,23 @@
           <select class="field" id="cer_sector"><option value="">— nessuno —</option></select>
         </div>
         <div class="q checks">
-          <label><input type="checkbox" id="cer_formally_designated"> L'organizzazione è stata <b>designata formalmente</b> soggetto critico (D.Lgs. 134/2024)</label>
+          <label><input type="checkbox" id="cer_formally_designated"> L'organizzazione è stata&nbsp;<b>designata formalmente</b>&nbsp;soggetto critico (D.Lgs. 134/2024)</label>
         </div>
         <div class="q reveal" id="cer_sig_wrap">
           <span class="lbl">Criteri di impatto significativo (artt. 6-7 Dir. 2022/2557) — nessuno decisivo da solo</span>
           <div class="checks" id="cer_significance"></div>
         </div>
+        <div class="q checks">
+          <label><input type="checkbox" id="cer_resilience_plan_adopted"> È stato adottato un Piano di Resilienza per il servizio/soggetto?</label>
+        </div>
+        <p class="hint">La CER integra valutazione statale dei rischi sistemici e valutazione decentrata del soggetto critico, comprese dipendenze in ingresso e impatti in uscita. La designazione resta di competenza dell'autorità settoriale.</p>
       </fieldset>
 
       <fieldset>
         <legend>DORA — resilienza operativa digitale (settore finanziario)</legend>
         <div class="checks">
-          <label><input type="checkbox" id="dora_financial_entity"> È un'<b>entità finanziaria</b> rientrante nell'art. 2, par. 1, del Reg. 2022/2554</label>
-          <label><input type="checkbox" id="dora_ict_tpp_critical"> È un <b>fornitore terzo di servizi TIC</b> del settore finanziario designabile come critico (art. 31)</label>
+          <label><input type="checkbox" id="dora_financial_entity"> È un'&nbsp;<b>entità finanziaria</b>&nbsp;rientrante nell'art. 2, par. 1, del Reg. 2022/2554</label>
+          <label><input type="checkbox" id="dora_ict_tpp_critical"> È un&nbsp;<b>fornitore terzo di servizi TIC</b>&nbsp;del settore finanziario designabile come critico (art. 31)</label>
         </div>
         <details><summary>Le 20 categorie di entità finanziarie</summary><ul id="dora_cats"></ul></details>
       </fieldset>
@@ -126,8 +155,9 @@
       <fieldset>
         <legend>CRA — prodotti con elementi digitali</legend>
         <div class="checks">
-          <label><input type="checkbox" id="cra_places_product"> Immette sul mercato UE un <b>prodotto con elementi digitali</b> (connessione dati logica o fisica)</label>
+          <label><input type="checkbox" id="cra_places_product"> Immette sul mercato UE un&nbsp;<b>prodotto con elementi digitali</b>&nbsp;(connessione dati logica o fisica)</label>
         </div>
+        <p class="hint">Il CRA è orientato al prodotto: per asset OT/industriali (PLC, DCS, CNC, SCADA, IIoT), la classificazione va valutata caso per caso in base alla funzione principale e alla categoria tecnica del bene.</p>
         <div class="reveal" id="cra_wrap" hidden>
           <div class="q">
             <label class="lbl" for="cra_role">Ruolo</label>
@@ -151,6 +181,9 @@
         <legend>Regolamento Macchine</legend>
         <span class="lbl">Ruolo rispetto a una macchina (Reg. 2023/1230)</span>
         <div class="checks" id="macchine_roles"></div>
+        <div class="checks">
+          <label><input type="checkbox" id="macchine_digital_connection"> La macchina ha connessioni esterne, accesso remoto o software/configurazioni che possono incidere sulla funzione di sicurezza</label>
+        </div>
         <div class="q">
           <span class="lbl">Componenti che incidono sulla funzione di sicurezza</span>
           <div class="checks" id="macchine_flags"></div>
@@ -164,21 +197,46 @@
         </div>
         <div class="reveal" id="ai_wrap" hidden>
           <div class="checks">
-            <label><input type="checkbox" id="ai_channel1"> <b>Canale art. 6.1</b> — l'IA è componente di sicurezza di (o è) un prodotto coperto dalla normativa di armonizzazione Allegato I, soggetto a valutazione di conformità di terzi</label>
-            <label><input type="checkbox" id="ai_channel2"> <b>Canale art. 6.2</b> — l'IA rientra in un uso dell'Allegato III (incl. gestione di infrastrutture digitali critiche, acqua, gas, riscaldamento, elettricità)</label>
+            <label><input type="checkbox" id="ai_prohibited"> Il sistema rientra in una <b>pratica vietata</b> (art. 5 — rischio inaccettabile; il Reg. 2026/1744 vi aggiunge, dal 2 dic 2026, materiale intimo non consensuale e materiale di abuso su minori)</label>
           </div>
-          <div class="reveal" id="ai_excl_wrap" hidden>
-            <span class="lbl">Condizioni di esclusione dall'alto rischio (art. 6.3) — solo canale 6.2</span>
-            <div class="checks" id="ai_exclusions"></div>
+          <div class="reveal" id="ai_hr_wrap">
             <div class="checks">
-              <label><input type="checkbox" id="ai_profiling"> Il sistema effettua <b>profilazione di persone fisiche</b> (l'esclusione non opera)</label>
+              <label><input type="checkbox" id="ai_channel1"> <b>Canale art. 6.1</b> — l'IA è componente di sicurezza di (o è) un prodotto coperto dalla normativa di armonizzazione Allegato I (incl. Regolamento Macchine), soggetto a valutazione di conformità di terzi</label>
+            </div>
+            <div class="reveal" id="ai_ch1_purpose_wrap" hidden>
+              <div class="checks">
+                <label><input type="checkbox" id="ai_channel1_safety_purpose"> La <b>finalità specifica</b> dell'IA è prevenire o attenuare rischi per salute e sicurezza (o il suo malfunzionamento li metterebbe in pericolo) — Reg. 2026/1744</label>
+              </div>
+              <p class="hint">Dal Reg. (UE) 2026/1744, l'IA integrata in un prodotto regolato è ad alto rischio per il canale 6.1 <b>solo</b> con finalità di sicurezza; usi di sola assistenza, ottimizzazione o comodità sono esclusi.</p>
+            </div>
+            <div class="checks">
+              <label><input type="checkbox" id="ai_channel2"> <b>Canale art. 6.2</b> — l'IA rientra in un uso dell'Allegato III</label>
+            </div>
+            <div class="reveal" id="ai_use_wrap" hidden>
+              <label class="lbl" for="ai_annex_iii_use">Uso dell'Allegato III</label>
+              <select class="field" id="ai_annex_iii_use"><option value="">— seleziona —</option></select>
+            </div>
+            <div class="reveal" id="ai_excl_wrap" hidden>
+              <span class="lbl">Condizioni di esclusione dall'alto rischio (art. 6.3) — solo canale 6.2</span>
+              <div class="checks" id="ai_exclusions"></div>
+              <div class="checks">
+                <label><input type="checkbox" id="ai_profiling"> Il sistema effettua <b>profilazione di persone fisiche</b> (l'esclusione non opera)</label>
+              </div>
+            </div>
+            <div class="reveal" id="ai_hr_req_wrap" hidden>
+              <span class="lbl">Requisiti dei sistemi ad alto rischio (§2.6.2)</span>
+              <div class="checks">
+                <label><input type="checkbox" id="ai_oversight_ready"> Predisposta la <b>supervisione umana</b> (art. 14): monitoraggio, rilevamento anomalie, override, arresto in stato sicuro</label>
+                <label><input type="checkbox" id="ai_robustness_ready"> Predisposte <b>accuratezza, robustezza e cybersecurity</b> (art. 15), incl. contro data/model poisoning e adversarial examples</label>
+                <label><input type="checkbox" id="ai_ot_field_data"> Il sistema opera in <b>ambiente OT</b> ed è alimentato da sensori o telemetria di campo</label>
+              </div>
             </div>
           </div>
         </div>
       </fieldset>
 
       <div class="btn-row">
-        <a class="btn btn--ghost" href="index.html">← Valutazioni</a>
+        <a class="btn btn--ghost" href="../index.html">← Valutazioni</a>
         <span>
           <button type="button" class="btn" id="save">Salva profilo</button>
           <button type="button" class="btn btn--primary" id="next">Avanti: Funzione →</button>
@@ -193,14 +251,14 @@
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="data/scope_sectors.js"></script>
-<script src="data/regime_classifier.js"></script>
-<script src="data/regime_rules.js"></script>
-<script src="data/scales.js"></script>
-<script src="data/assessment_schema.js"></script>
-<script src="data/organization_schema.js"></script>
-<script src="assets/app.js"></script>
-<script src="assets/regime-engine.js"></script>
+<script src="../data/scope_sectors.js"></script>
+<script src="../data/regime_classifier.js"></script>
+<script src="../data/regime_rules.js"></script>
+<script src="../data/scales.js"></script>
+<script src="../data/assessment_schema.js"></script>
+<script src="../data/organization_schema.js"></script>
+<script src="../assets/app.js"></script>
+<script src="../assets/regime-engine.js"></script>
 <script>
 (function () {
   var D = CPF.data, R = D.regimeRules;
@@ -247,6 +305,9 @@
   ul("cra_c2", R.cra.annex_iii_class_2);
   ul("cra_c4", R.cra.annex_iv_critical);
   $("cra_ics_note").textContent = R.cra.ics_note;
+  R.ai_act.annex_iii_uses.forEach(function (u) {
+    var o = document.createElement("option"); o.value = u.id; o.textContent = u.label; $("ai_annex_iii_use").appendChild(o);
+  });
 
   /* ---------- form <-> answers ---------- */
   function groupVals(name) {
@@ -266,9 +327,13 @@
     if (A.size) { $("employees").value = A.size.employees ?? ""; $("turnover").value = A.size.turnover_meur ?? ""; $("balance").value = A.size.balance_meur ?? ""; }
     $("ms_designation").value = A.ms_designation || "";
     setGroup("nis2_special_cases", A.nis2_special_cases);
+    $("acn_platform_registered").checked = !!A.acn_platform_registered;
+    $("acn_formal_qualification").value = A.acn_formal_qualification || "";
+    $("psnc_assets").checked = !!A.psnc_assets;
     $("cer_sector").value = A.cer_sector || "";
     $("cer_formally_designated").checked = !!A.cer_formally_designated;
     setGroup("cer_significance", A.cer_significance);
+    $("cer_resilience_plan_adopted").checked = !!A.cer_resilience_plan_adopted;
     $("dora_financial_entity").checked = !!A.dora_financial_entity;
     $("dora_ict_tpp_critical").checked = !!A.dora_ict_tpp_critical;
     $("cra_places_product").checked = !!A.cra_places_product;
@@ -276,11 +341,18 @@
     $("cra_category").value = A.cra_category || "";
     setGroup("macchine_roles", A.macchine_roles);
     setGroup("macchine_annex_i_part_a_flags", A.macchine_annex_i_part_a_flags);
+    $("macchine_digital_connection").checked = !!A.macchine_digital_connection;
     $("ai_system").checked = !!A.ai_system;
+    $("ai_prohibited").checked = !!A.ai_prohibited;
     $("ai_channel1").checked = !!A.ai_channel1;
+    $("ai_channel1_safety_purpose").checked = !!A.ai_channel1_safety_purpose;
     $("ai_channel2").checked = !!A.ai_channel2;
+    $("ai_annex_iii_use").value = A.ai_annex_iii_use || "";
     setGroup("ai_exclusion_conditions", A.ai_exclusion_conditions);
     $("ai_profiling").checked = !!A.ai_profiling;
+    $("ai_oversight_ready").checked = !!A.ai_oversight_ready;
+    $("ai_robustness_ready").checked = !!A.ai_robustness_ready;
+    $("ai_ot_field_data").checked = !!A.ai_ot_field_data;
   }
 
   function readForm() {
@@ -291,9 +363,13 @@
     A.size_class = null;
     A.ms_designation = $("ms_designation").value || null;
     A.nis2_special_cases = groupVals("nis2_special_cases");
+    A.acn_platform_registered = $("acn_platform_registered").checked;
+    A.acn_formal_qualification = $("acn_formal_qualification").value || null;
+    A.psnc_assets = $("psnc_assets").checked;
     A.cer_sector = $("cer_sector").value || null;
     A.cer_formally_designated = $("cer_formally_designated").checked;
     A.cer_significance = groupVals("cer_significance");
+    A.cer_resilience_plan_adopted = $("cer_resilience_plan_adopted").checked;
     A.dora_financial_entity = $("dora_financial_entity").checked;
     A.dora_ict_tpp_critical = $("dora_ict_tpp_critical").checked;
     A.cra_places_product = $("cra_places_product").checked;
@@ -301,22 +377,36 @@
     A.cra_category = $("cra_category").value || null;
     A.macchine_roles = groupVals("macchine_roles");
     A.macchine_annex_i_part_a_flags = groupVals("macchine_annex_i_part_a_flags");
+    A.macchine_digital_connection = $("macchine_digital_connection").checked;
     A.ai_system = $("ai_system").checked;
+    A.ai_prohibited = $("ai_prohibited").checked;
     A.ai_channel1 = $("ai_channel1").checked;
+    A.ai_channel1_safety_purpose = $("ai_channel1_safety_purpose").checked;
     A.ai_channel2 = $("ai_channel2").checked;
+    A.ai_annex_iii_use = $("ai_annex_iii_use").value || null;
     A.ai_exclusion_conditions = groupVals("ai_exclusion_conditions");
     A.ai_profiling = $("ai_profiling").checked;
+    A.ai_oversight_ready = $("ai_oversight_ready").checked;
+    A.ai_robustness_ready = $("ai_robustness_ready").checked;
+    A.ai_ot_field_data = $("ai_ot_field_data").checked;
 
     // reveal condizionali
     $("cra_wrap").hidden = !A.cra_places_product;
     $("ai_wrap").hidden = !A.ai_system;
-    $("ai_excl_wrap").hidden = !(A.ai_system && A.ai_channel2);
+    var aiHR = A.ai_system && !A.ai_prohibited;
+    var ch1HighRisk = A.ai_channel1 && A.ai_channel1_safety_purpose;
+    var ch2HighRisk = A.ai_channel2 && !(A.ai_exclusion_conditions.length && !A.ai_profiling);
+    $("ai_hr_wrap").hidden = !aiHR;
+    $("ai_ch1_purpose_wrap").hidden = !(aiHR && A.ai_channel1);
+    $("ai_use_wrap").hidden = !(aiHR && A.ai_channel2);
+    $("ai_excl_wrap").hidden = !(aiHR && A.ai_channel2 && !A.ai_profiling);
+    $("ai_hr_req_wrap").hidden = !(aiHR && (ch1HighRisk || ch2HighRisk));
     $("cer_sig_wrap").style.opacity = A.cer_formally_designated ? 0.5 : 1;
   }
 
   /* ---------- rendering risultato ---------- */
   var REG = [
-    ["nis2", "NIS2"], ["cer", "CER"], ["dora", "DORA"],
+    ["nis2", "NIS2"], ["cer", "CER"], ["dora", "DORA"], ["psnc", "PSNC"],
     ["cra", "CRA"], ["macchine", "Reg. Macchine"], ["ai_act", "AI Act"]
   ];
   function tagFor(key, r) {
@@ -325,8 +415,10 @@
     if (key === "cer") return '<span class="tag ' + (r.designation === "soggetto_critico" ? "ess" : "on") + '">' + (r.designation || "applicabile").replace(/_/g, " ") + '</span>';
     if (key === "cra") return '<span class="tag on">' + (r.category || "").replace(/_/g, " ") + '</span>';
     if (key === "ai_act") {
+      if (r.status === "vietato") return '<span class="tag ess">vietato</span>';
       if (r.high_risk === true) return '<span class="tag ess">alto rischio</span>';
       if (r.high_risk === "escluso") return '<span class="tag on">alto rischio escluso</span>';
+      if (r.status === "canale_6_1_non_attivato") return '<span class="tag on">da verificare (art. 6.1)</span>';
       return '<span class="tag on">applicabile</span>';
     }
     if (key === "macchine" && r.notified_body_required) return '<span class="tag ess">organismo notificato</span>';
@@ -341,15 +433,17 @@
       out += '<div class="rc"><h3>' + rg[1] + tagFor(rg[0], r) + '</h3>';
       out += '<ul class="trace">' + (r.trace || []).map(function (t) {
         return '<li><b>' + esc(t.esito) + '</b> — ' + esc(t.base) + '</li>';
-      }).join("") + '</ul></div>';
+      }).join("") + '</ul>';
+      out += '</div>';
+
+      if (rg[0] === "macchine" && p.verification_flags && p.verification_flags.length) {
+        out += '<div class="panel verify"><h4>Priorità di verifica</h4><ul>' +
+          p.verification_flags.map(function (v) { return '<li>' + esc(v) + '</li>'; }).join("") + '</ul></div>';
+      }
     });
     if (p.interactions && p.interactions.length) {
       out += '<div class="panel"><h4>Interazioni tra regimi applicabili</h4><ul>' +
         p.interactions.map(function (i) { return '<li><b>' + esc(i.type) + '</b>: ' + esc(i.text) + '</li>'; }).join("") + '</ul></div>';
-    }
-    if (p.verification_flags && p.verification_flags.length) {
-      out += '<div class="panel verify"><h4>Priorità di verifica</h4><ul>' +
-        p.verification_flags.map(function (v) { return '<li>' + esc(v) + '</li>'; }).join("") + '</ul></div>';
     }
     if (p.notes && p.notes.length) {
       out += '<div class="panel"><h4>Note</h4><ul>' + p.notes.map(function (n) { return '<li>' + esc(n) + '</li>'; }).join("") + '</ul></div>';

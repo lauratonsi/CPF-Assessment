@@ -29,9 +29,10 @@
 
     regime_profile: {
       _comment: "Output dello Step 1, vedi regime_classifier.js#output_schema",
-      nis2:     { applicable: true,  qualification: "essenziale" },
-      cer:      { applicable: false, designation: null },
+      nis2:     { applicable: true,  qualification: "essenziale", formal_acn_qualification: false },
+      cer:      { applicable: false, designation: null, resilience_plan_adopted: false },
       dora:     { applicable: false },
+      psnc:     { applicable: false },
       cra:      { applicable: true,  category: "importante_1" },
       macchine: { applicable: true },
       ai_act:   { applicable: false, high_risk: null, channel: null }
@@ -115,9 +116,10 @@
       // Clonato da un profilo organizzazione nello Step 1 (CPF.cloneRegimeProfile).
       // Fino ad allora resta il profilo neutro qui sotto.
       regime_profile: {
-        nis2:     { applicable: false, qualification: "fuori_perimetro" },
-        cer:      { applicable: false, designation: null },
+        nis2:     { applicable: false, qualification: "fuori_perimetro", formal_acn_qualification: false },
+        cer:      { applicable: false, designation: null, resilience_plan_adopted: false },
         dora:     { applicable: false },
+        psnc:     { applicable: false },
         cra:      { applicable: false, category: null },
         macchine: { applicable: false },
         ai_act:   { applicable: false, high_risk: null, channel: null }

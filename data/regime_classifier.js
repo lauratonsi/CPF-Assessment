@@ -38,6 +38,13 @@
         feeds: ["nis2"]
       },
       {
+        id: "q_acn_registration",
+        text: "Il soggetto è registrato sulla piattaforma ACN e ha ricevuto una qualificazione NIS2 formalmente notificata?",
+        type: "boolean_with_subtype",
+        thesis_ref: "§2.1.2",
+        feeds: ["nis2"]
+      },
+      {
         id: "q_cer_critical",
         text: "L'organizzazione è stata designata come soggetto critico ai sensi del D.Lgs. 134/2024, o eroga un servizio essenziale la cui interruzione avrebbe impatti significativi (utenti dipendenti, dipendenze intersettoriali, durata/estensione impatto)?",
         type: "boolean_with_criteria",
@@ -101,9 +108,10 @@
     ],
 
     output_schema: {
-      nis2:     { applicable: "boolean", qualification: "essenziale|importante|fuori_perimetro" },
+      nis2:     { applicable: "boolean", qualification: "essenziale|importante|fuori_perimetro", formal_acn_qualification: "boolean" },
       cer:      { applicable: "boolean", designation: "soggetto_critico|non_designato" },
       dora:     { applicable: "boolean" },
+      psnc:     { applicable: "boolean" },
       cra:      { applicable: "boolean", category: "ordinario|importante_1|importante_2|critico|null" },
       macchine: { applicable: "boolean" },
       ai_act:   { applicable: "boolean", high_risk: "boolean|escluso", channel: "art6_1|art6_2|null" }
