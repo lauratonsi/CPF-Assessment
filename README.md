@@ -77,8 +77,22 @@ conseguenze/percorsi e il profilo di capacità con autosave; la dashboard rende
 l'esito e permette export JSON / stampa. Senza una valutazione attiva la
 dashboard mostra un **esito dimostrativo** completo.
 
-Aperto: vendorizzare `d3-sankey` per un diagramma delle dipendenze più ricco
-nella dashboard (ora è un diagramma SVG a tre colonne fatto a mano).
+### Aperto
+
+- **Estrarre la sintesi della dashboard in `assets/report.js`.** Oggi
+  `dashboard.html` è il punto in cui regimi, funzione, dipendenze, profilo
+  obiettivo e profilo corrente vengono letti insieme per la prima volta — gli
+  step del wizard non si parlano tra loro, per costruzione (nessuna
+  compensazione a monte). La pagina però implementa *inline* tutta la
+  composizione dell'esito (cablaggio del dumbbell, SVG delle dipendenze, colonne
+  delle priorità, tabella dei divari): logica non testata e non riutilizzabile,
+  mentre `app.js` tiene solo i calcoli puri §3.6. Prevista una funzione pura
+  `CPF.buildReport(assessment) → { regimi, dipendenze, divari, essenziali,
+  priorità, conseguenze }` con una quarta suite di test `report`, così che
+  l'output finale sia verificabile da `test.html` come già lo è il motore dei
+  regimi — stesso argomento di trasparenza metodologica per il Capitolo 4.
+- **Vendorizzare `d3-sankey`** per un diagramma delle dipendenze più ricco nella
+  dashboard (ora è un diagramma SVG a tre colonne fatto a mano).
 
 ## Test
 
