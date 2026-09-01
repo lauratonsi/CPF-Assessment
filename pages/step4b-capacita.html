@@ -337,7 +337,7 @@
       DIMS.forEach(function (d) { if (e.current_profile[d].evidentiary_strength === "non_determinabile") undet++; });
     });
     var topInt = ranked.filter(function (r) { return r.priorita_intervento && r.priorita_intervento.band === "alta"; });
-    s.innerHTML = '<b>' + a.capability_assessment.length + '</b> domini · '
+    var html = '<b>' + a.capability_assessment.length + '</b> domini · '
       + '<span class="' + (essShort.length ? "crit" : "") + '"><b>' + essShort.length + '</b> divari essenziali</span> · '
       + '<b>' + topInt.length + '</b> a priorità di intervento alta · '
       + '<b>' + (undet) + '</b> livelli non determinabili'
@@ -347,6 +347,18 @@
           return '<li>' + esc(domLabel(e.domain_id)) + ' — ' + SC[x.dimension].label + ' ' + x.have + '/' + x.need + '</li>';
         }).join("") + '</ul>' : '')
       + '<span class="muted" style="font-size:.78rem">L\'ordinamento completo e i grafici sono nella dashboard. L\'aggregato è descrittivo (§3.7): i divari essenziali non vi sono assorbiti.</span>';
+    flashUpdate(s, html);
+  }
+
+  // aggiorna solo se cambiato + breve pulsazione "aggiornato" (transitoria)
+  function flashUpdate(el, html) {
+    if (el.innerHTML === html) return;
+    el.innerHTML = html;
+    el.classList.remove("did-change");
+    void el.offsetWidth;
+    el.classList.add("did-change");
+    clearTimeout(el._dcT);
+    el._dcT = setTimeout(function () { el.classList.remove("did-change"); }, 1100);
   }
 
   function save(immediate) {

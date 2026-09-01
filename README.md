@@ -85,6 +85,13 @@ conseguenze/percorsi e il profilo di capacità con autosave; la dashboard rende
 l'esito e permette export JSON / stampa. Senza una valutazione attiva la
 dashboard mostra un **esito dimostrativo** completo.
 
+Lo stepper è una barra di avanzamento reale (`nav.js`): riempimento proporzionale
+ai passi completati, badge `n/5`, link «Prossimo: …» e link che portano con sé
+`?id=` della valutazione. `index.html` mostra la stessa barra per ogni
+valutazione salvata, con «Riprendi». I pannelli di feedback dal vivo (coerenza
+dello Step 2, riepiloghi degli Step 4a/4b) si aggiornano solo quando cambiano,
+con una breve pulsazione.
+
 ### Aperto
 
 - **Vendorizzare `d3-sankey`** per un diagramma delle dipendenze più ricco nella

@@ -7,11 +7,16 @@
   <link rel="stylesheet" href="assets/theme.css">
 <script>(function(){try{var t=localStorage.getItem("cpf-theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
 <style>
-  .item { border: 1px solid var(--border); border-radius: 7px; padding: 0.7rem 0.9rem; margin: 0.5rem 0; background: var(--surface); }
   .item strong { font-family: var(--serif); }
   .item .meta { color: var(--muted); font-size: 0.82rem; }
-  .item .acts { margin-top: 0.35rem; font-size: 0.85rem; display: flex; gap: 0.9rem; flex-wrap: wrap; }
-  .empty { color: var(--muted); font-size: 0.9rem; }
+  .item .acts { margin-top: 0.5rem; font-size: 0.85rem; display: flex; gap: 0.9rem; flex-wrap: wrap; }
+  .empty { color: var(--muted); font-size: 0.9rem; line-height: 1.5; max-width: 44rem; }
+
+  .item-prog { display: flex; align-items: center; gap: 0.55rem; margin-top: 0.55rem; font-size: 0.78rem; }
+  .item-prog .bar { flex: 1; max-width: 14rem; height: 5px; border-radius: 999px; background: var(--surface-3); overflow: hidden; }
+  .item-prog .bar span { display: block; height: 100%; background: linear-gradient(90deg, var(--accent-strong), var(--accent)); transition: width .5s cubic-bezier(.33,1,.68,1); }
+  .item-prog .n { font-family: var(--mono); color: var(--muted); }
+  .item-prog .resume { margin-left: auto; font-family: var(--mono); font-size: 0.76rem; font-weight: 500; }
 
   .flow { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 1.2rem 0 1.6rem; font-family: var(--mono); font-size: 0.72rem; }
   .flow span { border: 1px solid var(--border); border-radius: 4px; padding: 0.3rem 0.6rem; background: var(--surface); color: var(--muted); }
@@ -67,6 +72,28 @@
 <script>
 (function () {
   function fmtDate(s) { return (s || "").slice(0, 10); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+
+  // avanzamento della valutazione (stesso criterio di assets/nav.js)
+  var STEP_LABELS = ["Regimi", "Funzione", "Dipendenze", "Conseguenze", "Capacità"];
+  function stepProgress(full) {
+    var F = full.function || {};
+    var caps = full.capability_assessment || [];
+    var capsStarted = caps.some(function (e) {
+      var cp = e.current_profile || {};
+      return Object.keys(cp).some(function (d) { return cp[d] && cp[d].evidentiary_strength && cp[d].evidentiary_strength !== "non_determinabile"; });
+    });
+    var flags = [
+      !!(full.regime_profile && (full.regime_profile.nis2 || full.organization_id)),
+      !!F.name,
+      (full.dependencies || []).length > 0,
+      (full.intolerable_consequences || []).length > 0,
+      capsStarted
+    ];
+    var done = flags.filter(Boolean).length;
+    var nextIdx = flags.indexOf(false);
+    return { done: done, total: flags.length, next: nextIdx === -1 ? null : STEP_LABELS[nextIdx], nextStep: nextIdx };
+  }
   function applicableRegimes(org) {
     var p = org.regime_profile;
     if (!p) return "profilo non ancora calcolato";
@@ -78,7 +105,7 @@
   function renderOrgs() {
     var list = CPF.listOrganizations();
     var el = document.getElementById("org-list");
-    if (!list.length) { el.innerHTML = '<p class="empty">Nessun profilo. Creane uno per iniziare.</p>'; return; }
+    if (!list.length) { el.innerHTML = '<p class="empty">Nessun profilo organizzazione. Lo Step 1 classifica i regimi applicabili (NIS2, CER, DORA, CRA, Reg. Macchine, AI Act); ogni valutazione di funzione parte da lì.</p>'; return; }
     el.innerHTML = list.map(function (o) {
       var org = CPF.loadOrganization(o.id) || {};
       return '<div class="item"><strong>' + (o.name || "(senza nome)") + '</strong> '
@@ -105,15 +132,28 @@
   function renderAssessments() {
     var list = CPF.listAssessments();
     var el = document.getElementById("assessment-list");
-    if (!list.length) { el.innerHTML = '<p class="empty">Nessuna valutazione.</p>'; return; }
+    if (!list.length) {
+      el.innerHTML = '<p class="empty">Nessuna valutazione ancora. Creane una da un profilo organizzazione qui sopra, oppure importa un file JSON.</p>';
+      return;
+    }
+    var STEP_HREF = ["step1-regimi.html", "step2-funzione.html", "step3-dipendenze.html", "step4a-conseguenze.html", "step4b-capacita.html"];
     el.innerHTML = list.map(function (a) {
       var full = CPF.loadAssessment(a.id) || {};
-      return '<div class="item"><strong>' + a.name + '</strong> '
-        + '<span class="meta">— ' + (full.organization_name || "organizzazione non collegata") + ' · agg. ' + fmtDate(a.updated_at) + '</span>'
+      var pr = stepProgress(full);
+      var pct = Math.round(pr.done / pr.total * 100);
+      var idq = "?id=" + encodeURIComponent(a.id);
+      var resume = pr.next
+        ? '<a class="resume" href="pages/' + STEP_HREF[pr.nextStep] + (pr.nextStep === 0 ? (full.organization_id ? "?org=" + encodeURIComponent(full.organization_id) : "") : idq) + '">Riprendi: ' + esc(pr.next) + ' →</a>'
+        : '<a class="resume" href="pages/dashboard.html' + idq + '">Vedi l\'esito →</a>';
+      return '<div class="item"><strong>' + esc(a.name) + '</strong> '
+        + '<span class="meta">— ' + esc(full.organization_name || "organizzazione non collegata") + ' · agg. ' + fmtDate(a.updated_at) + '</span>'
+        + '<div class="item-prog" title="' + pr.done + ' di ' + pr.total + ' passi completati">'
+        + '<span class="bar"><span style="width:' + pct + '%"></span></span>'
+        + '<span class="n">' + pr.done + '/' + pr.total + '</span>' + resume + '</div>'
         + '<div class="acts">'
-        + '<a href="pages/step1-regimi.html' + (full.organization_id ? "?org=" + encodeURIComponent(full.organization_id) : "") + '">apri</a>'
-        + '<a href="pages/step2-funzione.html?id=' + encodeURIComponent(a.id) + '">funzione</a>'
-        + '<a href="pages/dashboard.html?id=' + encodeURIComponent(a.id) + '">esito</a>'
+        + '<a href="pages/step2-funzione.html' + idq + '">funzione</a>'
+        + '<a href="pages/step3-dipendenze.html' + idq + '">dipendenze</a>'
+        + '<a href="pages/dashboard.html' + idq + '">esito</a>'
         + '<a href="#" data-export="' + a.id + '">esporta</a>'
         + '<a href="#" data-del="' + a.id + '">elimina</a>'
         + '</div></div>';

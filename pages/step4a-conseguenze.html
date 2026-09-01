@@ -317,10 +317,16 @@
     var pathNoCap = a.intolerable_consequences.reduce(function (n, c) {
       return n + c.compromise_paths.filter(function (p) { return !p.required_capabilities.length; }).length;
     }, 0);
-    s.innerHTML = '<b>' + nCons + '</b> conseguenze · <b>' + nPaths + '</b> percorsi · <b>' + nReq + '</b> capacità richieste · <span class="' + (nEss ? "crit" : "") + '"><b>' + nEss + '</b> essenziali</span>'
+    var html = '<b>' + nCons + '</b> conseguenze · <b>' + nPaths + '</b> percorsi · <b>' + nReq + '</b> capacità richieste · <span class="' + (nEss ? "crit" : "") + '"><b>' + nEss + '</b> essenziali</span>'
       + (pathNoCap ? ' · <span class="crit"><b>' + pathNoCap + '</b> percorsi senza capacità</span>' : '')
       + (todo ? ' · <b>' + todo + '</b> livelli obiettivo da motivare' : '')
       + '<br><span class="muted" style="font-size:.78rem">Profilo obiettivo e capacità essenziali passano allo Step 4b e alla dashboard (divari, anello debole, priorità).</span>';
+    if (s.innerHTML !== html) {
+      s.innerHTML = html;
+      s.classList.remove("did-change"); void s.offsetWidth; s.classList.add("did-change");
+      clearTimeout(s._dcT);
+      s._dcT = setTimeout(function () { s.classList.remove("did-change"); }, 1100);
+    }
   }
 
   function save(immediate) {

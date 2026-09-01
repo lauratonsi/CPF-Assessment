@@ -211,36 +211,69 @@ body.has-appbar .stepper { top: 3.25rem; }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .stepper { background: var(--paper); }
 }
+/* riempimento di avanzamento (nav.js imposta --steps-done / --steps-total) */
+.stepper[data-progress]::after {
+  content: ""; position: absolute; left: 0; bottom: -1px; height: 2px;
+  width: calc(var(--steps-done, 0) / var(--steps-total, 5) * 100%);
+  background: linear-gradient(90deg, var(--accent-strong), var(--accent));
+  border-radius: 0 2px 2px 0;
+  transition: width .55s cubic-bezier(.33, 1, .68, 1);
+}
 .stepper a, .stepper span {
+  position: relative;
   display: inline-flex; align-items: center; gap: 0.5rem;
   padding: 0.2rem 0; color: var(--muted); text-decoration: none; white-space: nowrap;
   transition: color .15s;
 }
+.stepper a { border-radius: 3px; }
 .stepper a::before, .stepper span::before {
-  content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%;
+  content: ""; flex: none; width: 9px; height: 9px; border-radius: 50%;
   border: 1.5px solid var(--border-strong); background: var(--surface);
-  transition: background .15s, border-color .15s, box-shadow .15s;
+  transition: background .2s, border-color .2s, box-shadow .2s, transform .2s;
 }
 .stepper a:hover { color: var(--accent-ink); }
-.stepper a:hover::before { border-color: var(--accent); }
+.stepper a:hover::before { border-color: var(--accent); transform: scale(1.15); }
 .stepper .is-done { color: var(--ink); }
-.stepper .is-done::before { background: var(--ok); border-color: var(--ok); }
+.stepper .is-done::before {
+  background: var(--ok); border-color: var(--ok);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M13 4.5L6.5 11 3 7.6' fill='none' stroke='%23fff' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-size: 8px; background-repeat: no-repeat; background-position: center;
+}
+.stepper a.is-done:hover::before { filter: brightness(1.08); }
 .stepper .is-todo { color: var(--faint); }
 .stepper .is-current { color: var(--accent-ink); font-weight: 600; }
 .stepper .is-current::before {
   background: var(--accent); border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-tint);
+  animation: step-pulse 2.4s ease-in-out infinite;
+}
+@keyframes step-pulse {
+  0%, 100% { box-shadow: 0 0 0 3px var(--accent-tint); }
+  50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 14%, transparent); }
 }
 
 /* riga di contesto sotto lo stepper (assets/nav.js) */
 .nav-context {
-  display: flex; align-items: baseline; gap: 0.35rem; flex-wrap: wrap;
-  margin: -0.7rem 0 0; padding-bottom: 0.9rem;
+  display: flex; align-items: center; gap: 0.35rem 0.5rem; flex-wrap: wrap;
+  margin: -0.7rem 0 0; padding: 0.55rem 0 0.75rem;
   border-bottom: 1px solid var(--border);
   font-size: 0.83rem;
+  animation: fade-in-down .3s ease both;
 }
 .nav-context .nc-fn { font-family: var(--serif); font-weight: 600; }
+.nav-context .nc-fn.nc-untitled { font-style: italic; color: var(--muted); font-weight: 400; }
 .nav-context .nc-org, .nav-context .nc-crit { color: var(--muted); }
+.nav-context .nc-prog {
+  font-family: var(--mono); font-size: 0.7rem; color: var(--accent-ink);
+  background: var(--accent-tint); border-radius: 999px; padding: 0.08rem 0.5rem;
+  margin-left: 0.3rem;
+}
+.nav-context .nc-next {
+  margin-left: auto; font-family: var(--mono); font-size: 0.74rem; font-weight: 500;
+  color: var(--accent-strong); text-decoration: none;
+  display: inline-flex; align-items: center; gap: 0.3rem;
+}
+.nav-context .nc-next:hover { text-decoration: underline; }
 .nav-context .nc-link { margin-left: auto; font-family: var(--mono); font-size: 0.72rem; }
 
 /* ---------------- intestazione di pagina ---------------- */
@@ -278,6 +311,22 @@ body.has-appbar .stepper { top: 3.25rem; }
   transition: border-color .15s, box-shadow .15s;
 }
 .card h2 { font-size: 1.15rem; margin-bottom: 0.5rem; }
+.card:focus-within { border-color: color-mix(in srgb, var(--accent) 30%, var(--border)); }
+
+/* riepilogo dell'editor (Step 4a/4b) — lettura viva dello stato */
+.ed-summary {
+  position: relative;
+  border-left: 3px solid var(--accent);
+  box-shadow: var(--shadow-sm);
+}
+.ed-summary.did-change::before {
+  content: "aggiornato";
+  position: absolute; top: -0.6rem; right: 0.7rem;
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.05em;
+  color: var(--accent-ink); background: var(--accent-tint);
+  padding: 0.05rem 0.4rem; border-radius: 999px;
+  animation: fade-in .2s ease;
+}
 
 /* ---------------- form controls ---------------- */
 label.field-label { display: block; font-size: 0.82rem; font-weight: 500; color: var(--muted); margin: 1rem 0 0.35rem; }
@@ -342,6 +391,10 @@ select.field {
   background-repeat: no-repeat; background-position: right 0.75rem center;
 }
 textarea.field { min-height: 4.5rem; resize: vertical; line-height: 1.55; }
+/* i campi a riga singola non hanno bisogno di tutta la larghezza: più leggibili */
+input.field:where([type="text"], [type="search"], [type="url"], [type="email"], [type="tel"], [type="number"], [type="month"], [type="date"], [type="time"], :not([type])) {
+  max-width: 44rem;
+}
 .field:hover { border-color: var(--accent); }
 .field:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--focus); }
 
@@ -356,7 +409,7 @@ legend { font-family: var(--serif); font-weight: 600; font-size: 1rem; padding: 
   border: 1px solid var(--border-strong); background: var(--surface); color: var(--ink);
   cursor: pointer; text-decoration: none; white-space: nowrap;
   box-shadow: var(--shadow-sm);
-  transition: border-color .15s, background .15s, box-shadow .15s, transform .06s;
+  transition: border-color .15s, background .15s, box-shadow .15s, transform .12s;
 }
 .btn:hover { border-color: var(--accent); box-shadow: var(--shadow); }
 .btn:active { transform: translateY(1px); box-shadow: var(--shadow-sm); }
@@ -366,7 +419,8 @@ legend { font-family: var(--serif); font-weight: 600; font-size: 1rem; padding: 
   border-color: var(--accent-strong); color: #fff;
   box-shadow: 0 1px 2px color-mix(in srgb, var(--accent) 45%, transparent), inset 0 1px 0 rgba(255,255,255,0.18);
 }
-.btn--primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
+.btn--primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); transform: translateY(-1px); }
+.btn--primary:active { transform: translateY(0); }
 :root[data-theme="dark"] .btn--primary, :root:not([data-theme="light"]) .btn--primary { color: #1a1204; }
 .btn--ghost { background: transparent; border-color: transparent; color: var(--muted); box-shadow: none; }
 .btn--ghost:hover { background: var(--surface-2); color: var(--ink); border-color: transparent; box-shadow: none; }
@@ -421,6 +475,29 @@ legend { font-family: var(--serif); font-weight: 600; font-size: 1rem; padding: 
 
 /* ---------------- utilità ---------------- */
 .stack > * + * { margin-top: 1rem; }
+
+/* ---------------- movimento ---------------- */
+@keyframes fade-in       { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fade-in-down  { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fade-in-up    { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pop           { 0% { transform: scale(0.9); } 60% { transform: scale(1.04); } 100% { transform: scale(1); } }
+@keyframes value-flash   { 0% { color: var(--accent-strong); } 100% { color: inherit; } }
+
+/* elemento che compare (JS aggiunge/rimuove per ri-triggerare) */
+.reveal { animation: fade-in-up .28s cubic-bezier(.33, 1, .68, 1); }
+/* valore che è appena cambiato: breve lampo (JS toggla la classe) */
+.did-change { animation: value-flash .9s ease-out; }
+
+/* i pannelli di feedback entrano con una micro-transizione */
+.panel { animation: fade-in-up .25s ease; }
+details[open] > :not(summary) { animation: fade-in-down .2s ease; }
+
+/* messa a fuoco della riga di modulo in cui stai scrivendo */
+:where(.q, .dim, .dep, .reg):focus-within > :where(.lbl, label, .dname),
+:where(.dep):focus-within .dep-not b { color: var(--accent-ink); }
+.dim:focus-within, .dep:focus-within, .reg:focus-within {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+}
 
 /* ============================================================
    runner dei test (tests/runner.js)

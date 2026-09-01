@@ -258,24 +258,30 @@
   function currentFindings() {
     return CPF.reviewFunction({ function: F, regime_profile: RP });
   }
+  var _reviewHTML = "";
   function renderReview() {
     var f = currentFindings();
     var el = $("review");
     var nTodo = f.filter(function (x) { return x.level === "todo"; }).length;
     var nWarn = f.filter(function (x) { return x.level === "warn"; }).length;
+    var html;
     if (!f.length) {
-      el.innerHTML = '<h4>Controllo di coerenza <span class="score clean">nessuna segnalazione</span></h4>'
+      html = '<h4>Controllo di coerenza <span class="score clean">nessuna segnalazione</span></h4>'
         + '<p class="ok-msg">La definizione è completa e internamente coerente. Restano scelte di merito tue: il controllo non le valuta.</p>';
-      return;
+    } else {
+      html = '<h4>Controllo di coerenza <span class="score">'
+        + (nTodo ? nTodo + " da completare" : "") + (nTodo && nWarn ? " · " : "") + (nWarn ? nWarn + " da verificare" : "")
+        + '</span></h4>'
+        + '<ul>' + f.map(function (x) {
+          return '<li class="' + x.level + '"><span class="tag">' + (x.level === "todo" ? "DA FARE" : "VERIFICA") + '</span>'
+            + '<span class="msg"><b>' + esc(FIELD_LABEL[x.field] || x.field) + '</b> — ' + esc(x.message) + '</span></li>';
+        }).join("") + '</ul>'
+        + '<p class="hint" style="margin:.5rem 0 0">Sono suggerimenti euristici per aiutarti a non lasciare buchi o incoerenze: non bloccano il passaggio allo step successivo.</p>';
     }
-    el.innerHTML = '<h4>Controllo di coerenza <span class="score">'
-      + (nTodo ? nTodo + " da completare" : "") + (nTodo && nWarn ? " · " : "") + (nWarn ? nWarn + " da verificare" : "")
-      + '</span></h4>'
-      + '<ul>' + f.map(function (x) {
-        return '<li class="' + x.level + '"><span class="tag">' + (x.level === "todo" ? "DA FARE" : "VERIFICA") + '</span>'
-          + '<span class="msg"><b>' + esc(FIELD_LABEL[x.field] || x.field) + '</b> — ' + esc(x.message) + '</span></li>';
-      }).join("") + '</ul>'
-      + '<p class="hint" style="margin:.5rem 0 0">Sono suggerimenti euristici per aiutarti a non lasciare buchi o incoerenze: non bloccano il passaggio allo step successivo.</p>';
+    if (html === _reviewHTML) return;
+    _reviewHTML = html;
+    el.innerHTML = html;
+    el.classList.remove("reveal"); void el.offsetWidth; el.classList.add("reveal");
   }
 
   // ---- esempi compilati
