@@ -30,10 +30,12 @@ pages/                      i sei passi del wizard + verifica
 
 data/                       configurazione fissa (window.CPF.data.*)
   regime_classifier.js      metadati e domande dello Step 1
-  regime_rules.js           liste per il motore (settori CER, categorie DORA, Allegati CRA, canali AI Act + Digital Omnibus, interazioni)
+  regime_rules.js           liste per il motore (settori CER, categorie DORA, Allegati CRA, canali AI Act
+                            art. 6 come modificato dal Reg. 2026/1744, interazioni §2.8.1)
   scope_sectors.js          settori NIS2 Allegati I-II + casi speciali + soglie dimensionali (Racc. 2003/361/CE)
   capability_domains.js     i 6-7 domini di capacità (§2.9)
-  scales.js                 scale ordinali 1-5 (4 dimensioni) + criticità funzione 1-4 + forza probatoria
+  scales.js                 scale ordinali 1-5 (4 dimensioni) + matrice di corroborazione §3.5 (tipi di evidenza
+                            per proprietà) + criticità funzione + forza probatoria
   dependency_taxonomy.js    id/enum per l'editor delle dipendenze (§3.4)
   dependency_reference.js   legenda narrativa §3.4 resa nello Step 3
   assessment_schema.js      forma della valutazione salvata + factory (blankAssessment / blankDependency /
@@ -46,7 +48,8 @@ assets/
   theme.css                 sistema di stile: token, tipografia IBM Plex, componenti
   vendor/fonts/             IBM Plex Sans / Serif / Mono (woff2, per uso offline)
   app.js                    persistenza localStorage + export/import + guard quota
-                            + calcoli §3.6 (dimensionGap, essentialShortfall, domainPriority, rankDomains)
+                            + calcoli §3.6 (dimensionGap, essentialShortfall, domainPriority — a regola
+                              ordinale, non a somma —, rankDomains) + CPF.evidenceCurrency() (attualità §3.5)
                             + CPF.reviewFunction() (euristiche di coerenza per lo Step 2)
   regime-engine.js          CPF.classifyRegimes(answers) → regime_profile — funzione pura, ogni esito con trace motivato
   dumbbell.js               grafico gap a manubrio per dominio (sostituisce il radar, §3.6-3.7)
@@ -119,10 +122,19 @@ derivati §3.6), **review** (euristiche di coerenza dello Step 2).
 - **Quattro dimensioni indipendenti** per capacità — consolidamento, estensione,
   efficacia, prestazione osservata — su scala **ordinale** 1-5. Nessuna
   compensazione tra dimensioni.
+- **Matrice di corroborazione** (§3.5): per ciascuna dimensione lo strumento
+  elenca i tipi di evidenza che possono sostenere quella proprietà (una policy
+  attesta la formalizzazione, non l'attuazione; un log un comportamento, non la
+  sua continuità). Ogni livello porta la **data dell'evidenza**: un riscontro
+  valido alla raccolta può non rappresentare più lo stato corrente.
 - **Forza probatoria** separata dal livello (corroborata / parziale / non
   determinabile). L'incertezza non abbassa il livello: genera una **priorità di
   verifica** distinta dalla priorità di intervento («assenza di prova ≠ prova
   dell'assenza»).
+- **Priorità come regola ordinale, non come somma** (§3.6-3.7): `domainPriority`
+  mappa (criticità, essenzialità, ampiezza del divario) su tre bande, senza
+  sommare ordinali. La scala di criticità 1-4 è un'operazionalizzazione dello
+  strumento — la tesi fissa i criteri (CER artt. 6-7), non una scala.
 - **Profilo obiettivo** fissato *a priori* dalle conseguenze intollerabili →
   percorsi di compromissione → capacità richieste (logica CCE, Bochman & Freeman
   2021, INL). Non si adatta alle capacità già presenti.
@@ -134,11 +146,25 @@ derivati §3.6), **review** (euristiche di coerenza dello Step 2).
   manubrio per dominio.
 - **Dipendenze:** relazione orientata B → A, quattro classi, accoppiamento,
   posizione, tipi di guasto (Rinaldi/Peerenboom/Kelly 2001; Argonne 2015; NAT).
-- **Criticità della funzione:** scala 1-4 dai criteri CER artt. 6-7, raccolta
-  nello Step 2; entra in `domainPriority()` come `f(criticità, essenzialità, gap)`.
+  La classe *geografica* è segnalata come struttura E → {A, B} (causa comune),
+  non come relazione reciproca.
+- **Criticità della funzione:** raccolta nello Step 2 dai criteri CER artt. 6-7;
+  entra in `domainPriority()` come `f(criticità, essenzialità, ampiezza del divario)`.
 - **Tracciabilità:** ogni classificazione di regime porta un `trace` di coppie
   `{ esito, base }` che la motivano — esempio di trasparenza metodologica per il
   Capitolo 4, verificabile dalla pagina `test.html`.
+
+### Aderenza al testo della tesi
+
+Il modello è quello del Capitolo 3; il Capitolo 2 alimenta il motore dei regimi.
+Sono **operazionalizzazioni dello strumento**, non prescrizioni del testo: la
+scala 1-4 della criticità, il mapping a bande di `domainPriority`, la soglia di
+24 mesi di `evidenceCurrency`. Ciascuna è marcata come tale nel codice.
+
+Non è codificato ciò che la tesi non riscontra: il calendario differenziato di
+applicabilità dei sistemi AI ad alto rischio e le integrazioni all'art. 5 AI Act
+sono stati rimossi da `regime_rules.js` in attesa di un riferimento a fonte
+primaria per il Capitolo 4 (vedi commenti nel file).
 
 Strumento orientativo, non parere legale. Non codifica designazioni caso per caso
 di CER, esclusioni per sicurezza nazionale/difesa, né la valutazione integrale di

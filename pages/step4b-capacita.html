@@ -34,11 +34,22 @@
     border: 1px solid var(--border); border-radius: 5px; background: var(--paper); color: var(--ink);
   }
   .dim .desc { font-size: 0.73rem; color: var(--faint); margin: 0.2rem 0 0; }
+  .dim .dim-what { font-size: 0.76rem; color: var(--muted); margin: 0.15rem 0 0.5rem; max-width: 60ch; }
   .dim .fb { margin: 0.35rem 0 0; font-size: 0.78rem; }
   .dim .fb.gap { color: var(--accent-ink); }
   .dim .fb.ok { color: var(--ok); }
   .dim .fb.uncert { color: var(--accent-ink); }
   .dim .fb.ess { color: var(--danger); font-weight: 600; }
+  .dim .fb.ev { color: var(--muted); font-size: 0.75rem; }
+  .dim .fb.ev.warn { color: var(--accent-ink); }
+
+  .ev-hint { grid-column: 1 / -1; font-size: 0.75rem; color: var(--muted); border: 1px solid var(--border); border-radius: 5px; padding: 0.3rem 0.55rem; background: var(--surface-2); }
+  .ev-hint summary { cursor: pointer; color: var(--accent-ink); }
+  .ev-hint ul { margin: 0.35rem 0 0.2rem; padding-left: 1.1rem; }
+  .ev-hint li { margin: 0.15rem 0; }
+  .ev-hint .ev-supports { margin: 0.35rem 0 0; font-style: italic; }
+  .ev-hint .ev-rule { margin: 0.3rem 0 0; color: var(--faint); }
+  .dim input[type="month"] { font: inherit; font-size: 0.83rem; }
 
   .thr-fb { margin-top: 0.6rem; padding: 0.55rem 0.7rem; border-radius: 6px; font-size: 0.8rem; border: 1px solid var(--border); }
   .thr-fb.short { border-color: var(--danger); color: var(--danger); background: color-mix(in srgb, var(--danger) 7%, transparent); font-weight: 600; }
@@ -80,7 +91,7 @@
 
   <div id="editor" hidden>
     <p class="intro" id="ed-fn"></p>
-    <p class="intro">Il <b>livello</b> è ordinale (1-5), non un voto: descrive uno stato, non una percentuale. La <b>forza probatoria</b> è separata dal livello — «non determinabile» non abbassa il livello, ma sospende il divario e genera una priorità di <i>verifica</i>, non di intervento (§3.6).</p>
+    <p class="intro">Il <b>livello</b> è ordinale (1-5), non un voto: descrive uno stato, non una percentuale. La <b>forza probatoria</b> è separata dal livello — «non determinabile» non abbassa il livello, ma sospende il divario e genera una priorità di <i>verifica</i>, non di intervento (§3.6). Per ogni dimensione, «Evidenze pertinenti» elenca i tipi di prova che possono sostenere quel giudizio (matrice di corroborazione, §3.5); la <b>data dell'evidenza</b> serve a segnalare quando un riscontro non rappresenta più lo stato corrente.</p>
 
     <div id="dom-list"></div>
 
@@ -136,7 +147,7 @@
   a.capability_assessment.forEach(function (e) {
     if (!e.current_profile) e.current_profile = CPF.blankCurrentProfile();
     DIMS.forEach(function (d) {
-      if (!e.current_profile[d]) e.current_profile[d] = { level: 3, evidentiary_strength: "non_determinabile", evidence_notes: "" };
+      if (!e.current_profile[d]) e.current_profile[d] = { level: null, evidentiary_strength: "non_determinabile", evidence_notes: "" };
     });
     if (!Array.isArray(e.current_profile.estensione.excluded_essential_components)) e.current_profile.estensione.excluded_essential_components = [];
     if (!e.target_profile) e.target_profile = {};
@@ -154,7 +165,8 @@
   function flash(m) { toast.textContent = m; toast.classList.add("show"); setTimeout(function () { toast.classList.remove("show"); }, 1500); }
 
   function levelOpt(dim, cur) {
-    return SC[dim].levels.map(function (l) {
+    var none = '<option value=""' + (cur == null ? " selected" : "") + '>— non ancora valutato</option>';
+    return none + SC[dim].levels.map(function (l) {
       return '<option value="' + l.value + '"' + (Number(cur) === l.value ? " selected" : "") + '>' + l.value + " — " + esc(l.label) + '</option>';
     }).join("");
   }
@@ -164,6 +176,16 @@
     }).join("");
   }
 
+  function evidenceHint(d) {
+    var ev = SC[d].evidence;
+    if (!ev || !ev.types) return "";
+    return '<details class="ev-hint"><summary>Evidenze pertinenti (§3.5) — cosa può sostenere questo giudizio</summary>'
+      + '<p class="ev-supports">Sostiene: ' + esc(ev.supports) + '.</p>'
+      + '<ul>' + ev.types.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join("") + '</ul>'
+      + '<p class="ev-rule">La stessa evidenza vale per un solo giudizio alla volta: va riferita a questa capacità, alla funzione, al perimetro e — se rilevante — allo scenario e al periodo.</p>'
+      + '</details>';
+  }
+
   function dimBlock(e, d) {
     var cp = e.current_profile[d], tp = e.target_profile[d];
     var curLv = SC[d].levels.filter(function (x) { return x.value === Number(cp.level); })[0];
@@ -171,15 +193,19 @@
     var h = '<div class="dim" data-dim="' + d + '">'
       + '<div class="head"><span class="dname">' + esc(SC[d].label) + '</span>'
       + '<span class="tgt">obiettivo: ' + (tp ? '<b>' + tp.level + '</b> — ' + esc(tgtLv ? tgtLv.label : "") : "non definito") + '</span></div>'
+      + (SC[d].what ? '<p class="dim-what">' + esc(SC[d].what) + '</p>' : '')
       + '<div class="grid">'
       + '<label><span>Livello corrente</span><select data-f="level">' + levelOpt(d, cp.level) + '</select>'
       + '<p class="desc">' + esc(curLv ? curLv.descriptor : "") + '</p></label>'
       + '<label><span>Forza probatoria</span><select data-f="evidentiary_strength">' + strOpt(cp.evidentiary_strength) + '</select></label>'
-      + '<label class="wide"><span>Note di evidenza</span><input data-f="evidence_notes" placeholder="cosa sostiene il livello: documenti, test, audit, riscontri operativi" value="' + esc(cp.evidence_notes) + '"></label>';
+      + '<label class="wide"><span>Note di evidenza</span><input data-f="evidence_notes" placeholder="cosa sostiene il livello: documenti, test, audit, riscontri operativi" value="' + esc(cp.evidence_notes) + '"></label>'
+      + '<label><span>Data dell\'evidenza più recente</span><input type="month" data-f="evidence_date" value="' + esc(cp.evidence_date || "") + '">'
+      + '<p class="desc">§3.5 — l\'attualità va verificata dove asset, accessi o dipendenze cambiano spesso.</p></label>';
     if (d === "estensione") {
       h += '<label class="wide"><span>Componenti essenziali esclusi dalla copertura (separati da virgola) — §3.6, non riassorbire nel punteggio</span>'
         + '<input data-f="excluded_essential_components" placeholder="es. PLC di dosaggio linea A, storico di processo" value="' + esc((cp.excluded_essential_components || []).join(", ")) + '"></label>';
     }
+    h += evidenceHint(d);
     h += '</div><p class="fb" data-fb></p></div>';
     return h;
   }
@@ -210,9 +236,11 @@
         var lvl = dEl.querySelector('[data-f="level"]');
         var str = dEl.querySelector('[data-f="evidentiary_strength"]');
         var nt = dEl.querySelector('[data-f="evidence_notes"]');
-        cp.level = lvl ? Number(lvl.value) : 3;
+        var dt = dEl.querySelector('[data-f="evidence_date"]');
+        cp.level = lvl && lvl.value !== "" ? Number(lvl.value) : null;
         cp.evidentiary_strength = str ? str.value : "non_determinabile";
         cp.evidence_notes = nt ? nt.value : "";
+        cp.evidence_date = dt ? dt.value : "";
         if (d === "estensione") {
           var ex = dEl.querySelector('[data-f="excluded_essential_components"]');
           cp.excluded_essential_components = ex && ex.value.trim()
@@ -245,6 +273,23 @@
           fb.className = "fb ok"; fb.textContent = "Obiettivo raggiunto per questa dimensione.";
         }
         if (thrDim) fb.textContent += "  ·  dimensione della soglia non compensabile.";
+
+        // attualità dell'evidenza (§3.5) — solo se un livello è stato attribuito
+        var cpd = e.current_profile[d] || {};
+        var evEl = dEl.querySelector("[data-ev]") || (function () {
+          var p = document.createElement("p"); p.setAttribute("data-ev", ""); p.className = "fb ev";
+          dEl.appendChild(p); return p;
+        })();
+        if (cpd.level != null && cpd.evidentiary_strength !== "non_determinabile") {
+          var cur = CPF.evidenceCurrency(cpd.evidence_date);
+          if (cur.state === "assente") {
+            evEl.hidden = false; evEl.className = "fb ev warn";
+            evEl.textContent = "Indica la data dell'evidenza: senza, l'attualità del livello non è verificabile (§3.5).";
+          } else if (cur.state === "da_rivalutare") {
+            evEl.hidden = false; evEl.className = "fb ev warn";
+            evEl.textContent = "Evidenza di " + Math.floor(cur.months / 12) + (cur.months >= 24 ? " anni" : " anno") + " fa: valuta se rappresenta ancora lo stato corrente.";
+          } else { evEl.hidden = true; }
+        } else { evEl.hidden = true; }
       });
 
       // soglia non compensabile

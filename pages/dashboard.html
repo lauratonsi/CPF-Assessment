@@ -292,10 +292,16 @@
         var c = e.current_profile[d] || {}, t = (e.target_profile || {})[d] || {};
         var g = CPF.dimensionGap(c, t);
         var gtxt = g.state === "incertezza_probatoria" ? "—" : (g.state === "ok" ? (g.gap || 0) : "—");
+        var stale = "";
+        if (c.level != null && c.evidentiary_strength !== "non_determinabile") {
+          var ec = CPF.evidenceCurrency(c.evidence_date);
+          if (ec.state === "assente") stale = ' <small style="color:var(--accent-ink)">· data evidenza n/d</small>';
+          else if (ec.state === "da_rivalutare") stale = ' <small style="color:var(--accent-ink)">· evidenza ' + esc(c.evidence_date) + ', da rivalutare</small>';
+        }
         rows.push('<tr' + (g.state === "ok" && g.gap > 0 ? ' class="crit"' : '') + '>'
           + '<td>' + esc(domLabel(e.domain_id)) + (e.is_essential ? ' ⚠' : '') + '</td>'
           + '<td>' + esc(SC[d].label) + '</td>'
-          + '<td>' + (c.level != null ? c.level : "—") + ' <small style="color:var(--faint)">(' + esc(STRLAB[c.evidentiary_strength] || "—") + ')</small></td>'
+          + '<td>' + (c.level != null ? c.level : "—") + ' <small style="color:var(--faint)">(' + esc(STRLAB[c.evidentiary_strength] || "—") + ')</small>' + stale + '</td>'
           + '<td>' + (t.level != null ? t.level : "—") + '</td>'
           + '<td>' + gtxt + '</td></tr>');
       });
@@ -303,7 +309,7 @@
     out.push('<section class="d-sec"><h2>Tabella dei divari</h2>'
       + '<table class="mini-table"><thead><tr><th>Dominio</th><th>Dimensione</th><th>Corrente</th><th>Obiettivo</th><th>Divario</th></tr></thead>'
       + '<tbody>' + rows.join("") + '</tbody></table>'
-      + '<p class="lead" style="margin-top:.5rem">⚠ = capacità essenziale. «—» nel divario = livello non determinabile: priorità di verifica.</p></section>');
+      + '<p class="lead" style="margin-top:.5rem">⚠ = capacità essenziale. «—» nel divario = livello non determinabile: priorità di verifica. «Da rivalutare» = evidenza non recente (§3.5): l\'attualità va confermata.</p></section>');
   }
 
   /* ---------- divari essenziali ---------- */

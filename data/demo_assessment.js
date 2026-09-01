@@ -7,8 +7,8 @@
   root.CPF = root.CPF || {};
   root.CPF.data = root.CPF.data || {};
 
-  function cur(level, strength, notes, excl) {
-    var o = { level: level, evidentiary_strength: strength, evidence_notes: notes || "" };
+  function cur(level, strength, notes, date, excl) {
+    var o = { level: level, evidentiary_strength: strength, evidence_notes: notes || "", evidence_date: date || "" };
     if (excl) o.excluded_essential_components = excl;
     return o;
   }
@@ -90,7 +90,7 @@
             id: "path-1",
             description: "Accesso alla rete OT via manutenzione remota del fornitore → manipolazione dei setpoint di dosaggio sul PLC di linea → il dosaggio scende sotto soglia mentre il monitoraggio riporta valori normali (dati di campo alterati).",
             required_capabilities: ["conoscenza", "segmentazione", "monitoraggio", "risposta"],
-            essential_capabilities: ["segmentazione", "monitoraggio"]
+            essential_capabilities: ["conoscenza", "segmentazione", "monitoraggio"]
           }
         ]
       },
@@ -102,7 +102,7 @@
             id: "path-2",
             description: "Guasto in cascata dall'alimentazione elettrica + indisponibilità del telecontrollo → impossibile commutare sul serbatoio di compenso in tempo → svuotamento della riserva.",
             required_capabilities: ["conoscenza", "continuita", "risposta"],
-            essential_capabilities: ["continuita"]
+            essential_capabilities: ["conoscenza", "continuita"]
           }
         ]
       }
@@ -114,9 +114,9 @@
         non_compensable_threshold: { dimension: "estensione", min_level: 4, rationale: "La mappa di asset e dipendenze deve coprire l'intera catena OT della linea A, compresi gli accessi di manutenzione dei fornitori: è la condizione per riconoscere entrambi i percorsi." },
         target_profile: profile(function (d) { return d === "estensione" ? tgt(5, "copertura completa della catena OT + accessi fornitori") : tgt(4, "definito e verificato"); }),
         current_profile: profile(function (d) {
-          if (d === "estensione") return cur(3, "corroborata", "Inventario OT aggiornato 2026, ma gli accessi di manutenzione remota dei fornitori non sono mappati.", ["Accesso VPN fornitore visione ML", "Storico di processo"]);
-          if (d === "consolidamento") return cur(4, "corroborata", "Procedura di aggiornamento inventario semestrale, con evidenze.");
-          if (d === "efficacia") return cur(3, "parziale", "Verificata sullo scenario di dosaggio, non su quello elettrico/telecontrollo.");
+          if (d === "estensione") return cur(3, "corroborata", "Inventario OT aggiornato 2026, ma gli accessi di manutenzione remota dei fornitori non sono mappati.", "2026-03", ["Accesso VPN fornitore visione ML", "Storico di processo"]);
+          if (d === "consolidamento") return cur(4, "corroborata", "Procedura di aggiornamento inventario semestrale, con evidenze.", "2026-06");
+          if (d === "efficacia") return cur(3, "parziale", "Verificata sullo scenario di dosaggio, non su quello elettrico/telecontrollo.", "2025-11");
           return cur(2, "non_determinabile", "Nessun test recente della completezza della mappa.");
         })
       },
@@ -125,10 +125,10 @@
         non_compensable_threshold: { dimension: "consolidamento", min_level: 4, rationale: "La separazione tra rete IT, DMZ industriale e rete OT di linea deve essere applicata stabilmente e verificata: è ciò che impedisce il pivot dall'accesso del fornitore al PLC di dosaggio." },
         target_profile: profile(function (d) { return d === "consolidamento" ? tgt(5, "misurata e migliorata") : d === "efficacia" ? tgt(5, "verificata end-to-end sul percorso di dosaggio") : tgt(4, ""); }),
         current_profile: profile(function (d) {
-          if (d === "consolidamento") return cur(4, "corroborata", "Zone e conduit secondo Purdue, verificati nell'ultimo audit OT.");
-          if (d === "efficacia") return cur(2, "corroborata", "L'accesso di manutenzione remota bypassa la DMZ industriale: testato in tabletop, il pivot riesce.");
-          if (d === "estensione") return cur(4, "corroborata", "Tutta la linea A; la linea B è fuori dal perimetro di questa valutazione.");
-          return cur(3, "parziale", "Un solo test di intrusione, 2025.");
+          if (d === "consolidamento") return cur(4, "corroborata", "Zone e conduit secondo Purdue, verificati nell'ultimo audit OT.", "2026-02");
+          if (d === "efficacia") return cur(2, "corroborata", "L'accesso di manutenzione remota bypassa la DMZ industriale: testato in tabletop, il pivot riesce.", "2025-09");
+          if (d === "estensione") return cur(4, "corroborata", "Tutta la linea A; la linea B è fuori dal perimetro di questa valutazione.", "2026-02");
+          return cur(3, "parziale", "Un solo test di intrusione, 2024 — da ripetere.", "2024-03");
         })
       },
       {
@@ -137,8 +137,8 @@
         target_profile: profile(function (d) { return d === "efficacia" ? tgt(5, "correlazione processo↔fisico, rilevamento di dati incoerenti") : tgt(4, ""); }),
         current_profile: profile(function (d) {
           if (d === "efficacia") return cur(2, "non_determinabile", "Non è mai stato verificato se il SOC rileverebbe una manipolazione coordinata dei dati di campo.");
-          if (d === "consolidamento") return cur(3, "corroborata", "Logging centralizzato IT+OT, casi d'uso definiti.");
-          if (d === "estensione") return cur(3, "parziale", "Copertura OT parziale: il PLC di linea invia log, le RTU di serbatoio no.");
+          if (d === "consolidamento") return cur(3, "corroborata", "Logging centralizzato IT+OT, casi d'uso definiti.", "2026-01");
+          if (d === "estensione") return cur(3, "parziale", "Copertura OT parziale: il PLC di linea invia log, le RTU di serbatoio no.", "2025-10");
           return cur(2, "non_determinabile", "Nessuna esercitazione di rilevamento su scenario OT.");
         })
       },
@@ -147,10 +147,10 @@
         non_compensable_threshold: { dimension: "efficacia", min_level: 4, rationale: "La commutazione verso lo stato sicuro (chiusura linea + serbatoio di compenso) deve essere verificata nei vincoli operativi reali: è l'unica barriera al percorso 2." },
         target_profile: profile(function (d) { return tgt(4, "modalità degradata verificata nei vincoli di safety"); }),
         current_profile: profile(function (d) {
-          if (d === "efficacia") return cur(4, "corroborata", "Prova di commutazione su serbatoio di compenso eseguita e documentata, 2026.");
-          if (d === "consolidamento") return cur(4, "corroborata", "Procedura di modalità degradata parte del Piano di Resilienza CER.");
-          if (d === "estensione") return cur(4, "corroborata", "Copre alimentazione, telecontrollo e dosaggio.");
-          return cur(4, "corroborata", "Due esercitazioni recenti, esiti coerenti.");
+          if (d === "efficacia") return cur(4, "corroborata", "Prova di commutazione su serbatoio di compenso eseguita e documentata, 2026.", "2026-05");
+          if (d === "consolidamento") return cur(4, "corroborata", "Procedura di modalità degradata parte del Piano di Resilienza CER.", "2026-05");
+          if (d === "estensione") return cur(4, "corroborata", "Copre alimentazione, telecontrollo e dosaggio.", "2026-05");
+          return cur(4, "corroborata", "Due esercitazioni recenti, esiti coerenti.", "2026-04");
         })
       },
       {
@@ -158,10 +158,10 @@
         non_compensable_threshold: null,
         target_profile: profile(function (d) { return tgt(4, "coordinamento IT/OT/safety e notifica alle autorità"); }),
         current_profile: profile(function (d) {
-          if (d === "consolidamento") return cur(3, "parziale", "Piano di risposta esiste; il raccordo con la safety di impianto è informale.");
-          if (d === "efficacia") return cur(3, "corroborata", "Verificato sullo scenario di dosaggio in tabletop.");
-          if (d === "estensione") return cur(3, "corroborata", "Copre IT e OT di linea A.");
-          return cur(3, "parziale", "Un'esercitazione congiunta, 2025.");
+          if (d === "consolidamento") return cur(3, "parziale", "Piano di risposta esiste; il raccordo con la safety di impianto è informale.", "2025-12");
+          if (d === "efficacia") return cur(3, "corroborata", "Verificato sullo scenario di dosaggio in tabletop.", "2025-09");
+          if (d === "estensione") return cur(3, "corroborata", "Copre IT e OT di linea A.", "2025-12");
+          return cur(3, "parziale", "Un'esercitazione congiunta, 2025.", "2025-05");
         })
       }
     ]

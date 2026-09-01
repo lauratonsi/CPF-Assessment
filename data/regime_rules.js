@@ -200,24 +200,26 @@
       ],
       ot_epistemic_note: "L'AI Act è software-centric e concepito 'a monte': un modello formalmente conforme può essere alimentato da una catena di sensori industriali legacy non protetti (protocolli senza crittografia come Modbus o OPC Classic). Un attaccante che manipola i dati di campo via man-in-the-middle può generare un adversarial example che induce l'IA di supervisione a classificare uno stato d'emergenza fisica come condizione operativa normale, ritardando l'allarme.",
       art_437bis_note: "Schema di D.Lgs. approvato in via definitiva il 4 agosto 2026 (in attuazione della L. 132/2025): introduce l'art. 437-bis c.p. — sanziona penalmente l'omessa adozione delle misure di sicurezza o di sorveglianza umana, e l'alterazione illecita, dei sistemi di IA ad alto rischio, quando ne derivi un pericolo concreto per la vita, l'incolumità pubblica o individuale o la sicurezza dello Stato. Salda la responsabilità penale d'impianto alla cybersecurity dei sistemi intelligenti.",
-      prohibited_note: "Art. 5 — le pratiche di IA a rischio inaccettabile sono vietate: il sistema non può essere immesso sul mercato né messo in servizio. Il Reg. (UE) 2026/1744 aggiunge (applicabili dal 2 dicembre 2026) la generazione/manipolazione di materiale intimo non consensuale di persone identificabili e la generazione di materiale di abuso sessuale su minori.",
-      transparency_note: "Art. 50 — obblighi di trasparenza per sistemi a rischio limitato (chatbot, contenuti sintetici/deepfake, riconoscimento delle emozioni) anche se non ad alto rischio. Per i generatori di contenuti sintetici immessi sul mercato prima del 2 agosto 2026, l'art. 50(2) va rispettato entro il 2 dicembre 2026.",
+      prohibited_note: "Art. 5 — le pratiche di IA a rischio inaccettabile sono vietate: il sistema non può essere immesso sul mercato né messo in servizio (§2.6, Reg. (UE) 2024/1689, artt. 5, 6 e 50).",
+      transparency_note: "Art. 50 — obblighi di trasparenza per i sistemi a rischio limitato (chatbot, contenuti sintetici/deepfake, riconoscimento delle emozioni) anche se non ad alto rischio (Reg. (UE) 2024/1689, art. 50; §2.6).",
 
       /* ---- Digital Omnibus on AI — Regolamento (UE) 2026/1744 ---- */
       digital_omnibus: {
-        regulation: "Regolamento (UE) 2026/1744",
-        timeline: "Proposta della Commissione 19 novembre 2025; accordo provvisorio 6 maggio 2026; conferma del Consiglio 13 maggio 2026; GUUE 24 luglio 2026; in vigore dal 27 luglio 2026.",
-        // Date fisse di calendario (il meccanismo condizionale inizialmente
-        // proposto, legato alla disponibilità delle norme armonizzate, è stato
-        // sostituito da date fisse).
-        deadlines: {
-          annex_iii_standalone: { date: "2027-12-02", label: "Sistemi ad alto rischio dell'Allegato III (autonomi): applicabilità differita al 2 dicembre 2027 (dal 2 agosto 2026)." },
-          annex_i_embedded:     { date: "2028-08-02", label: "Sistemi ad alto rischio come componenti di sicurezza di prodotti dell'Allegato I: applicabilità differita al 2 agosto 2028." },
-          public_authority:     { date: "2030-08-02", label: "Deployment da parte di autorità pubbliche: invariato (2 agosto 2030)." }
-        },
-        deadlines_rationale: "Il rinvio è motivato dalla mancata maturazione, nei tempi previsti, dell'infrastruttura regolatoria: norme armonizzate CEN/CENELEC e organismi di valutazione della conformità. È lo stesso fenomeno di 'standard tecnici in transizione' già osservato per il prEN 50742 sul Regolamento Macchine (§2.5.3).",
-        safety_component_narrowing: "Canale art. 6.1: un sistema di IA integrato in un prodotto già regolamentato è ad alto rischio solo se ha la finalità specifica di prevenire o attenuare rischi per la salute e la sicurezza, oppure se il suo malfunzionamento li metterebbe in pericolo. Sono esclusi i sistemi destinati unicamente ad assistenza all'utente, ottimizzazione delle prestazioni, efficienza del servizio o automazione di comodità. Il criterio sposta la valutazione dalla presenza dell'IA nel prodotto alla sua funzione di sicurezza — coerente con il RESS 1.2.1 del Regolamento Macchine.",
-        commission_limitation_power: "Dove la normativa dell'Allegato I, Sezione A, impone obblighi equivalenti, la Commissione può limitare l'applicazione di specifici requisiti dell'AI Act (evita duplicazioni; si collega alla legal interoperability, §2.7)."
+        regulation: "Regolamento (UE) 2026/1744 (Digital Omnibus on AI)",
+        // Riscontrato dal testo (§2.6.1, §2.8.3): presentato dalla Commissione il
+        // 19 novembre 2025; pubblicato in GUUE il 24 luglio 2026; in vigore dal
+        // 27 luglio 2026. Da NON confondere con il Digital Omnibus procedurale
+        // (COM(2025) 837 final, Single Entry Point), tuttora una proposta.
+        timeline: "Presentato dalla Commissione il 19 novembre 2025; pubblicato in GUUE il 24 luglio 2026; in vigore dal 27 luglio 2026 (§2.8.3).",
+        // safety_component_narrowing è l'unico effetto del Reg. 2026/1744 che il
+        // motore usa (canale art. 6.1). Il calendario differenziato di
+        // applicabilità dei sistemi ad alto rischio non è riscontrato dal testo
+        // della tesi e quindi non è codificato qui: se serve nel Cap. 4, va
+        // aggiunto con riferimento alla fonte primaria (art. 113 Reg. 2024/1689
+        // come modificato). Cfr. §2.4.1 e §2.5.3 sul fenomeno degli standard in
+        // transizione.
+        safety_component_narrowing: "Canale art. 6.1: un sistema di IA integrato in un prodotto già regolamentato è ad alto rischio solo se ha la finalità specifica di prevenire o attenuare rischi per la salute e la sicurezza, oppure se il suo malfunzionamento li metterebbe in pericolo. Sono esclusi i sistemi destinati unicamente ad assistenza all'utente, ottimizzazione delle prestazioni, efficienza del servizio o automazione di comodità. Il criterio sposta la valutazione dalla presenza dell'IA nel prodotto alla sua funzione di sicurezza — coerente con il RESS 1.2.1 del Regolamento Macchine (§2.6.1, Allegato I come modificato dal Reg. 2026/1744).",
+        commission_limitation_power: "Dove la normativa dell'Allegato I impone obblighi equivalenti, la Commissione può limitare l'applicazione di specifici requisiti dell'AI Act, evitando duplicazioni (si collega alla legal interoperability, §2.7)."
       }
     },
 

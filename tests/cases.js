@@ -181,10 +181,11 @@
   t("engine", "AI Act", "nessun sistema di IA → non applicabile", function () {
     eq(C({}).ai_act.applicable, false);
   });
-  t("engine", "AI Act", "pratica vietata (art. 5) → status vietato, nota nudifier/CSAM dal 2 dic 2026", function () {
+  t("engine", "AI Act", "pratica vietata (art. 5) → status vietato, nota art. 5", function () {
     var p = C({ ai_system: true, ai_prohibited: true });
     eq(p.ai_act.status, "vietato", "status");
-    traceHas(p.ai_act, /2 dicembre 2026|materiale intimo|abuso sessuale/i, "nota Reg. 2026/1744");
+    traceHas(p.ai_act, /art\. 5|vietat/i, "nota art. 5");
+    has(p.notes, /pratiche vietate|art\. 5/i, "nota pratiche vietate");
   });
   t("engine", "AI Act", "IA presente ma fuori dai due canali → non ad alto rischio + nota trasparenza (art. 50)", function () {
     var p = C({ ai_system: true });
@@ -204,11 +205,10 @@
     var p = C({ ai_system: true, ai_channel1: true, ai_channel2: true });
     eq(p.ai_act.high_risk, true, "high_risk"); eq(p.ai_act.channel, "art6_2", "channel");
   });
-  t("engine", "AI Act", "Reg. 2026/1744 — calendario differito: canale 6.2 → 2027-12-02", function () {
-    eq(C({ ai_system: true, ai_channel2: true }).ai_act.compliance_deadline, "2027-12-02");
-  });
-  t("engine", "AI Act", "Reg. 2026/1744 — calendario differito: canale 6.1 → 2028-08-02", function () {
-    eq(C({ ai_system: true, ai_channel1: true, ai_channel1_safety_purpose: true }).ai_act.compliance_deadline, "2028-08-02");
+  t("engine", "AI Act", "canale 6.1 → il narrowing del Reg. 2026/1744 è nel trace (finalità di sicurezza)", function () {
+    var p = C({ ai_system: true, ai_channel1: true, ai_channel1_safety_purpose: true });
+    eq(p.ai_act.channel, "art6_1");
+    traceHas(p.ai_act, /finalità di sicurezza|6\.1/i, "trace canale 6.1");
   });
   t("engine", "AI Act", "canale 6.2 + condizione di esclusione (art. 6.3) + no profilazione → alto rischio escluso", function () {
     eq(C({ ai_system: true, ai_channel2: true, ai_exclusion_conditions: ["procedurale"], ai_profiling: false }).ai_act.high_risk, "escluso");
@@ -296,11 +296,21 @@
     var p = root.CPF.domainPriority(mk({ consolidamento: { level: 4, evidentiary_strength: "corroborata" } }, { consolidamento: { level: 4 } }, false, null), 3);
     eq(p.priorita_intervento, null); eq(p.priorita_verifica, null);
   });
-  t("calcs", "blankCurrentProfile", "4 dimensioni, default non determinabile, estensione con esclusioni []", function () {
+  t("calcs", "blankCurrentProfile", "4 dimensioni, livello non attribuito (null) + non determinabile, estensione con esclusioni []", function () {
     var cp = root.CPF.blankCurrentProfile();
     eq(Object.keys(cp).sort(), ["consolidamento", "efficacia", "estensione", "prestazione_osservata"]);
     eq(cp.consolidamento.evidentiary_strength, "non_determinabile");
+    eq(cp.consolidamento.level, null);
     eq(cp.estensione.excluded_essential_components, []);
+  });
+  t("calcs", "dimensionGap", "livello corrente non attribuito (null) → incertezza_probatoria", function () {
+    eq(root.CPF.dimensionGap({ level: null, evidentiary_strength: "corroborata" }, { level: 4 }).state, "incertezza_probatoria");
+  });
+  t("calcs", "essentialShortfall", "current_profile assente → null, nessun errore", function () {
+    eq(root.CPF.essentialShortfall({ is_essential: true, non_compensable_threshold: { dimension: "estensione", min_level: 4, rationale: "x" } }), null);
+  });
+  t("calcs", "essentialShortfall", "soglia su livello non attribuito (null) → verifica", function () {
+    eq(root.CPF.essentialShortfall(mk({ estensione: { level: null, evidentiary_strength: "non_determinabile" } }, {}, true, { dimension: "estensione", min_level: 5, rationale: "x" })).kind, "verifica");
   });
   t("calcs", "integrazione 4a→4b", "target da 4a + corrente da 4b → divario essenziale rilevato e priorità alta", function () {
     var e = root.CPF.blankCapabilityTarget("segmentazione", true);
@@ -316,6 +326,50 @@
     var essShort = mk({ estensione: { level: 2, evidentiary_strength: "corroborata" } }, { estensione: { level: 3 } }, true, { dimension: "estensione", min_level: 5, rationale: "x" });
     essShort.domain_id = "vulnerabilita";
     eq(root.CPF.rankDomains([noGap, essShort], 3)[0].domain_id, "vulnerabilita");
+  });
+
+  /* --- priorità come regola ordinale (§3.6-3.7), non somma di punteggi --- */
+  t("calcs", "domainPriority", "regola: non essenziale, criticità bassa, divario contenuto → intervento bassa", function () {
+    var p = root.CPF.domainPriority(mk({ efficacia: { level: 3, evidentiary_strength: "corroborata" } }, { efficacia: { level: 4 } }, false, null), 1);
+    eq(p.priorita_intervento.band, "bassa");
+  });
+  t("calcs", "domainPriority", "regola: non essenziale, criticità alta, divario ampio → intervento media", function () {
+    var p = root.CPF.domainPriority(mk({ efficacia: { level: 2, evidentiary_strength: "corroborata" } }, { efficacia: { level: 4 } }, false, null), 3);
+    eq(p.priorita_intervento.band, "media");
+  });
+  t("calcs", "domainPriority", "regola: essenziale (senza soglia) con divario contenuto e criticità bassa → intervento media, mai bassa", function () {
+    var p = root.CPF.domainPriority(mk({ efficacia: { level: 3, evidentiary_strength: "corroborata" } }, { efficacia: { level: 4 } }, true, null), 1);
+    eq(p.priorita_intervento.band, "media");
+  });
+  t("calcs", "domainPriority", "regola: criticità assente trattata come neutra (2)", function () {
+    var p = root.CPF.domainPriority(mk({ efficacia: { level: 3, evidentiary_strength: "corroborata" } }, { efficacia: { level: 4 } }, false, null), null);
+    eq(p.priorita_intervento.band, "bassa");
+  });
+  t("calcs", "domainPriority", "verifica: incertezza su soglia essenziale + funzione critica → verifica alta", function () {
+    var p = root.CPF.domainPriority(mk({ estensione: { level: null, evidentiary_strength: "non_determinabile" } }, {}, true, { dimension: "estensione", min_level: 5, rationale: "x" }), 4);
+    eq(p.priorita_verifica.band, "alta");
+    eq(!!p.priorita_verifica.essential_uncertainty, true);
+  });
+
+  /* --- attualità dell'evidenza (§3.5) --- */
+  t("calcs", "evidenceCurrency", "data assente → stato 'assente'", function () {
+    eq(root.CPF.evidenceCurrency("").state, "assente");
+  });
+  t("calcs", "evidenceCurrency", "evidenza di 6 mesi (default 24) → recente", function () {
+    eq(root.CPF.evidenceCurrency("2026-01", 24, "2026-07-01").state, "recente");
+  });
+  t("calcs", "evidenceCurrency", "evidenza di 30 mesi → da_rivalutare", function () {
+    var c = root.CPF.evidenceCurrency("2024-01", 24, "2026-07-01");
+    eq(c.state, "da_rivalutare"); eq(c.months, 30);
+  });
+  t("calcs", "blankCurrentProfile", "ogni dimensione ha evidence_date vuota", function () {
+    eq(root.CPF.blankCurrentProfile().efficacia.evidence_date, "");
+  });
+  t("calcs", "scales", "matrice di corroborazione: ogni dimensione elenca i tipi di evidenza pertinenti (§3.5)", function () {
+    var dims = root.CPF.data.scales.dimensions;
+    ["consolidamento", "estensione", "efficacia", "prestazione_osservata"].forEach(function (d) {
+      ok(dims[d].evidence && dims[d].evidence.types && dims[d].evidence.types.length >= 2, d + " senza matrice di corroborazione");
+    });
   });
 
   /* ================================================================

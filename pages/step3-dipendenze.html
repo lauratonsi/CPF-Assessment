@@ -246,6 +246,9 @@
   function depIssues(d) {
     var out = [];
     var downstream = d.position === "downstream";
+    if (d.class === "geografica") {
+      out.push({ warn: false, text: "Dipendenza geografica: struttura E → {A, B} (§3.4), non una relazione reciproca. Leggi «B» come l'evento o il luogo comune e «A» come l'elemento esposto; per più elementi esposti usa una riga ciascuno e imposta il guasto su «causa comune»." });
+    }
     if (d.coupling === "tight" && !d.alternative_available && !downstream) {
       out.push({ warn: true, text: "Anello critico: accoppiamento stretto e nessuna alternativa — la perturbazione si propaga senza margine." });
     }

@@ -1,24 +1,22 @@
-/* CPF Assessment — logica applicativa condivisa (stub di scaffold).
+/* CPF Assessment — logica applicativa condivisa.
    App statica client-side, nessun server. Le valutazioni vivono in
    localStorage e si esportano/importano come JSON.
 
-   Da completare dopo la definizione del flusso UI:
-     - rendering dei 4 step
-     - motore di inferenza dello Step 1 (regime_profile da risposte)
-     - calcoli derivati (gap, divario essenziale, priorità)
-     - grafici dashboard (vendor: chart.js, d3-sankey) */
+   Contenuto:
+     - persistenza (list/load/save/delete, export/import, profilo attivo)
+     - calcoli derivati §3.6: dimensionGap, essentialShortfall,
+       domainPriority, rankDomains
+     - CPF.reviewFunction() — euristiche di coerenza per lo Step 2
+   Il motore dei regimi (Step 1) è in regime-engine.js; i grafici in
+   dumbbell.js; lo stepper in nav.js; l'appbar in shell.js. */
 (function (root) {
   "use strict";
   root.CPF = root.CPF || {};
   var CPF = root.CPF;
 
   /* ---------- tema ---------- */
-  CPF.applyStoredTheme = function () {
-    try {
-      var t = localStorage.getItem("cpf-theme");
-      if (t === "dark" || t === "light") document.documentElement.setAttribute("data-theme", t);
-    } catch (e) {}
-  };
+  // L'applicazione del tema salvato avviene con lo snippet inline in <head>
+  // di ogni pagina (evita il flash) e con assets/theme-toggle.js.
   CPF.toggleTheme = function () {
     var cur = document.documentElement.getAttribute("data-theme");
     var next = cur === "dark" ? "light" : "dark";
@@ -134,24 +132,25 @@
     r.readAsText(file);
   };
 
-  /* ---------- calcoli derivati (§3.6) — stub ---------- */
+  /* ---------- calcoli derivati (§3.6) ---------- */
 
-  // Gap per dimensione: G = max(0, target - current), sospeso se prova non determinabile.
+  // Gap per dimensione: G = max(0, target - current), sospeso se prova non
+  // determinabile o se il livello corrente non è ancora stato attribuito.
   CPF.dimensionGap = function (current, target) {
-    if (!current || current.evidentiary_strength === "non_determinabile") {
+    if (!current || current.evidentiary_strength === "non_determinabile" || current.level == null) {
       return { state: "incertezza_probatoria", gap: null };
     }
-    if (!target) return { state: "nessun_obiettivo", gap: null };
+    if (!target || target.level == null) return { state: "nessun_obiettivo", gap: null };
     return { state: "ok", gap: Math.max(0, target.level - current.level) };
   };
 
   // Divario essenziale (anello debole): flag non assorbibile in medie.
   CPF.essentialShortfall = function (domainAssessment) {
-    var t = domainAssessment.non_compensable_threshold;
-    if (!domainAssessment.is_essential || !t) return null;
-    var cur = domainAssessment.current_profile[t.dimension];
+    var t = domainAssessment && domainAssessment.non_compensable_threshold;
+    if (!domainAssessment || !domainAssessment.is_essential || !t) return null;
+    var cur = (domainAssessment.current_profile || {})[t.dimension];
     if (!cur) return null;
-    if (cur.evidentiary_strength === "non_determinabile") {
+    if (cur.evidentiary_strength === "non_determinabile" || cur.level == null) {
       return { kind: "verifica", dimension: t.dimension, rationale: t.rationale };
     }
     if (cur.level < t.min_level) {
@@ -160,17 +159,57 @@
     return null;
   };
 
+  // Attualità dell'evidenza (§3.5): «un'evidenza valida al momento della raccolta
+  // può non rappresentare più lo stato corrente della capacità». La tesi non
+  // fissa una soglia: staleMonths è un default dello strumento (rivedibile),
+  // non un requisito del modello. Accetta "YYYY", "YYYY-MM" o "YYYY-MM-DD".
+  CPF.evidenceCurrency = function (dateStr, staleMonths, now) {
+    staleMonths = staleMonths || 24;
+    if (!dateStr) return { state: "assente", months: null };
+    var m = String(dateStr).match(/^(\d{4})(?:-(\d{1,2}))?(?:-(\d{1,2}))?/);
+    if (!m) return { state: "assente", months: null };
+    var d = new Date(Number(m[1]), (m[2] ? Number(m[2]) : 1) - 1, m[3] ? Number(m[3]) : 1);
+    var ref = now ? new Date(now) : new Date();
+    var months = (ref.getFullYear() - d.getFullYear()) * 12 + (ref.getMonth() - d.getMonth());
+    if (months < 0) return { state: "recente", months: months };
+    return { state: months >= staleMonths ? "da_rivalutare" : "recente", months: months };
+  };
+
   var DIMS = ["consolidamento", "estensione", "efficacia", "prestazione_osservata"];
-  function band(score, hi, mid) { return score >= hi ? "alta" : score >= mid ? "media" : "bassa"; }
+
+  // Priorità come REGOLA ORDINALE, non come somma di punteggi (§3.6-3.7).
+  // §3.6: «La criticità della funzione, l'essenzialità della capacità e la natura
+  // e l'ampiezza del divario determinano la priorità sostanziale della carenza».
+  // §3.7 avverte che le operazioni algebriche di aggregazione hanno ruolo
+  // puramente descrittivo: qui non si sommano ordinali, si applica un mapping.
+  // maxGap = ampiezza del divario corroborato più ampio; "ampio" = ≥ 2 livelli.
+  // crit = criticità della funzione 1-4 (assente → 2, neutra).
+  function interventoBand(essential, crit, maxGap) {
+    crit = crit || 2;
+    var wide = maxGap >= 2;
+    if (essential && (wide || crit === 4)) return "alta";
+    if (!essential && crit === 4 && maxGap >= 3) return "alta";
+    if (essential || crit >= 3 || wide) return "media";
+    return "bassa";                                 // non essenziale, criticità ≤2, divario contenuto
+  }
+  // Urgenza di chiarire l'incertezza probatoria. essUncert = incertezza su una
+  // dimensione con soglia non compensabile (capacità essenziale).
+  function verificaBand(essential, crit, essUncert, verificaCount) {
+    crit = crit || 2;
+    if (essUncert && (essential || crit >= 3)) return "alta";
+    if (essential && crit === 4) return "alta";
+    if (essUncert || essential || crit >= 3 || verificaCount >= 2) return "media";
+    return "bassa";
+  }
 
   // Priorità di un dominio (§3.6). Due esiti DISTINTI, mai fusi:
-  //  - priorita_intervento: per le carenze corroborate. Ordinamento da
-  //    f(criticità funzione, essenzialità capacità, natura/ampiezza del divario).
+  //  - priorita_intervento: per le carenze corroborate. f(criticità funzione,
+  //    essenzialità capacità, natura/ampiezza del divario) resa come regola.
   //  - priorita_verifica:   per le condizioni non determinabili o solo
   //    parzialmente documentate. Non si traduce in intervento diretto.
-  // L'ordinamento è ORDINALE, non cardinale (§3.7): è un indicatore descrittivo
-  // di priorità, non una misura. Il divario essenziale (anello debole) non è
-  // mai assorbito: porta l'intervento ad "alta" a prescindere dal resto.
+  // L'ordinamento è ORDINALE, non cardinale (§3.7): indicatore descrittivo di
+  // priorità, non una misura. Il divario essenziale (anello debole) non è mai
+  // assorbito: porta l'intervento ad "alta" a prescindere dal resto.
   CPF.domainPriority = function (da, functionCriticality) {
     if (!da) return null;
     var crit = (typeof functionCriticality === "number") ? functionCriticality : null;
@@ -196,27 +235,22 @@
     var essShort = shortfall && shortfall.kind === "divario_essenziale" ? shortfall : null;
     var essUncert = shortfall && shortfall.kind === "verifica" ? shortfall : null;
 
-    // composito ordinale: criticità (1-4, default 2) + essenzialità (+1) + ampiezza del divario
-    var base = (crit || 2) + (essential ? 1 : 0) + maxGap;
-
     var out = {
       domain_id: da.domain_id || null,
       priorita_intervento: null,
       priorita_verifica: null,
       _ordinale: true,
-      _note: "Ordinamento ordinale, non cardinale (§3.7): indicatore descrittivo di priorità."
+      _note: "Ordinamento ordinale, non cardinale (§3.7): indicatore descrittivo di priorità, ottenuto per regola su criticità, essenzialità e ampiezza del divario."
     };
 
     if (essShort) {
-      out.priorita_intervento = { band: "alta", reason: "divario essenziale su soglia non compensabile", dimensions: intervento, essential_shortfall: essShort };
+      out.priorita_intervento = { band: "alta", reason: "divario essenziale su soglia non compensabile (anello debole, §3.6)", dimensions: intervento, essential_shortfall: essShort };
     } else if (intervento.length) {
-      out.priorita_intervento = { band: band(base, 7, 4), dimensions: intervento };
+      out.priorita_intervento = { band: interventoBand(essential, crit, maxGap), dimensions: intervento, basis: { essential: essential, criticality: crit, max_gap: maxGap } };
     }
 
     if (verifica.length || essUncert) {
-      // urgenza di chiarire l'incertezza: più alta se funzione critica o capacità essenziale
-      var vbase = (crit || 2) + (essential ? 1 : 0) + (essUncert ? 2 : 0) + verifica.length;
-      out.priorita_verifica = { band: band(vbase, 6, 3), items: verifica, essential_uncertainty: essUncert };
+      out.priorita_verifica = { band: verificaBand(essential, crit, essUncert, verifica.length), items: verifica, essential_uncertainty: essUncert };
     }
 
     return out;

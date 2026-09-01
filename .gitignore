@@ -5,7 +5,7 @@ node_modules/
 .vscode/
 
 # materiale di lavoro, non parte del tool
-TESI_LAURA TONSI.pdf
+TESI_LAURA TONSI.md
 *.pdf
 
 # graphify: ignore working state and cache, keep the real outputs

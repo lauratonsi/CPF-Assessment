@@ -280,14 +280,17 @@
 
       // Requisiti dei sistemi ad alto rischio (§2.6.2) — rilevanti per la convergenza cyber-fisica
       if (ai.high_risk === true) {
-        // Calendario differito dal Digital Omnibus (Reg. 2026/1744), date fisse.
+        // Il calendario differenziato di applicabilità dei sistemi ad alto
+        // rischio non è riscontrato dal testo della tesi: se DO.deadlines viene
+        // ripopolato (con fonte primaria, cfr. commento in regime_rules.js) il
+        // motore lo espone di nuovo qui.
         var dl = DO.deadlines || {};
         if (ai.channel === "art6_1" && dl.annex_i_embedded) {
           ai.compliance_deadline = dl.annex_i_embedded.date;
-          ai.trace.push(step("Applicabilità differita", dl.annex_i_embedded.label + " (Reg. 2026/1744, data fissa)."));
+          ai.trace.push(step("Applicabilità differita", dl.annex_i_embedded.label));
         } else if (ai.channel === "art6_2" && dl.annex_iii_standalone) {
           ai.compliance_deadline = dl.annex_iii_standalone.date;
-          ai.trace.push(step("Applicabilità differita", dl.annex_iii_standalone.label + " (Reg. 2026/1744, data fissa)."));
+          ai.trace.push(step("Applicabilità differita", dl.annex_iii_standalone.label));
         }
         if (!a.ai_oversight_ready) {
           ai.open_requirements.push("oversight");
