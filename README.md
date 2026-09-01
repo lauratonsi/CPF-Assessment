@@ -1,10 +1,48 @@
-# CPF Assessment — Cyber-Physical Function Assessment
+# CPF Assessment
 
-Strumento a supporto del **Capitolo 4** della tesi (cybersecurity, convergenza
-IT/OT, regolazione europea). Implementa il modello di misurazione del **Capitolo
-3**: valutazione delle capacità cyber-fisiche con **unità di analisi = la
-funzione**, quattro dimensioni ordinali indipendenti, profilo corrente/obiettivo,
-soglie non compensabili, priorità di intervento e di verifica tenute distinte.
+Strumento di valutazione della sicurezza di una **funzione cyber-fisica** — una
+attività in cui software e processo fisico sono così accoppiati che un guasto
+informatico diventa un danno materiale (rete elettrica, impianto idrico,
+produzione, logistica, sanità).
+
+## A cosa serve
+
+Data una funzione, lo strumento struttura la valutazione in quattro domande
+tenute deliberatamente separate:
+
+1. **Quali regimi si applicano?** Classificatore multi-regime NIS2 / CER / DORA /
+   CRA / Reg. Macchine / AI Act a partire dal profilo dell'organizzazione, con
+   una traccia motivata per ogni esito.
+2. **Quali conseguenze sono intollerabili e per quali vie ci si arriva?**
+   Conseguenze → percorsi di compromissione → capacità richieste (logica CCE:
+   il profilo obiettivo è fissato *a priori* dal danno da evitare, non dalle
+   capacità già presenti).
+3. **Quali capacità servono e quali sono già in atto?** Profilo obiettivo contro
+   profilo corrente su quattro dimensioni ordinali indipendenti
+   (consolidamento, estensione, efficacia, prestazione osservata), senza
+   compensazione tra dimensioni e con la forza probatoria tenuta distinta dal
+   livello.
+4. **Dove intervenire e dove verificare?** Due graduatorie separate: priorità di
+   *intervento* sui divari accertati, priorità di *verifica* dove il divario è
+   possibile ma non provato («assenza di prova ≠ prova dell'assenza»).
+
+L'esito è una dashboard con i divari per dominio, le soglie non compensabili non
+rispettate, le due graduatorie e la mappa delle dipendenze — esportabile in JSON
+e stampabile.
+
+## Cosa non è
+
+Non è uno strumento di conformità: non produce un giudizio di adeguatezza
+legale, non codifica designazioni caso per caso (CER) né esclusioni per
+sicurezza nazionale e difesa, non sostituisce una valutazione integrale.
+Rende esplicito e ripercorribile un ragionamento di misura — non è un parere.
+
+## Contesto
+
+Accompagna il **Capitolo 4** della tesi di Laura Tonsi (cybersecurity,
+convergenza IT/OT, regolazione europea) e implementa il modello di misurazione
+del **Capitolo 3**. Unità di analisi: la funzione, mai l'organizzazione o il
+settore.
 
 ## Architettura
 
@@ -48,8 +86,9 @@ data/                       configurazione fissa (window.CPF.data.*)
   demo_assessment.js        valutazione dimostrativa completa (usata dalla dashboard quando non c'è nulla di attivo)
 
 assets/
-  theme.css                 sistema di stile: token, tipografia IBM Plex, componenti
-  vendor/fonts/             IBM Plex Sans / Serif / Mono (woff2, per uso offline)
+  theme.css                 design system: token colore/tipografia, IBM Plex Sans + Mono, componenti
+                            (grigi neutri + un accent, raggi piccoli, densità compatta, nessuna texture)
+  vendor/fonts/             IBM Plex Sans / Mono (woff2, per uso offline)
   app.js                    persistenza localStorage + export/import + guard quota
                             + calcoli §3.6 (dimensionGap, essentialShortfall, domainPriority — a regola
                               ordinale, non a somma —, rankDomains) + CPF.evidenceCurrency() (attualità §3.5)
