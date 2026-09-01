@@ -1,8 +1,8 @@
 /* Barra di navigazione del wizard, condivisa.
-   Aggiorna lo stepper con lo stato di completamento reale della valutazione
-   attiva e mostra una riga di contesto (funzione · organizzazione).
-   Attivazione: <nav class="stepper" data-nav> nella pagina.
-   Nessun effetto se non c'è una valutazione attiva. */
+   - imposta gli attributi di accessibilità sullo stepper (sempre);
+   - aggiorna lo stepper con lo stato di completamento reale della valutazione
+     attiva e mostra una riga di contesto (funzione · organizzazione).
+   Attivazione: <nav class="stepper" data-nav> nella pagina. */
 (function (root) {
   var CPF = root.CPF;
   if (!CPF) return;
@@ -12,9 +12,20 @@
     else fn();
   }
 
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c];
+    });
+  }
+
   ready(function () {
     var nav = document.querySelector("nav.stepper[data-nav]");
     if (!nav) return;
+
+    // --- accessibilità: sempre, anche senza valutazione attiva ---
+    if (!nav.getAttribute("aria-label")) nav.setAttribute("aria-label", "Passi della valutazione");
+    var current = nav.querySelector(".is-current");
+    if (current && !current.getAttribute("aria-current")) current.setAttribute("aria-current", "step");
 
     var params = new URLSearchParams(location.search);
     var a = params.get("id") ? CPF.loadAssessment(params.get("id")) : (CPF.getActive && CPF.getActive());
@@ -42,6 +53,8 @@
       if (!(href in done)) return;
       link.classList.toggle("is-done", done[href]);
       link.classList.toggle("is-todo", !done[href] && !link.classList.contains("is-current"));
+      if (done[href]) link.setAttribute("aria-label", link.textContent.trim() + " — completato");
+      else link.removeAttribute("aria-label");
     });
 
     // riga di contesto
@@ -49,17 +62,11 @@
       var bar = document.createElement("div");
       bar.className = "nav-context";
       var id = a.assessment_id ? "?id=" + encodeURIComponent(a.assessment_id) : "";
-      bar.innerHTML = '<span class="nc-fn">' + escape(F.name) + '</span>'
-        + (a.organization_name ? '<span class="nc-org"> · ' + escape(a.organization_name) + '</span>' : '')
+      bar.innerHTML = '<span class="nc-fn">' + esc(F.name) + '</span>'
+        + (a.organization_name ? '<span class="nc-org"> · ' + esc(a.organization_name) + '</span>' : '')
         + (F.criticality ? '<span class="nc-crit"> · criticità ' + F.criticality + '/4</span>' : '')
         + '<a class="nc-link" href="step2-funzione.html' + id + '">modifica</a>';
       nav.parentNode.insertBefore(bar, nav.nextSibling);
-    }
-
-    function escape(s) {
-      return String(s == null ? "" : s).replace(/[&<>]/g, function (c) {
-        return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c];
-      });
     }
   });
 })(window);

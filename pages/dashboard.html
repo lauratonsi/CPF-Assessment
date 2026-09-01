@@ -92,13 +92,13 @@
 </head>
 <body>
 <div class="wrap">
-  <nav class="stepper" data-nav data-step="9">
+  <nav class="stepper" data-nav data-step="9" aria-label="Passi della valutazione">
     <a class="is-done" href="step1-regimi.html">1 · Regimi</a>
     <a class="is-done" href="step2-funzione.html">2 · Funzione</a>
     <a class="is-done" href="step3-dipendenze.html">3 · Dipendenze</a>
     <a class="is-done" href="step4a-conseguenze.html">4a · Conseguenze</a>
     <a class="is-done" href="step4b-capacita.html">4b · Capacità</a>
-    <span class="is-current">Esito</span>
+    <span class="is-current" aria-current="step">Esito</span>
     <a href="test.html">Verifica</a>
   </nav>
   <header class="masthead">
@@ -132,6 +132,7 @@
 <script src="../data/demo_assessment.js"></script>
 <script src="../assets/app.js"></script>
 <script src="../assets/regime-engine.js"></script>
+<script src="../assets/report.js"></script>
 <script src="../assets/dumbbell.js"></script>
 <script src="../assets/nav.js"></script>
 <script>
@@ -140,7 +141,6 @@
   var $ = function (id) { return document.getElementById(id); };
   var SC = CPF.data.scales.dimensions;
   var STRLAB = {}; CPF.data.scales.evidentiary_strength.values.forEach(function (s) { STRLAB[s.id] = s.label; });
-  var DIMS = ["consolidamento", "estensione", "efficacia", "prestazione_osservata"];
   var DOMS = CPF.data.capabilityDomains.domains;
   var domLabel = function (id) { var d = DOMS.filter(function (x) { return x.id === id; })[0]; return d ? d.label : id; };
 
@@ -152,14 +152,14 @@
     isDemo = true;
   }
 
-  // profilo dei regimi: calcolato dal motore se manca (demo) o incompleto
-  var RP = a.regime_profile;
-  if ((!RP || !RP.nis2) && a._answers) { try { RP = CPF.classifyRegimes(a._answers); } catch (e) { RP = null; } }
-  RP = RP || {};
-
-  var crit = (a.function && typeof a.function.criticality === "number") ? a.function.criticality : null;
   var CA = Array.isArray(a.capability_assessment) ? a.capability_assessment : [];
   CA.forEach(function (e) { if (!e.current_profile) e.current_profile = CPF.blankCurrentProfile(); });
+
+  // Tutta la sintesi dell'esito è calcolata in un'unica funzione pura (§3.6-3.7);
+  // la dashboard sotto si limita a renderizzarla. Verificabile da test.html.
+  var R = CPF.buildReport(a);
+  var RP = R.regime_profile;
+  var crit = R.criticality;
 
   if (isDemo) {
     $("demo-banner").hidden = false;
@@ -183,8 +183,6 @@
     + '</dl></div></section>');
 
   /* ---------- regimi ---------- */
-  var REGN = [["nis2", "NIS2"], ["cer", "CER"], ["dora", "DORA"], ["psnc", "PSNC"], ["cra", "CRA"], ["macchine", "Reg. Macchine"], ["ai_act", "AI Act"]];
-  var relReg = (F.regimes_relevant_to_this_function || []);
   function regTag(k, r) {
     if (!r || !r.applicable) return '<span class="tag off">n/d</span>';
     if (k === "nis2") return '<span class="tag ' + (r.qualification === "essenziale" ? "ess" : "on") + '">' + esc(r.qualification || "applicabile") + '</span>';
@@ -199,21 +197,19 @@
     if (k === "macchine" && r.notified_body_required) return '<span class="tag ess">org. notificato</span>';
     return '<span class="tag on">applicabile</span>';
   }
-  var regCards = REGN.map(function (rg) {
-    var r = RP[rg[0]] || {};
-    var relevant = relReg.indexOf(rg[0]) !== -1;
-    var lastTrace = (r.trace || [])[(r.trace || []).length - 1];
-    return '<div class="reg-card"' + (relevant ? '' : ' style="opacity:.55"') + '>'
-      + '<h3>' + rg[1] + regTag(rg[0], r) + '</h3>'
-      + (r.applicable && lastTrace ? '<p>' + esc(lastTrace.base) + '</p>' : (relevant ? '' : '<p>non rilevante per questa funzione</p>'))
-      + (rg[0] === "ai_act" && r.compliance_deadline ? '<p>applicabilità differita: ' + esc(r.compliance_deadline) + '</p>' : '')
+  var REG_LABEL = { nis2: "NIS2", cer: "CER", dora: "DORA", psnc: "PSNC", cra: "CRA", macchine: "Reg. Macchine", ai_act: "AI Act" };
+  var regCards = R.regimes.map(function (rg) {
+    var r = rg.profile;
+    return '<div class="reg-card"' + (rg.relevant ? '' : ' style="opacity:.55"') + '>'
+      + '<h3>' + REG_LABEL[rg.key] + regTag(rg.key, r) + '</h3>'
+      + (rg.applicable && rg.last_trace ? '<p>' + esc(rg.last_trace.base) + '</p>' : (rg.relevant ? '' : '<p>non rilevante per questa funzione</p>'))
       + '</div>';
   }).join("");
   out.push('<section class="d-sec"><h2>Regimi applicabili</h2>'
     + '<p class="lead">Profilo dei regimi per questa funzione. In evidenza quelli rilevanti; gli altri sono attenuati.</p>'
     + '<div class="reg-grid">' + regCards + '</div>'
-    + panel(RP.interactions, "Interazioni tra regimi", function (i) { return '<b>' + esc(i.type) + '</b>: ' + esc(i.text); })
-    + panel(RP.verification_flags, "Priorità di verifica normativa", function (v) { return esc(v); }, "warn")
+    + panel(R.interactions, "Interazioni tra regimi", function (i) { return '<b>' + esc(i.type) + '</b>: ' + esc(i.text); })
+    + panel(R.verification_flags, "Priorità di verifica normativa", function (v) { return esc(v); }, "warn")
     + '</section>');
 
   function panel(arr, title, fn, cls) {
@@ -223,19 +219,16 @@
   }
 
   /* ---------- dipendenze ---------- */
-  var deps = Array.isArray(a.dependencies) ? a.dependencies : [];
-  function depCritical(d) { return d.coupling === "tight" && !d.alternative_available && d.position !== "downstream"; }
+  var D = R.dependencies;
+  var deps = D.all;
+  var depCritical = D.is_critical;
   if (deps.length) {
-    var up = deps.filter(function (d) { return d.position === "upstream"; });
-    var down = deps.filter(function (d) { return d.position === "downstream"; });
-    var intn = deps.filter(function (d) { return d.position === "internal"; });
-    var critDeps = deps.filter(depCritical);
     out.push('<section class="d-sec"><h2>Dipendenze</h2>'
       + '<p class="lead">Relazioni orientate B → A (§3.4). In rosso gli anelli critici: accoppiamento stretto e nessuna alternativa.</p>'
-      + '<div class="dep-stat"><span><b>' + deps.length + '</b> totali</span><span><b>' + up.length + '</b> a monte</span>'
-      + '<span><b>' + intn.length + '</b> interne</span><span><b>' + down.length + '</b> a valle</span>'
-      + '<span style="color:var(--danger)"><b>' + critDeps.length + '</b> anelli critici</span></div>'
-      + depFlow(up, down, F.name)
+      + '<div class="dep-stat"><span><b>' + deps.length + '</b> totali</span><span><b>' + D.upstream.length + '</b> a monte</span>'
+      + '<span><b>' + D.internal.length + '</b> interne</span><span><b>' + D.downstream.length + '</b> a valle</span>'
+      + '<span style="color:var(--danger)"><b>' + D.critical.length + '</b> anelli critici</span></div>'
+      + depFlow(D.upstream, D.downstream, F.name)
       + '<table class="mini-table" style="margin-top:0.8rem"><thead><tr><th>B → A</th><th>Risorsa</th><th>Classe</th><th>Accoppiamento</th><th>Alternativa</th></tr></thead><tbody>'
       + deps.map(function (d) {
           return '<tr class="' + (depCritical(d) ? "crit" : "") + '"><td>' + esc(d.source) + ' → ' + esc(d.target) + '</td>'
@@ -278,29 +271,25 @@
   function clip(s, n) { s = String(s || ""); return s.length > n ? s.slice(0, n - 1) + "…" : s; }
 
   /* ---------- capacità: dumbbell per dominio ---------- */
-  if (CA.length) {
+  if (R.domains.length) {
     out.push('<section class="d-sec"><h2>Capacità — corrente rispetto all\'obiettivo</h2>'
       + '<p class="lead">Una riga per dimensione: ● corrente, ○ obiettivo, barra del divario. La forza probatoria è nel marker; la soglia non compensabile è la linea rossa tratteggiata. Nessuna area da leggere a colpo d\'occhio (§3.6-3.7).</p>'
       + '<div id="dumbbells"></div></section>');
   }
 
   /* ---------- tabella gap ---------- */
-  if (CA.length) {
+  if (R.domains.length) {
     var rows = [];
-    CA.forEach(function (e) {
-      DIMS.forEach(function (d) {
-        var c = e.current_profile[d] || {}, t = (e.target_profile || {})[d] || {};
-        var g = CPF.dimensionGap(c, t);
+    R.domains.forEach(function (dom) {
+      dom.dimensions.forEach(function (dd) {
+        var c = dd.current, t = dd.target, g = dd.gap;
         var gtxt = g.state === "incertezza_probatoria" ? "—" : (g.state === "ok" ? (g.gap || 0) : "—");
         var stale = "";
-        if (c.level != null && c.evidentiary_strength !== "non_determinabile") {
-          var ec = CPF.evidenceCurrency(c.evidence_date);
-          if (ec.state === "assente") stale = ' <small style="color:var(--accent-ink)">· data evidenza n/d</small>';
-          else if (ec.state === "da_rivalutare") stale = ' <small style="color:var(--accent-ink)">· evidenza ' + esc(c.evidence_date) + ', da rivalutare</small>';
-        }
+        if (dd.currency && dd.currency.state === "assente") stale = ' <small style="color:var(--accent-ink)">· data evidenza n/d</small>';
+        else if (dd.currency && dd.currency.state === "da_rivalutare") stale = ' <small style="color:var(--accent-ink)">· evidenza ' + esc(c.evidence_date) + ', da rivalutare</small>';
         rows.push('<tr' + (g.state === "ok" && g.gap > 0 ? ' class="crit"' : '') + '>'
-          + '<td>' + esc(domLabel(e.domain_id)) + (e.is_essential ? ' ⚠' : '') + '</td>'
-          + '<td>' + esc(SC[d].label) + '</td>'
+          + '<td>' + esc(domLabel(dom.domain_id)) + (dom.is_essential ? ' ⚠' : '') + '</td>'
+          + '<td>' + esc(SC[dd.dimension].label) + '</td>'
           + '<td>' + (c.level != null ? c.level : "—") + ' <small style="color:var(--faint)">(' + esc(STRLAB[c.evidentiary_strength] || "—") + ')</small>' + stale + '</td>'
           + '<td>' + (t.level != null ? t.level : "—") + '</td>'
           + '<td>' + gtxt + '</td></tr>');
@@ -313,29 +302,24 @@
   }
 
   /* ---------- divari essenziali ---------- */
-  var essShort = [], essVer = [];
-  CA.forEach(function (e) {
-    var s = CPF.essentialShortfall(e);
-    if (s && s.kind === "divario_essenziale") essShort.push({ e: e, s: s });
-    else if (s && s.kind === "verifica") essVer.push({ e: e, s: s });
-  });
+  var essShort = R.essential_shortfalls, essVer = R.essential_verifications;
   out.push('<section class="d-sec"><div class="ess-box"><h2>Divari essenziali — anello debole</h2>'
     + '<p class="lead" style="margin:0">Sotto la soglia non compensabile: nessuna forza sulle altre dimensioni li compensa. Portano la priorità di intervento ad «alta» a prescindere dall\'aggregato (§3.6).</p>'
     + (essShort.length
         ? '<ul>' + essShort.map(function (x) {
-            return '<li><b>' + esc(domLabel(x.e.domain_id)) + '</b> — ' + esc(SC[x.s.dimension].label) + ' a ' + x.s.have + ', soglia minima ' + x.s.need
-              + (x.s.rationale ? '<br><small style="color:var(--muted)">' + esc(x.s.rationale) + '</small>' : '') + '</li>';
+            var s = x.shortfall;
+            return '<li><b>' + esc(domLabel(x.domain_id)) + '</b> — ' + esc(SC[s.dimension].label) + ' a ' + s.have + ', soglia minima ' + s.need
+              + (s.rationale ? '<br><small style="color:var(--muted)">' + esc(s.rationale) + '</small>' : '') + '</li>';
           }).join("") + '</ul>'
         : '<p class="none">Nessun divario essenziale corroborato.</p>')
     + (essVer.length ? '<p class="lead" style="margin:.6rem 0 0">Soglie su livello non determinabile (verifica prioritaria, non intervento): '
-        + essVer.map(function (x) { return esc(domLabel(x.e.domain_id)) + " / " + esc(SC[x.s.dimension].label); }).join("; ") + '.</p>' : '')
+        + essVer.map(function (x) { return esc(domLabel(x.domain_id)) + " / " + esc(SC[x.shortfall.dimension].label); }).join("; ") + '.</p>' : '')
     + '</div></section>');
 
   /* ---------- priorità ---------- */
-  if (CA.length) {
-    var ranked = CPF.rankDomains(CA, crit);
-    var interv = ranked.filter(function (r) { return r.priorita_intervento; });
-    var verif = ranked.filter(function (r) { return r.priorita_verifica; });
+  if (R.domains.length) {
+    var interv = R.priority_intervento;
+    var verif = R.priority_verifica;
     function prioItem(r, kind) {
       var p = r[kind === "int" ? "priorita_intervento" : "priorita_verifica"];
       var dims = kind === "int"
@@ -356,7 +340,7 @@
   }
 
   /* ---------- conseguenze e percorsi ---------- */
-  var cons = Array.isArray(a.intolerable_consequences) ? a.intolerable_consequences : [];
+  var cons = R.consequences;
   if (cons.length) {
     out.push('<section class="d-sec"><h2>Conseguenze intollerabili e percorsi</h2>'
       + '<p class="lead">Il punto di partenza (§3.1): l\'esito da escludere, i percorsi che vi arrivano, le capacità che li interrompono.</p>'
@@ -380,19 +364,19 @@
 
   // dumbbell (SVG, dopo l'inserimento in DOM)
   var db = $("dumbbells");
-  if (db && CA.length) {
-    CA.forEach(function (e) {
+  if (db && R.domains.length) {
+    R.domains.forEach(function (dom) {
       var wrap = document.createElement("div");
-      wrap.className = "cap-block" + (e.is_essential ? " ess" : "");
-      var p = CPF.domainPriority(e, crit);
+      wrap.className = "cap-block" + (dom.is_essential ? " ess" : "");
+      var p = dom.priority;
       var chips = "";
       if (p && p.priorita_intervento) chips += '<span class="chip int-' + p.priorita_intervento.band + '">intervento: ' + p.priorita_intervento.band + '</span>';
       if (p && p.priorita_verifica) chips += '<span class="chip ver">verifica: ' + p.priorita_verifica.band + '</span>';
       if (!chips) chips = '<span class="chip">allineato</span>';
-      wrap.innerHTML = '<h3>' + esc(domLabel(e.domain_id)) + (e.is_essential ? ' <span class="tag">ESSENZIALE</span>' : '') + '</h3>'
+      wrap.innerHTML = '<h3>' + esc(domLabel(dom.domain_id)) + (dom.is_essential ? ' <span class="tag">ESSENZIALE</span>' : '') + '</h3>'
         + '<div class="chips">' + chips + '</div><div class="db-host"></div>';
       db.appendChild(wrap);
-      CPF.renderDumbbell(wrap.querySelector(".db-host"), e, CPF.data.scales);
+      CPF.renderDumbbell(wrap.querySelector(".db-host"), dom.assessment, CPF.data.scales);
     });
   }
 

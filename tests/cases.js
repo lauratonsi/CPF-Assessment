@@ -426,4 +426,59 @@
     var f = rv(goodFn, { nis2: { qualification: "essenziale", overridden_from_org_profile: true, override_reason: "" } });
     ok(hasFinding(f, "regimes", "todo"), "override senza motivo");
   });
+
+  /* ================================================================
+     SUITE "report" — CPF.buildReport: sintesi dell'esito (dashboard)
+     Funzione pura: regimi + funzione + dipendenze + profilo obiettivo +
+     profilo corrente letti insieme, senza aggregati (§3.6-3.7).
+     ================================================================ */
+  var demo = function () { return JSON.parse(JSON.stringify(root.CPF.data.demoAssessment)); };
+
+  t("report", "buildReport", "demo → regime_profile calcolato da _answers quando manca", function () {
+    var R = root.CPF.buildReport(demo());
+    eq(R.regime_profile.nis2.qualification, "essenziale");
+    eq(R.regime_profile.cer.designation, "soggetto_critico");
+  });
+  t("report", "buildReport", "demo → 7 regimi, quelli rilevanti marcati", function () {
+    var R = root.CPF.buildReport(demo());
+    eq(R.regimes.length, 7);
+    var rel = R.regimes.filter(function (x) { return x.relevant; }).map(function (x) { return x.key; }).sort();
+    eq(rel, ["ai_act", "cer", "macchine", "nis2"]);
+  });
+  t("report", "buildReport", "demo → dipendenze partizionate + anelli critici", function () {
+    var R = root.CPF.buildReport(demo());
+    eq(R.dependencies.all.length, 4);
+    eq(R.dependencies.upstream.length, 3);
+    eq(R.dependencies.downstream.length, 1);
+    ok(R.dependencies.critical.length >= 1, "almeno un anello critico (dep-2: tight, no alt, upstream)");
+  });
+  t("report", "buildReport", "demo → un divario essenziale (conoscenza/estensione) e una verifica su soglia (monitoraggio)", function () {
+    var R = root.CPF.buildReport(demo());
+    eq(R.essential_shortfalls.map(function (x) { return x.domain_id; }), ["conoscenza"]);
+    eq(R.essential_verifications.map(function (x) { return x.domain_id; }), ["monitoraggio"]);
+  });
+  t("report", "buildReport", "demo → priorità di intervento e di verifica come liste distinte, non fuse", function () {
+    var R = root.CPF.buildReport(demo());
+    ok(R.priority_intervento.length > 0 && R.priority_verifica.length > 0, "entrambe popolate");
+    ok(R.priority_intervento.every(function (r) { return r.priorita_intervento; }), "solo domini con intervento");
+    ok(R.priority_verifica.every(function (r) { return r.priorita_verifica; }), "solo domini con verifica");
+  });
+  t("report", "buildReport", "demo → segnala l'evidenza da rivalutare (§3.5)", function () {
+    var R = root.CPF.buildReport(demo());
+    ok(R.summary.stale_evidence.some(function (x) { return x.domain_id === "segmentazione" && x.dimension === "prestazione_osservata"; }),
+      "segmentazione/prestazione_osservata (2024-03) è da rivalutare");
+  });
+  t("report", "buildReport", "demo → conta le dimensioni non determinabili", function () {
+    var R = root.CPF.buildReport(demo());
+    ok(R.summary.undetermined_dimensions >= 3, "il demo ha più livelli non determinabili");
+  });
+  t("report", "buildReport", "valutazione minima (solo funzione) → nessun errore, liste vuote", function () {
+    var R = root.CPF.buildReport({ function: { name: "X", criticality: 2 } });
+    eq(R.domains, []); eq(R.essential_shortfalls, []); eq(R.consequences, []);
+    eq(R.dependencies.all, []);
+  });
+  t("report", "buildReport", "nessuna compensazione: l'oggetto non espone alcun punteggio aggregato di capacità", function () {
+    var R = root.CPF.buildReport(demo());
+    ok(!("score" in R) && !("aggregate" in R) && !("total" in R.summary), "nessun aggregato di sicurezza");
+  });
 })(typeof window !== "undefined" ? window : this);

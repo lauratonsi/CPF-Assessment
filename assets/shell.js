@@ -1,9 +1,28 @@
 /* Barra applicativa condivisa. Si inietta in cima a <body> su ogni pagina
    e assorbe il tasto tema (creato da theme-toggle.js) portandolo nella barra.
+   Aggiunge anche lo skip-link e il landmark <main> per l'accessibilità.
    Nessuna dipendenza; degrada senza effetti se assente. */
 (function () {
+  function a11y() {
+    // landmark principale: la prima .wrap o .content della pagina
+    var main = document.querySelector("main") || document.querySelector(".wrap, .content");
+    if (main && main.tagName !== "MAIN") {
+      main.setAttribute("role", "main");
+      if (!main.id) main.id = "contenuto";
+      main.setAttribute("tabindex", "-1");
+    }
+    var target = main ? "#" + (main.id || "contenuto") : "#contenuto";
+    if (!document.querySelector(".skip-link")) {
+      var skip = document.createElement("a");
+      skip.className = "skip-link";
+      skip.setAttribute("href", target);
+      skip.textContent = "Vai al contenuto";
+      document.body.insertBefore(skip, document.body.firstChild);
+    }
+  }
+
   function build() {
-    if (document.querySelector(".appbar")) return;
+    if (document.querySelector(".appbar")) { a11y(); return; }
 
     var bar = document.createElement("header");
     bar.className = "appbar";
@@ -26,6 +45,7 @@
 
     document.body.insertBefore(bar, document.body.firstChild);
     document.body.classList.add("has-appbar");
+    a11y(); // skip-link prima della barra (diventa il primo elemento focalizzabile)
 
     // assorbe il tasto tema fluttuante, se già montato
     absorbToggle();

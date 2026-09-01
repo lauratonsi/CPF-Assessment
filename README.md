@@ -12,6 +12,8 @@ App **statica client-side**: nessun server, nessun build step. Si apre
 `index.html` direttamente (anche da `file://`), funziona offline. Le valutazioni
 vivono in `localStorage` e si esportano/importano come JSON. La configurazione è
 in file `data/*.js` caricati come `<script>` che popolano `window.CPF.data.*`.
+`shell.js` inietta su ogni pagina la barra applicativa, uno skip-link e il
+landmark `<main>`; lo stepper porta `aria-current`/`aria-label`.
 
 ```
 index.html                 ingresso: profili organizzazione + valutazioni, nuova / importa / esito dimostrativo
@@ -24,8 +26,9 @@ pages/                      i sei passi del wizard + verifica
   step4a-conseguenze.html   conseguenze intollerabili → percorsi di compromissione → capacità richieste/essenziali (CCE, §3.1);
                             genera il profilo obiettivo per dimensione (§3.6)
   step4b-capacita.html      profilo corrente per i domini richiesti: 4 dimensioni × livello/forza probatoria, feedback live sui divari
-  dashboard.html            esito: regimi, dipendenze (diagramma SVG), dumbbell per dominio, tabella dei divari,
-                            divari essenziali, priorità di intervento / di verifica, export JSON + stampa
+  dashboard.html            esito: renderizza CPF.buildReport() — regimi, dipendenze (diagramma SVG), dumbbell per
+                            dominio, tabella dei divari, divari essenziali, priorità di intervento / di verifica,
+                            export JSON + stampa
   test.html                 "Verifica del motore": esegue in pagina l'intera batteria di test, con spiegazione e sorgente dei casi
 
 data/                       configurazione fissa (window.CPF.data.*)
@@ -52,13 +55,15 @@ assets/
                               ordinale, non a somma —, rankDomains) + CPF.evidenceCurrency() (attualità §3.5)
                             + CPF.reviewFunction() (euristiche di coerenza per lo Step 2)
   regime-engine.js          CPF.classifyRegimes(answers) → regime_profile — funzione pura, ogni esito con trace motivato
+  report.js                 CPF.buildReport(assessment) → sintesi dell'esito (regimi + dipendenze + divari +
+                            divari essenziali + due priorità), funzione pura che la dashboard renderizza
   dumbbell.js               grafico gap a manubrio per dominio (sostituisce il radar, §3.6-3.7)
-  nav.js                    stepper con stato di completamento reale + riga di contesto (funzione · organizzazione)
-  shell.js                  barra applicativa fissa (monogramma, wordmark, tasto tema)
+  nav.js                    stepper: attributi ARIA + stato di completamento reale + riga di contesto
+  shell.js                  barra applicativa fissa (monogramma, wordmark, tasto tema) + skip-link + landmark <main>
   theme-toggle.js           tema chiaro/scuro persistito
 
 tests/
-  cases.js                  batteria unica di casi { suite, group, name, fn } — suite engine / calcs / review
+  cases.js                  batteria unica di casi { suite, group, name, fn } — suite engine / calcs / review / report
   runner.js                 renderer condiviso: CPF.runTests({ suites, mount, summary })
   engine.html               runner della suite "engine"
   calcs.html                runner della suite "calcs"
@@ -82,20 +87,13 @@ dashboard mostra un **esito dimostrativo** completo.
 
 ### Aperto
 
-- **Estrarre la sintesi della dashboard in `assets/report.js`.** Oggi
-  `dashboard.html` è il punto in cui regimi, funzione, dipendenze, profilo
-  obiettivo e profilo corrente vengono letti insieme per la prima volta — gli
-  step del wizard non si parlano tra loro, per costruzione (nessuna
-  compensazione a monte). La pagina però implementa *inline* tutta la
-  composizione dell'esito (cablaggio del dumbbell, SVG delle dipendenze, colonne
-  delle priorità, tabella dei divari): logica non testata e non riutilizzabile,
-  mentre `app.js` tiene solo i calcoli puri §3.6. Prevista una funzione pura
-  `CPF.buildReport(assessment) → { regimi, dipendenze, divari, essenziali,
-  priorità, conseguenze }` con una quarta suite di test `report`, così che
-  l'output finale sia verificabile da `test.html` come già lo è il motore dei
-  regimi — stesso argomento di trasparenza metodologica per il Capitolo 4.
 - **Vendorizzare `d3-sankey`** per un diagramma delle dipendenze più ricco nella
   dashboard (ora è un diagramma SVG a tre colonne fatto a mano).
+- **Consolidare gli `<script>` per pagina.** Ogni pagina elenca a mano i file
+  `data/*.js` + `assets/*.js` nell'ordine di caricamento. Funziona ed è esplicito
+  (un file mancante dà subito un `ReferenceError` che lo nomina), ma un
+  `assets/cpf.bundle.js` concatenato ridurrebbe la ripetizione — richiede però
+  un passo di build, oggi assente per scelta.
 
 ## Test
 
@@ -109,12 +107,14 @@ dall'interfaccia; girano in pagina e a riga di comando.
   ```sh
   JSC=/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Helpers/jsc
   # shim minimo per window/localStorage/document, poi:
-  "$JSC" shim.js data/*.js assets/app.js assets/regime-engine.js tests/cases.js tests/runner.js \
+  "$JSC" shim.js data/*.js assets/app.js assets/regime-engine.js assets/report.js \
+    tests/cases.js tests/runner.js \
     -e 'var r = CPF.runTests({}); print(r.pass + "/" + r.total);'
   ```
 
 Suite: **engine** (classificazione multi-regime, Cap. 2), **calcs** (calcoli
-derivati §3.6), **review** (euristiche di coerenza dello Step 2).
+derivati §3.6), **review** (euristiche di coerenza dello Step 2), **report**
+(`CPF.buildReport` — la sintesi che la dashboard renderizza).
 
 ## Il modello (sintesi)
 

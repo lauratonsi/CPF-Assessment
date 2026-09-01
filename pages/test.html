@@ -32,14 +32,14 @@
 </head>
 <body>
 <div class="wrap">
-  <nav class="stepper">
+  <nav class="stepper" aria-label="Passi della valutazione">
     <a href="step1-regimi.html">1 · Regimi</a>
     <a href="step2-funzione.html">2 · Funzione</a>
     <a href="step3-dipendenze.html">3 · Dipendenze</a>
     <a href="step4a-conseguenze.html">4a · Conseguenze</a>
     <a href="step4b-capacita.html">4b · Capacità</a>
     <a href="dashboard.html">Esito</a>
-    <span class="is-current">Verifica</span>
+    <span class="is-current" aria-current="step">Verifica</span>
   </nav>
 
   <header class="masthead">
@@ -98,6 +98,10 @@
   <p>Le euristiche di aiuto dello Step 2 (<code>CPF.reviewFunction</code>): non una validazione giuridica, ma controlli che segnalano campi mancanti e incoerenze interne.</p>
   <div id="out-review"></div>
 
+  <h2 class="suite-h">Suite <code>report</code> — sintesi dell'esito</h2>
+  <p><code>CPF.buildReport</code>: la funzione pura che la dashboard renderizza. Verifica che regimi, dipendenze, divari, divari essenziali e le due priorità siano composti senza aggregati (§3.6-3.7).</p>
+  <div id="out-report"></div>
+
   <p class="disclaimer">Un esito verde indica coerenza interna del motore con le regole codificate, non una validazione giuridica. Le designazioni caso per caso, le esclusioni per sicurezza nazionale e la valutazione integrale di conformità restano fuori dallo strumento.</p>
 </div>
 
@@ -109,8 +113,10 @@
 <script src="../data/dependency_taxonomy.js"></script>
 <script src="../data/assessment_schema.js"></script>
 <script src="../data/organization_schema.js"></script>
+<script src="../data/demo_assessment.js"></script>
 <script src="../assets/app.js"></script>
 <script src="../assets/regime-engine.js"></script>
+<script src="../assets/report.js"></script>
 <script src="../tests/cases.js"></script>
 <script src="../tests/runner.js"></script>
 <script>
@@ -121,14 +127,15 @@
     var e = CPF.runTests({ suites: ["engine"], mount: document.getElementById("out-engine"), source: src });
     var c = CPF.runTests({ suites: ["calcs"], mount: document.getElementById("out-calcs"), source: src });
     var v = CPF.runTests({ suites: ["review"], mount: document.getElementById("out-review"), source: src });
-    var total = e.total + c.total + v.total, pass = e.pass + c.pass + v.pass, fail = e.fail + c.fail + v.fail;
+    var rp = CPF.runTests({ suites: ["report"], mount: document.getElementById("out-report"), source: src });
+    var total = e.total + c.total + v.total + rp.total, pass = e.pass + c.pass + v.pass + rp.pass, fail = e.fail + c.fail + v.fail + rp.fail;
     var pct = total ? Math.round((pass / total) * 100) : 0;
     var sum = document.getElementById("sum");
     sum.className = "tr-sum " + (fail ? "ko" : "ok");
     sum.innerHTML =
       '<div class="tr-sum-line"><b>' + pass + ' / ' + total + '</b> test superati'
       + (fail ? ' &nbsp;·&nbsp; <span class="tr-sum-fail">' + fail + ' falliti</span>' : ' &nbsp;·&nbsp; tutto verde')
-      + ' &nbsp;·&nbsp; engine ' + e.pass + '/' + e.total + ', calcs ' + c.pass + '/' + c.total + ', review ' + v.pass + '/' + v.total + '</div>'
+      + ' &nbsp;·&nbsp; engine ' + e.pass + '/' + e.total + ', calcs ' + c.pass + '/' + c.total + ', review ' + v.pass + '/' + v.total + ', report ' + rp.pass + '/' + rp.total + '</div>'
       + '<div class="tr-progress"><span style="width:' + pct + '%"></span></div>';
   }
   document.getElementById("rerun").addEventListener("click", function (ev) { ev.preventDefault(); run(); });
