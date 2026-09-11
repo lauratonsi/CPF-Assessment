@@ -13,6 +13,21 @@ L'applicazione non intende automatizzare un giudizio di conformità. Il suo
 scopo è rendere esplicito, tracciabile e riproducibile il percorso con cui una
 valutazione viene costruita e motivata.
 
+## Riferimenti accademici
+
+**Titolo della tesi:** *Dall'Information Technology (IT) all'Operational
+Technology (OT): misurare, verificare e regolare il rischio cyber-fisico a
+tutela dei servizi essenziali*
+
+- **Dipartimento:** Scienze Politiche e Sociali — SPS
+- **Corso di laurea:** Laurea Magistrale in Governance e Politiche
+  dell'Innovazione Digitale — LM-91
+- **Elaborato:** Tesi di laurea magistrale in Governance della Cybersecurity
+- **Relatore:** Prof. Michele Colajanni
+- **Autrice:** Laura Tonsi
+- **Sessione:** Ottobre 2026
+- **Anno accademico:** 2025/2026
+
 L'unità di analisi è una **funzione cyber-fisica**: un'attività nella quale
 software e processo fisico sono sufficientemente accoppiati perché un guasto
 informatico possa produrre conseguenze materiali, come in una rete elettrica,
