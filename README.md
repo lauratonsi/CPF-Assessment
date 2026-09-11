@@ -1,14 +1,27 @@
 # CPF Assessment
 
-Strumento di valutazione della sicurezza di una **funzione cyber-fisica** — una
-attività in cui software e processo fisico sono così accoppiati che un guasto
-informatico diventa un danno materiale (rete elettrica, impianto idrico,
-produzione, logistica, sanità).
+## Abstract
 
-## A cosa serve
+CPF Assessment è un prototipo sperimentale per la valutazione della sicurezza
+di funzioni cyber-fisiche, intese come attività nelle quali componenti digitali
+e processo fisico risultano funzionalmente accoppiati. Il progetto traduce in
+un artefatto eseguibile il modello di analisi sviluppato nei Capitoli 2, 3 e 4
+della tesi di Laura Tonsi, mantenendo separati il perimetro regolatorio, la
+funzione valutata, le conseguenze intollerabili, le dipendenze e le capacità.
 
-Data una funzione, lo strumento struttura la valutazione in quattro domande
-tenute deliberatamente separate:
+L'applicazione non intende automatizzare un giudizio di conformità. Il suo
+scopo è rendere esplicito, tracciabile e riproducibile il percorso con cui una
+valutazione viene costruita e motivata.
+
+L'unità di analisi è una **funzione cyber-fisica**: un'attività nella quale
+software e processo fisico sono sufficientemente accoppiati perché un guasto
+informatico possa produrre conseguenze materiali, come in una rete elettrica,
+un impianto idrico, un processo produttivo, logistico o sanitario.
+
+## Oggetto e finalità
+
+Data una funzione cyber-fisica, lo strumento struttura la valutazione in quattro
+livelli analitici distinti e deliberatamente separati:
 
 1. **Quali regimi si applicano?** Classificatore multi-regime NIS2 / CER / DORA /
    CRA / Reg. Macchine / AI Act a partire dal profilo dell'organizzazione, con
@@ -30,24 +43,26 @@ L'esito è una dashboard con i divari per dominio, le soglie non compensabili no
 rispettate, le due graduatorie e la mappa delle dipendenze — esportabile in JSON
 e stampabile.
 
-## Cosa non è
+## Perimetro e limiti
 
 Non è uno strumento di conformità: non produce un giudizio di adeguatezza
 legale, non codifica designazioni caso per caso (CER) né esclusioni per
 sicurezza nazionale e difesa, non sostituisce una valutazione integrale.
-Rende esplicito e ripercorribile un ragionamento di misura — non è un parere.
+Rende esplicito e ripercorribile un percorso di misurazione, ma non costituisce
+un parere legale né una certificazione.
 
-## Contesto
+## Collocazione nella ricerca
 
-Accompagna il **Capitolo 4** della tesi di Laura Tonsi (cybersecurity,
+Il progetto accompagna il **Capitolo 4** della tesi di Laura Tonsi (cybersecurity,
 convergenza IT/OT, regolazione europea) e implementa il modello di misurazione
 del **Capitolo 3**. Unità di analisi: la funzione, mai l'organizzazione o il
 settore.
 
-## Architettura
+## Architettura e tracciabilità
 
-App **statica client-side**: nessun server, nessun build step. Si apre
-`index.html` direttamente (anche da `file://`), funziona offline. Le valutazioni
+L'applicazione è **statica e client-side**: non richiede un server applicativo
+né un processo di build. Può essere aperta direttamente da `index.html`, anche
+tramite `file://`, e opera offline. Le valutazioni
 vivono in `localStorage` e si esportano/importano come JSON. La configurazione è
 in file `data/*.js` caricati come `<script>` che popolano `window.CPF.data.*`.
 `shell.js` inietta su ogni pagina la barra applicativa, uno skip-link e il
@@ -115,13 +130,14 @@ singola funzione, con un flag `overridden_from_org_profile` per regime — una
 funzione può ricadere in un regime che non riguarda l'organizzazione nel suo
 complesso (es. CRA per un singolo prodotto digitale).
 
-## Stato
+## Stato dell'implementazione
 
-Tutti e sei i passi del wizard e la dashboard sono **costruiti e funzionanti
-end-to-end**. Il flusso: Step 1 → profilo organizzazione; "Avanti" clona il
-profilo in una valutazione; Step 2-4b compilano la funzione, le dipendenze, le
-conseguenze/percorsi e il profilo di capacità con autosave; la dashboard rende
-l'esito e permette export JSON / stampa. Senza una valutazione attiva la
+Tutti e sei i passi del wizard e la dashboard sono **implementati e funzionanti
+end-to-end**. Il flusso è il seguente: Step 1 produce il profilo organizzativo;
+il comando "Avanti" lo clona in una valutazione; gli Step 2-4b raccolgono la
+funzione, le dipendenze, le conseguenze, i percorsi e il profilo di capacità
+con salvataggio automatico; la dashboard restituisce l'esito e consente
+l'esportazione JSON e la stampa. In assenza di una valutazione attiva, la
 dashboard mostra un **esito dimostrativo** completo.
 
 Lo stepper è una barra di avanzamento reale (`nav.js`): riempimento proporzionale
@@ -131,7 +147,7 @@ valutazione salvata, con «Riprendi». I pannelli di feedback dal vivo (coerenza
 dello Step 2, riepiloghi degli Step 4a/4b) si aggiornano solo quando cambiano,
 con una breve pulsazione.
 
-### Aperto
+### Sviluppi aperti
 
 - **Vendorizzare `d3-sankey`** per un diagramma delle dipendenze più ricco nella
   dashboard (ora è un diagramma SVG a tre colonne fatto a mano).
