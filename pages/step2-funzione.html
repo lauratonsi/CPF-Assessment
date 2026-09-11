@@ -70,6 +70,7 @@
     <a href="step4b-capacita.html">4b · Capacità</a>
     <a href="dashboard.html">Esito</a>
     <a href="test.html">Test motore</a>
+    <a href="casi-studio.html">Casi</a>
   </nav>
   <header class="masthead">
     <h1>Step 2 — Definizione della funzione cyber-fisica</h1>
@@ -153,7 +154,8 @@
     + '<div class="q"><label class="lbl" for="fn_name">Nome della funzione</label><input class="field" id="fn_name" placeholder="es. Potabilizzazione — linea A"></div>'
     + '<div class="q"><label class="lbl" for="fn_service">Risultato operativo / servizio da preservare</label><textarea class="field" id="fn_service" placeholder="Cosa produce o mantiene questa funzione, e per chi."></textarea></div>'
     + '<div class="q"><label class="lbl" for="fn_process">Processo fisico governato</label><textarea class="field" id="fn_process" placeholder="Il processo fisico controllato e le condizioni di safety rilevanti."></textarea></div>'
-    + '<div class="q"><label class="lbl" for="fn_perimeter">Perimetro osservabile</label><textarea class="field" id="fn_perimeter" placeholder="Ciò che l\'organizzazione può ragionevolmente conoscere, monitorare, governare o affrontare con misure di continuità (§3.2)."></textarea></div>'
+    + '<div class="q"><label class="lbl" for="fn_perimeter">Perimetro osservabile</label><textarea class="field" id="fn_perimeter" placeholder="Ciò che l\'organizzazione può ragionevolmente conoscere, monitorare, governare o affrontare con misure di continuità (§3.2)."></textarea>'
+    + '<p class="hint">Includi esplicitamente i sistemi IT dai quali il processo dipende operativamente (storici, MES, reti aziendali che veicolano comandi o dati verso il campo), non solo l\'OT in senso stretto. Un\'interruzione del processo non dimostra da sola la compromissione dei sistemi di controllo: può derivare dalla perdita di un sistema IT di supporto — un divario reale ma di dominio diverso da quello a cui verrebbe istintivamente attribuito. Caso di riferimento: <a href="casi-studio.html#norsk-hydro">Norsk Hydro →</a></p></div>'
     + '</fieldset>'
 
     + '<fieldset><legend>Regimi rilevanti per questa funzione</legend>'

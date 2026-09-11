@@ -141,6 +141,7 @@
     eq(p.nis2.psnc_exclusion, true, "nis2.psnc_exclusion");
     ok(p.interactions.some(function (i) { return i.type === "lex specialis nazionale"; }), "interazione PSNC");
     has(p.verification_flags, /PSNC/, "verifica PSNC");
+    has(p.notes, /complementari/, "nota di complementarità PSNC/strumento (§5.2, §5.7)");
   });
   t("engine", "PSNC", "nessun asset indicato → non applicabile", function () {
     eq(C({}).psnc.applicable, false);
@@ -371,6 +372,29 @@
       ok(dims[d].evidence && dims[d].evidence.types && dims[d].evidence.types.length >= 2, d + " senza matrice di corroborazione");
     });
   });
+  t("calcs", "dependencyReference", "accoppiamento: caso Baltico (§5.4.2) documenta ridondanza reale vs nominale", function () {
+    var cn = root.CPF.data.dependencyReference.coupling.case_note;
+    ok(cn && cn.title && cn.text && cn.thesis_ref === "§5.4.2", "case_note assente o incompleto");
+  });
+  t("calcs", "caseStudies", "i sette casi del Cap. 5 sono presenti, ciascuno con almeno un collegamento al modello", function () {
+    var cs = root.CPF.data.caseStudies;
+    ok(Array.isArray(cs) && cs.length === 7, "attesi 7 casi, trovati " + (cs && cs.length));
+    cs.forEach(function (c) {
+      ok(c.id && c.title && c.thesis_ref && c.summary, "caso incompleto: " + (c.id || "?"));
+      ok(Array.isArray(c.model_links) && c.model_links.length >= 1, c.id + " senza model_links");
+      c.model_links.forEach(function (l) {
+        ok(l.ref && l.concept && l.text, c.id + ": model_link incompleto");
+      });
+    });
+    var ids = cs.map(function (c) { return c.id; });
+    ["baltico-sottomarino", "norsk-hydro"].forEach(function (id) {
+      ok(ids.indexOf(id) !== -1, "id atteso mancante (usato nei link incrociati Step 2/3): " + id);
+    });
+  });
+  t("calcs", "caseStudies", "sintesi §5.5 presente (Assante e Lee vs modello del Cap. 3)", function () {
+    var syn = root.CPF.data.caseStudiesSynthesis;
+    ok(syn && syn.thesis_ref === "§5.5" && syn.text, "caseStudiesSynthesis assente o incompleta");
+  });
 
   /* ================================================================
      SUITE "review" — controllo di coerenza della funzione (Step 2)
@@ -438,6 +462,10 @@
     var R = root.CPF.buildReport(demo());
     eq(R.regime_profile.nis2.qualification, "essenziale");
     eq(R.regime_profile.cer.designation, "soggetto_critico");
+  });
+  t("report", "buildReport", "le note del motore regimi (es. complementarità PSNC, §5.2/§5.7) passano nel report", function () {
+    var R = root.CPF.buildReport({ function: { name: "x" }, regime_profile: { nis2: {}, notes: ["nota di prova"] } });
+    eq(R.notes, ["nota di prova"]);
   });
   t("report", "buildReport", "demo → 7 regimi, quelli rilevanti marcati", function () {
     var R = root.CPF.buildReport(demo());

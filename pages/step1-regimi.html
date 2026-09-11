@@ -99,6 +99,7 @@
     <a href="step4b-capacita.html">4b · Capacità</a>
     <a href="dashboard.html">Esito</a>
     <a href="test.html">Test motore</a>
+    <a href="casi-studio.html">Casi</a>
   </nav>
   <header class="masthead">
     <h1>Step 1 — Regimi applicabili</h1>
@@ -539,10 +540,11 @@
       var target = document.querySelector('.result .rc[data-domain="' + domain + '"]');
       if (!source || !target) return;
       var sourceRect = source.getBoundingClientRect();
+      var targetRect = target.getBoundingClientRect();
       var x1 = sourceRect.right - layoutRect.left;
       var y1 = sourceRect.top + 28 - layoutRect.top;
-      var x2 = target.getBoundingClientRect().left - layoutRect.left;
-      var y2 = y1;
+      var x2 = targetRect.left - layoutRect.left;
+      var y2 = targetRect.top + 20 - layoutRect.top;
       var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
       path.setAttribute("class", "domain-link");
       path.setAttribute("stroke", DOMAIN_COLORS[domain]);
@@ -557,20 +559,32 @@
       });
     });
   }
+  var CARD_GAP = 12; // px tra due card impilate, quando la precedente è più alta del previsto
   function positionResultCards() {
     if (window.innerWidth < 992) return;
     var layout = document.querySelector(".layout");
+    var layoutRect = layout.getBoundingClientRect();
+    /* Ogni card vorrebbe allinearsi al fieldset che la genera, ma l'altezza
+       delle card varia con il contenuto (tracce, note): un ancoraggio "cieco"
+       può far scavalcare la card successiva. Si calcola prima la posizione
+       desiderata di ciascuna, poi si scorre in ordine verticale spingendo in
+       basso solo quando serve, così non si sovrappongono mai. */
+    var placements = [];
     document.querySelectorAll(".result .rc[data-domain]").forEach(function (target) {
       var domain = target.getAttribute("data-domain");
       var source = domain === "nis2"
         ? document.querySelector(".domain--nis2")
         : document.querySelector('fieldset[data-domain="' + domain + '"]');
       if (!source) return;
-      var layoutRect = layout.getBoundingClientRect();
-      var sourceRect = source.getBoundingClientRect();
-      var top = sourceRect.top - layoutRect.top;
       target.style.minHeight = "";
-      target.style.top = top + "px";
+      placements.push({ el: target, desired: source.getBoundingClientRect().top - layoutRect.top });
+    });
+    placements.sort(function (a, b) { return a.desired - b.desired; });
+    var cursor = 0;
+    placements.forEach(function (p) {
+      var top = Math.max(p.desired, cursor);
+      p.el.style.top = top + "px";
+      cursor = top + p.el.offsetHeight + CARD_GAP;
     });
   }
 
@@ -643,6 +657,14 @@
 
   fillForm();
   recompute();
+
+  /* i font IBM Plex caricano async (font-display: swap): al cambio dal
+     fallback possono cambiare gli a-capo e quindi l'altezza dei fieldset.
+     Le card sono ancorate una tantum al layout corrente: vanno riallineate
+     quando i font (e quindi il layout) si sono assestati. */
+  if (window.document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () { positionResultCards(); drawDomainLinks(CPF.classifyRegimes(A)); });
+  }
 })();
 </script>
 <script src="../assets/nav.js"></script>

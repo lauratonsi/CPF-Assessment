@@ -98,6 +98,8 @@ pages/                      i sei passi del wizard + verifica
                             dominio, tabella dei divari, divari essenziali, priorità di intervento / di verifica,
                             export JSON + stampa
   test.html                 "Verifica del motore": esegue in pagina l'intera batteria di test, con spiegazione e sorgente dei casi
+  casi-studio.html          "Casi di riferimento": i 7 casi del Cap. 5 (§5.4.1-§5.4.7) riletti come esempi del modello,
+                            ciascuno con collegamento esplicito al punto preciso del Cap. 3 che illustra
 
 data/                       configurazione fissa (window.CPF.data.*)
   regime_classifier.js      metadati e domande dello Step 1
@@ -114,6 +116,7 @@ data/                       configurazione fissa (window.CPF.data.*)
   organization_schema.js    profilo organizzazione riutilizzabile + CPF.cloneRegimeProfile()
   function_examples.js      3 funzioni-tipo compilate per intero (Step 2)
   demo_assessment.js        valutazione dimostrativa completa (usata dalla dashboard quando non c'è nulla di attivo)
+  case_studies.js           i 7 casi del Cap. 5 + sintesi §5.5, consultabili in pages/casi-studio.html
 
 assets/
   theme.css                 design system: token colore/tipografia, IBM Plex Sans + Mono, componenti
@@ -242,6 +245,28 @@ Non è codificato ciò che la tesi non riscontra: il calendario differenziato di
 applicabilità dei sistemi AI ad alto rischio e le integrazioni all'art. 5 AI Act
 sono stati rimossi da `regime_rules.js` in attesa di un riferimento a fonte
 primaria per il Capitolo 4 (vedi commenti nel file).
+
+Dal Capitolo 5 (PSNC, guerra ibrida, casi di studio) sono confluiti tre punti:
+- **Complementarità PSNC/strumento** (§5.2, §5.7): il motore dei regimi
+  (`regime-engine.js`) ora esplicita che il Perimetro tutela per via
+  amministrativa gli asset formalmente inclusi, mentre lo strumento valuta la
+  funzione cyber-fisica nel suo complesso — l'uno non sostituisce l'altro. La
+  nota compare nello Step 1 e, tramite `CPF.buildReport`, nella dashboard.
+- **Ridondanza reale vs nominale** (§5.4.2, infrastrutture sottomarine del
+  Baltico): la legenda dello Step 3 (`dependency_reference.js`) documenta come
+  danni fisici comparabili producano esiti opposti a seconda che
+  un'alternativa sia effettivamente attivabile — non solo dichiarata nel campo
+  «alternativa disponibile».
+- **Guardia sul perimetro IT/OT** (§5.4.5, Norsk Hydro): un hint nello Step 2
+  ricorda che l'interruzione di un processo non dimostra da sola la
+  compromissione dei sistemi di controllo — può derivare dalla perdita di un
+  sistema IT di supporto, un divario reale ma di dominio diverso.
+- **`pages/casi-studio.html`**: tutti e sette i casi del §5.4 (più la sintesi
+  del §5.5, "Assante e Lee classificano l'effetto, il modello valuta le
+  capacità che lo assorbono") come pagina di consultazione, raggiungibile
+  dallo stepper e linkata dai punti del wizard dove un caso è pertinente.
+  Include anche i casi che restano *fuori* dall'unità di analisi del modello
+  (Estonia, in parte il Baltico) — il confine è istruttivo quanto l'esempio.
 
 Strumento orientativo, non parere legale. Non codifica designazioni caso per caso
 di CER, esclusioni per sicurezza nazionale/difesa, né la valutazione integrale di

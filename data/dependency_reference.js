@@ -74,6 +74,13 @@
         text: "Nei sistemi SCADA, dove reti di comunicazione, sensori, attuatori, operatori e processi fisici concorrono al controllo della funzione, la combinazione tra interazioni complesse e accoppiamento stretto può consentire a guasti tecnici, errori software o azioni operative circoscritte di concatenarsi e propagarsi oltre il componente d'origine. L'accoppiamento descrive la rapidità e la rigidità con cui la perturbazione attraversa la catena di controllo; la complessità riguarda le retroazioni e le interazioni non immediatamente visibili che rendono difficile anticiparne la sequenza.",
         example: "Il blackout nordamericano del 2003: il malfunzionamento del sistema di allarme e la perdita di consapevolezza operativa interagirono con errori nella stima dello stato della rete, distacchi delle linee e sovraccarichi, in una finestra temporale troppo breve per riconoscere e contenere la perturbazione prima che raggiungesse la funzione controllata.",
         thesis_ref: "§3.4, Lewis (2020)"
+      },
+      case_note: {
+        title: "Lo stesso danno, esiti opposti: le infrastrutture sottomarine del Baltico",
+        text: "Un danno fisico comparabile può produrre esiti funzionali opposti a seconda che un'alternativa sia effettivamente attivabile in tempo utile. Le reti di telecomunicazione sottomarine possono di norma compensare la rottura di un collegamento mediante il reinstradamento del traffico; gli interconnettori elettrici sottomarini presentano invece vincoli tecnici più stringenti e tempi di ripristino più lunghi. La sola classe e il solo tipo di guasto non bastano quindi a prevedere l'impatto sulla funzione: va accertata la disponibilità reale — non nominale — di un'alternativa (campo «alternativa disponibile» di questo editor).",
+        example: "Nel danneggiamento dei cavi Elisa presso Fitburg (dicembre 2025) il traffico fu reinstradato e il servizio restò disponibile nonostante il danno fisico accertato; nei casi che hanno coinvolto interconnettori elettrici la stessa categoria di evento ha prodotto interruzioni prolungate.",
+        thesis_ref: "§5.4.2",
+        see_also: { href: "casi-studio.html#baltico-sottomarino", label: "Caso di riferimento: infrastrutture sottomarine del Baltico →" }
       }
     },
 

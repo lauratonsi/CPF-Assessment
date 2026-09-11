@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Casi di riferimento · CPF Assessment</title>
+<link rel="stylesheet" href="../assets/theme.css">
+<script>(function(){try{var t=localStorage.getItem("cpf-theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+<style>
+  .wrap { max-width: 60rem; }
+  .lead { border-left: 3px solid var(--accent); padding: 0.2rem 0 0.2rem 1rem; margin: 1.4rem 0; }
+  .lead p { margin: 0.5rem 0; font-size: 0.92rem; }
+
+  .cs-card { border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--shadow-sm); padding: 1.1rem 1.25rem 1.25rem; margin: 1rem 0; scroll-margin-top: 5rem; }
+  .cs-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem 0.7rem; }
+  .cs-head h2 { margin: 0; font-size: 1.1rem; }
+  .cs-year { font-family: var(--mono); font-size: 0.72rem; color: var(--faint); }
+  .cs-sub { margin: 0.2rem 0 0; color: var(--muted); font-size: 0.85rem; }
+  .cs-sub .ref { font-family: var(--mono); font-size: 0.72rem; color: var(--accent-strong); }
+  .cs-sector { margin: 0.3rem 0 0; font-size: 0.78rem; }
+  .cs-summary { margin: 0.7rem 0 0; font-size: 0.9rem; line-height: 1.55; }
+  .cs-tax { margin: 0.6rem 0 0; font-size: 0.78rem; color: var(--muted); border-left: 2px solid var(--border); padding-left: 0.6rem; }
+  .cs-links { margin-top: 0.8rem; display: grid; gap: 0.55rem; }
+  .cs-link { background: var(--accent-tint); border-radius: var(--r); padding: 0.6rem 0.75rem; }
+  .cs-link .k { font-family: var(--mono); font-size: 0.68rem; color: var(--accent-ink); }
+  .cs-link b { display: block; font-size: 0.85rem; margin: 0.1rem 0 0.25rem; }
+  .cs-link p { margin: 0; font-size: 0.82rem; color: var(--accent-ink); line-height: 1.5; }
+
+  .cs-index { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 1.2rem 0 1.6rem; font-family: var(--mono); font-size: 0.72rem; }
+  .cs-index a { border: 1px solid var(--border); border-radius: 4px; padding: 0.3rem 0.6rem; background: var(--surface); color: var(--muted); text-decoration: none; }
+  .cs-index a:hover { border-color: var(--accent); color: var(--accent-ink); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="stepper" aria-label="Passi della valutazione">
+    <a href="step1-regimi.html">1 · Regimi</a>
+    <a href="step2-funzione.html">2 · Funzione</a>
+    <a href="step3-dipendenze.html">3 · Dipendenze</a>
+    <a href="step4a-conseguenze.html">4a · Conseguenze</a>
+    <a href="step4b-capacita.html">4b · Capacità</a>
+    <a href="dashboard.html">Esito</a>
+    <a href="test.html">Test motore</a>
+    <span class="is-current" aria-current="step">Casi di riferimento</span>
+  </nav>
+
+  <header class="masthead">
+    <h1>Casi di riferimento</h1>
+    <p class="dek">I sette casi del Capitolo 5 (§5.4.1-§5.4.7), riletti come esempi del modello: cosa illustrano, e a quale punto preciso del Capitolo 3 si collegano.</p>
+  </header>
+
+  <div class="lead" id="lead"></div>
+
+  <nav class="cs-index" aria-label="Vai al caso"></nav>
+
+  <div id="cases"></div>
+
+  <p class="disclaimer">Riassunti parafrasati dal testo della tesi a scopo illustrativo, non una loro riproduzione integrale: per la ricostruzione completa, le fonti primarie e l'apparato di note, il riferimento resta il Capitolo 5. Questa pagina non aggiunge nulla al motore di classificazione né ai calcoli dello strumento — è consultazione, non un passo del wizard.</p>
+</div>
+
+<script src="../data/case_studies.js"></script>
+<script>
+(function () {
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+
+  var CS = CPF.data.caseStudies || [];
+  var syn = CPF.data.caseStudiesSynthesis;
+  if (syn) {
+    document.getElementById("lead").innerHTML =
+      '<p>' + esc(syn.text) + ' <span class="cs-sub"><span class="ref">' + esc(syn.thesis_ref) + '</span></span></p>';
+  }
+
+  document.querySelector(".cs-index").innerHTML = CS.map(function (c) {
+    return '<a href="#' + c.id + '">' + esc(c.title) + '</a>';
+  }).join("");
+
+  document.getElementById("cases").innerHTML = CS.map(function (c) {
+    var links = (c.model_links || []).map(function (l) {
+      return '<div class="cs-link"><span class="k">' + esc(l.ref) + '</span><b>' + esc(l.concept) + '</b><p>' + esc(l.text) + '</p></div>';
+    }).join("");
+    return '<article class="cs-card" id="' + c.id + '">'
+      + '<div class="cs-head"><h2>' + esc(c.title) + '</h2><span class="cs-year">' + esc(c.year) + '</span></div>'
+      + '<p class="cs-sub">' + esc(c.subtitle) + ' &nbsp;·&nbsp; <span class="ref">' + esc(c.thesis_ref) + '</span></p>'
+      + '<p class="cs-sector muted">' + esc(c.sector) + '</p>'
+      + '<p class="cs-summary">' + esc(c.summary) + '</p>'
+      + (c.taxonomy_note ? '<p class="cs-tax">' + esc(c.taxonomy_note) + '</p>' : '')
+      + (links ? '<div class="cs-links">' + links + '</div>' : '')
+      + '</article>';
+  }).join("");
+})();
+</script>
+<script src="../assets/theme-toggle.js"></script>
+<script src="../assets/shell.js"></script>
+</body>
+</html>

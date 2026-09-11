@@ -157,6 +157,7 @@
       nis2.psnc_exclusion = true;
       nis2.trace.push(step("PSNC: prevalenza nazionale per ambito", R.nis2.lex_specialis_note));
       notes.push("PSNC: per le reti, i sistemi e i servizi già inclusi nel Perimetro, applicare il framework nazionale in via esclusiva per gli obblighi relativi a tali asset; la verifica è distinta dalla qualificazione NIS2 dell'organizzazione.");
+      notes.push("PSNC e questo strumento valutano oggetti complementari, non sovrapposti: il Perimetro tutela per via amministrativa gli asset formalmente inclusi (misure di sicurezza, CVCN, notifica al CSIRT); questa valutazione riguarda la funzione cyber-fisica nel suo complesso, compresi i componenti non assoggettati al PSNC da cui la stessa funzione dipende. L'una non sostituisce gli obblighi dell'altra.");
       verification.push("PSNC: verificare la notifica riservata di inclusione, l'elenco degli asset e delle dipendenze tecnologiche interessate, il raccordo con ACN/autorità competenti/CSIRT Italia e gli approvvigionamenti soggetti a verifica CVCN.");
     } else {
       psnc.trace.push(step("Non indicato", "Nessuna rete o sistema informativo è stato indicato come già incluso nel PSNC."));

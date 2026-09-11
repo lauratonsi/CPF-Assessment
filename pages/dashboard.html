@@ -104,6 +104,7 @@
     <a class="is-done" href="step4b-capacita.html">4b · Capacità</a>
     <span class="is-current" aria-current="step">Esito</span>
     <a href="test.html">Test motore</a>
+    <a href="casi-studio.html">Casi</a>
   </nav>
   <header class="masthead">
     <h1>Esito della valutazione</h1>
@@ -221,6 +222,7 @@
     + '<p class="lead">Profilo dei regimi per questa funzione. In evidenza quelli rilevanti; gli altri sono attenuati.</p>'
     + '<div class="reg-grid">' + regCards + '</div>'
     + panel(R.interactions, "Interazioni tra regimi", function (i) { return '<b>' + esc(i.type) + '</b>: ' + esc(i.text); })
+    + panel(R.notes, "Note", function (n) { return esc(n); })
     + panel(R.verification_flags, "Priorità di verifica normativa", function (v) { return esc(v); }, "warn")
     + '</section>');
 

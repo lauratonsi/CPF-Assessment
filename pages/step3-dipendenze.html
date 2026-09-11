@@ -74,6 +74,7 @@
     <a href="step4b-capacita.html">4b · Capacità</a>
     <a href="dashboard.html">Esito</a>
     <a href="test.html">Test motore</a>
+    <a href="casi-studio.html">Casi</a>
   </nav>
   <header class="masthead">
     <h1>Step 3 — Mappatura delle dipendenze</h1>
@@ -143,11 +144,11 @@
     }
     function grid(items, two) { out.push('<div class="tax' + (two ? ' two' : '') + '">' + items.map(card).join("") + '</div>'); }
     function callout(o) {
-      out.push('<div class="callout"><h4>' + esc(o.title) + (o.thesis_ref ? ' <span class="ref">' + esc(o.thesis_ref) + '</span>' : '') + '</h4><p>' + esc(o.text) + '</p>' + (o.example ? '<p class="ex">' + esc(o.example) + '</p>' : '') + '</div>');
+      out.push('<div class="callout"><h4>' + esc(o.title) + (o.thesis_ref ? ' <span class="ref">' + esc(o.thesis_ref) + '</span>' : '') + '</h4><p>' + esc(o.text) + '</p>' + (o.example ? '<p class="ex">' + esc(o.example) + '</p>' : '') + (o.see_also ? '<p class="ex"><a href="' + esc(o.see_also.href) + '">' + esc(o.see_also.label) + '</a></p>' : '') + '</div>');
     }
     sectionHead(D.intro);
     sectionHead(D.classes); grid(D.classes.items, true); out.push('<p class="closing">' + esc(D.classes.closing_note) + '</p>');
-    sectionHead(D.coupling); grid(D.coupling.items, true); out.push('<p class="closing">' + esc(D.coupling.dynamic_note) + '</p>'); callout(D.coupling.complexity_note);
+    sectionHead(D.coupling); grid(D.coupling.items, true); out.push('<p class="closing">' + esc(D.coupling.dynamic_note) + '</p>'); callout(D.coupling.complexity_note); callout(D.coupling.case_note);
     sectionHead(D.positions); grid(D.positions.items, false); out.push('<p class="closing">' + esc(D.positions.important_distinction) + '</p>');
     sectionHead(D.failure_types); grid(D.failure_types.items, false);
     sectionHead(D.temporal_dimension); out.push('<p>' + esc(D.temporal_dimension.model_extension) + '</p>'); callout({ title: "Il punto chiave", text: D.temporal_dimension.key_point });

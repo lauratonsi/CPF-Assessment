@@ -115,6 +115,7 @@
       regime_profile: RP,
       regimes: regimes,
       interactions: RP.interactions || [],
+      notes: RP.notes || [],
       verification_flags: RP.verification_flags || [],
 
       dependencies: dependencies,
