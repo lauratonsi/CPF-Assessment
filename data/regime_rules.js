@@ -100,7 +100,7 @@
     psnc: {
       thesis_ref: "§2.7",
       label: "Perimetro di Sicurezza Nazionale Cibernetica",
-      note: "Per gli asset già inseriti nel PSNC, il framework nazionale disciplina in via esclusiva gli obblighi di gestione del rischio e notifica connessi a tali asset; il raccordo va verificato caso per caso."
+      note: "Il PSNC tutela reti, sistemi e servizi informatici formalmente inclusi perché rilevanti per funzioni essenziali dello Stato. Il CVCN opera presso l'ACN e l'ACN svolge le principali funzioni operative e tecniche. Per gli asset inclusi, il framework nazionale disciplina in via esclusiva gli obblighi di gestione del rischio e notifica; l'inclusione dell'asset e la qualificazione NIS2 dell'organizzazione restano distinte."
     },
 
     /* ---- CRA ---- (Reg. 2024/2847, artt. 7-8; Allegati III-IV) */

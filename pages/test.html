@@ -28,6 +28,11 @@
   .howto li { margin: 0.35rem 0; }
   .howto pre { background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; padding: 0.7rem 0.9rem; overflow-x: auto; font-family: var(--mono); font-size: 0.76rem; line-height: 1.5; white-space: pre; }
   .howto .k { font-family: var(--mono); font-size: 0.82rem; color: var(--accent-ink); background: var(--accent-tint); padding: 0.03rem 0.3rem; border-radius: 3px; }
+  .test-nav { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 0.6rem; margin: 1.4rem 0 1.7rem; }
+  .test-nav a { display: block; padding: 0.75rem 0.85rem; border: 1px solid var(--border); border-top: 3px solid var(--accent); border-radius: var(--r); background: var(--surface); color: var(--ink); text-decoration: none; box-shadow: var(--shadow-sm); }
+  .test-nav a:hover { border-color: var(--accent); background: var(--accent-tint); }
+  .test-nav b { display: block; margin-bottom: 0.18rem; font-size: 0.84rem; }
+  .test-nav span { display: block; color: var(--muted); font-size: 0.75rem; line-height: 1.4; }
 </style>
 </head>
 <body>
@@ -39,12 +44,12 @@
     <a href="step4a-conseguenze.html">4a · Conseguenze</a>
     <a href="step4b-capacita.html">4b · Capacità</a>
     <a href="dashboard.html">Esito</a>
-    <span class="is-current" aria-current="step">Verifica</span>
+    <span class="is-current" aria-current="step">Test motore</span>
   </nav>
 
   <header class="masthead">
-    <h1>Verifica del motore di inferenza</h1>
-    <p class="dek">La stessa batteria di asserzioni che accompagna il codice, eseguita qui nel browser a ogni apertura della pagina. Serve a rendere ispezionabile — non solo dichiarata — la logica con cui lo strumento classifica i regimi e deriva le priorità.</p>
+    <h1>Test del motore di inferenza</h1>
+    <p class="dek">Questa è la verifica tecnica interna dello strumento: la stessa batteria di asserzioni che accompagna il codice viene eseguita qui nel browser a ogni apertura della pagina. Non è una verifica normativa dell'organizzazione.</p>
   </header>
 
   <div class="lead">
@@ -52,6 +57,13 @@
     <p>I casi vivono in un unico file (<code>tests/cases.js</code>) e non dipendono dall'interfaccia: girano identici qui, nelle pagine tecniche <a href="../tests/engine.html">engine</a> e <a href="../tests/calcs.html">calcs</a>, e a riga di comando senza browser. La stessa proprietà — un input, un output atteso, una fonte — vale come esempio di trasparenza metodologica per il Capitolo 4.</p>
     <p>La suite <b>engine</b> copre la classificazione multi-regime (Capitolo 2); <b>calcs</b> copre i calcoli derivati del §3.6 (divari per dimensione, anello debole non compensabile, priorità di intervento distinta da quella di verifica); <b>review</b> copre le euristiche di aiuto alla compilazione dello Step 2.</p>
   </div>
+
+  <nav class="test-nav" aria-label="Sezioni dei test">
+    <a href="#suite-engine"><b>Classificazione regimi</b><span>Controlla NIS2, CER, DORA, PSNC, CRA, Macchine e AI Act.</span></a>
+    <a href="#suite-calcs"><b>Calcoli della valutazione</b><span>Verifica divari, soglie essenziali e priorità.</span></a>
+    <a href="#suite-review"><b>Coerenza della funzione</b><span>Segnala dati mancanti o incoerenze nello Step 2.</span></a>
+    <a href="#suite-report"><b>Composizione dell'esito</b><span>Controlla come la dashboard costruisce il report finale.</span></a>
+  </nav>
 
   <details class="howto">
     <summary>Come funziona questa verifica</summary>
@@ -86,19 +98,19 @@
   <p class="rerun"><a href="#" id="rerun">↻ riesegui</a>
     <label><input type="checkbox" id="show-src"> mostra il codice di ogni caso</label></p>
 
-  <h2 class="suite-h">Suite <code>engine</code> — classificazione multi-regime</h2>
+  <h2 class="suite-h" id="suite-engine">Classificazione regimi <code>engine</code></h2>
   <p>Riferimento: Capitolo 2 della tesi; <code>data/regime_rules.js</code> + <code>assets/regime-engine.js</code>.</p>
   <div id="out-engine"></div>
 
-  <h2 class="suite-h">Suite <code>calcs</code> — calcoli derivati §3.6</h2>
+  <h2 class="suite-h" id="suite-calcs">Calcoli della valutazione <code>calcs</code></h2>
   <p>Riferimento: §3.6; <code>assets/app.js</code>.</p>
   <div id="out-calcs"></div>
 
-  <h2 class="suite-h">Suite <code>review</code> — controllo di coerenza della funzione</h2>
+  <h2 class="suite-h" id="suite-review">Coerenza della funzione <code>review</code></h2>
   <p>Le euristiche di aiuto dello Step 2 (<code>CPF.reviewFunction</code>): non una validazione giuridica, ma controlli che segnalano campi mancanti e incoerenze interne.</p>
   <div id="out-review"></div>
 
-  <h2 class="suite-h">Suite <code>report</code> — sintesi dell'esito</h2>
+  <h2 class="suite-h" id="suite-report">Composizione dell'esito <code>report</code></h2>
   <p><code>CPF.buildReport</code>: la funzione pura che la dashboard renderizza. Verifica che regimi, dipendenze, divari, divari essenziali e le due priorità siano composti senza aggregati (§3.6-3.7).</p>
   <div id="out-report"></div>
 

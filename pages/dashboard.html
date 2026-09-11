@@ -40,7 +40,7 @@
   .panel ul { margin: 0; padding-left: 1.1rem; }
   .panel li { margin: 0.2rem 0; }
 
-  .dep-flow { width: 100%; overflow-x: auto; border: 1px solid var(--border); border-radius: var(--r); background: var(--surface); padding: 0.5rem; }
+  .dep-flow { display: block; width: 100%; min-height: 12rem; overflow-x: auto; border: 1px solid var(--border); border-radius: var(--r-lg); background: linear-gradient(90deg, color-mix(in srgb, var(--surface-2) 62%, var(--surface)), var(--surface) 48%, color-mix(in srgb, var(--accent-tint) 34%, var(--surface))); padding: 0.75rem; }
   .dep-stat { display: flex; gap: 0.5rem; flex-wrap: wrap; font-size: 0.8rem; margin-bottom: 0.6rem; }
   .dep-stat b { font-family: var(--mono); }
   .mini-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
@@ -83,6 +83,10 @@
   .cons-item .path .caps .e { color: var(--danger); }
 
   .dash-actions { display: flex; gap: 0.7rem; flex-wrap: wrap; margin-top: 1.5rem; }
+  .engine-check { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem; padding: 0.9rem 1rem; border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--r); background: var(--surface); }
+  .engine-check h2 { margin: 0 0 0.15rem; font-size: 0.95rem; }
+  .engine-check p { margin: 0; max-width: 38rem; color: var(--muted); font-size: 0.8rem; }
+  .engine-check .btn { flex: none; }
   @media print {
     .stepper, .theme-toggle, .dash-actions, .btn-row { display: none !important; }
     .wrap { max-width: none; }
@@ -99,7 +103,7 @@
     <a class="is-done" href="step4a-conseguenze.html">4a · Conseguenze</a>
     <a class="is-done" href="step4b-capacita.html">4b · Capacità</a>
     <span class="is-current" aria-current="step">Esito</span>
-    <a href="test.html">Verifica</a>
+    <a href="test.html">Test motore</a>
   </nav>
   <header class="masthead">
     <h1>Esito della valutazione</h1>
@@ -108,6 +112,14 @@
 
   <div id="demo-banner" class="demo-banner" hidden></div>
   <div id="out"></div>
+
+  <section class="engine-check" aria-labelledby="engine-check-title">
+    <div>
+      <h2 id="engine-check-title">Verifica tecnica del motore</h2>
+      <p>Controlla con casi ripetibili che classificazioni, priorità e calcoli siano coerenti con le regole codificate. È una verifica interna dello strumento, distinta dalla verifica normativa della tua organizzazione.</p>
+    </div>
+    <a class="btn btn--primary" href="test.html">Apri i test del motore →</a>
+  </section>
 
   <div class="dash-actions">
     <button type="button" class="btn" id="export">Esporta JSON</button>
@@ -241,20 +253,24 @@
 
   function depFlow(up, down, fnName) {
     var rows = Math.max(up.length, down.length, 1);
-    var W = 560, colGap = 40, boxH = 26, rowGap = 10, padT = 14;
+    var W = 620, colGap = 36, boxH = 34, rowGap = 14, padT = 18;
     var H = padT * 2 + rows * (boxH + rowGap);
-    var cx = W / 2, lw = 168, cw = 150;
+    var cx = W / 2, lw = 190, cw = 174;
     var s = ['<svg class="dep-flow" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Diagramma delle dipendenze">'];
     function box(x, y, w, label, danger) {
-      return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + boxH + '" rx="5" fill="var(--surface)" stroke="' + (danger ? "var(--danger)" : "var(--border)") + '"/>'
-        + '<text x="' + (x + w / 2) + '" y="' + (y + boxH / 2 + 3.5) + '" text-anchor="middle" font-size="9.5" fill="var(--ink)">' + esc(clip(label, 30)) + '</text>';
+      var stroke = danger ? "var(--danger)" : "var(--border-strong)";
+      var fill = danger ? "var(--danger-tint)" : "var(--surface)";
+      return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + boxH + '" rx="7" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + (danger ? 1.8 : 1) + '"/>'
+        + '<title>' + esc(label) + '</title>'
+        + '<text x="' + (x + w / 2) + '" y="' + (y + boxH / 2 + 3.5) + '" text-anchor="middle" font-size="10" font-weight="' + (danger ? 600 : 400) + '" fill="var(--ink)">' + esc(clip(label, 32)) + '</text>';
     }
     function line(x1, x2, y1, y2, danger) {
       return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + (danger ? "var(--danger)" : "var(--faint)") + '" stroke-width="' + (danger ? 1.6 : 1) + '"/>';
     }
     var fnY = H / 2 - boxH / 2;
-    s.push('<rect x="' + (cx - cw / 2) + '" y="' + fnY + '" width="' + cw + '" height="' + boxH + '" rx="5" fill="var(--accent-tint)" stroke="var(--accent)"/>');
-    s.push('<text x="' + cx + '" y="' + (fnY + boxH / 2 + 3.5) + '" text-anchor="middle" font-size="10" fill="var(--accent-ink)">' + esc(clip(fnName, 26)) + '</text>');
+    s.push('<rect x="' + (cx - cw / 2) + '" y="' + fnY + '" width="' + cw + '" height="' + boxH + '" rx="8" fill="var(--accent-tint)" stroke="var(--accent)" stroke-width="1.8"/>');
+    s.push('<title>' + esc(fnName) + '</title>');
+    s.push('<text x="' + cx + '" y="' + (fnY + boxH / 2 + 3.5) + '" text-anchor="middle" font-size="10.5" font-weight="600" fill="var(--accent-ink)">' + esc(clip(fnName, 26)) + '</text>');
     up.forEach(function (d, i) {
       var y = padT + i * (boxH + rowGap);
       s.push(line(colGap + lw, cx - cw / 2, y + boxH / 2, fnY + boxH / 2, depCritical(d)));

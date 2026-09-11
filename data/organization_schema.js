@@ -40,7 +40,7 @@
         dora_ict_tpp_critical: false,
 
         cra_places_product: false,
-        cra_role: null,              // "fabbricante" | "importatore_distributore"
+        cra_role: null,              // "fabbricante" | "importatore" | "distributore" | "rappresentante_autorizzato"
         cra_category: null,
 
         macchine_roles: [],

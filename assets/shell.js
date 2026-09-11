@@ -21,8 +21,38 @@
     }
   }
 
+  function backToTop() {
+    if (document.querySelector(".back-to-top")) return;
+    var button = document.createElement("button");
+    button.type = "button";
+    button.className = "back-to-top";
+    button.setAttribute("aria-label", "Torna all'inizio della pagina");
+    button.title = "Torna all'inizio della pagina";
+    button.textContent = "↑";
+    button.addEventListener("click", function () {
+      var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+    });
+    document.body.appendChild(button);
+    function update() { button.classList.toggle("is-visible", window.scrollY > 500); }
+    window.addEventListener("scroll", update, { passive: true });
+    update();
+  }
+
+  function footer() {
+    if (document.querySelector(".site-footer")) return;
+    var element = document.createElement("footer");
+    element.className = "site-footer";
+    element.innerHTML = '<span>Sviluppato da <b>Laura Tonsi</b></span>'
+      + '<span class="site-footer-links">'
+      + '<a href="https://github.com/lauratonsi" target="_blank" rel="noopener noreferrer">GitHub</a>'
+      + '<a href="mailto:laura.tonsi@studio.unibo.it">laura.tonsi@studio.unibo.it</a>'
+      + '</span>';
+    document.body.appendChild(element);
+  }
+
   function build() {
-    if (document.querySelector(".appbar")) { a11y(); return; }
+    if (document.querySelector(".appbar")) { a11y(); backToTop(); footer(); return; }
 
     var bar = document.createElement("header");
     bar.className = "appbar";
@@ -46,6 +76,8 @@
     document.body.insertBefore(bar, document.body.firstChild);
     document.body.classList.add("has-appbar");
     a11y(); // skip-link prima della barra (diventa il primo elemento focalizzabile)
+    backToTop();
+    footer();
 
     // assorbe il tasto tema fluttuante, se già montato
     absorbToggle();

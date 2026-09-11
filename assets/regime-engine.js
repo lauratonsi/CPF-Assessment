@@ -150,11 +150,14 @@
        classificazione alternativa dell'organizzazione. */
     var psnc = { applicable: !!a.psnc_assets, trace: [] };
     if (psnc.applicable) {
-      psnc.trace.push(step("Applicabile agli asset indicati", R.psnc.note));
+      psnc.trace.push(step("Asset formalmente inclusi", "Una o più reti, sistemi o servizi informatici sono stati indicati come già inclusi nel PSNC; l'inclusione riguarda l'asset e non determina automaticamente una qualificazione generale dell'organizzazione."));
+      psnc.trace.push(step("Funzione di sicurezza nazionale", "Il PSNC tutela dipendenze digitali rilevanti per funzioni essenziali dello Stato; il solo settore critico o la dimensione dell'impresa non bastano a determinarne l'inclusione."));
+      psnc.trace.push(step("Obblighi del perimetro", "Per gli asset inclusi si applicano comunicazione degli asset all'ACN, misure di sicurezza, procedure di valutazione del CVCN presso l'ACN per gli approvvigionamenti ICT e notifica degli incidenti rilevanti al CSIRT Italia."));
+      psnc.trace.push(step("Governance coordinata", "Il CIC formula proposte in materia di PSNC, il Presidente del Consiglio adotta gli atti previsti e l'ACN svolge le principali funzioni operative e tecniche; il COPASIR esercita il controllo parlamentare previsto dalla legge."));
       nis2.psnc_exclusion = true;
       nis2.trace.push(step("PSNC: prevalenza nazionale per ambito", R.nis2.lex_specialis_note));
-      notes.push("PSNC: per le reti e i sistemi informativi già inclusi nel Perimetro, applicare il framework nazionale in via esclusiva per gli obblighi relativi a tali asset; la verifica è distinta dalla qualificazione NIS2 dell'organizzazione.");
-      verification.push("PSNC: verificare quali reti e sistemi informativi siano effettivamente inclusi nel Perimetro e il raccordo con autorità competenti, CSIRT e obblighi NIS2.");
+      notes.push("PSNC: per le reti, i sistemi e i servizi già inclusi nel Perimetro, applicare il framework nazionale in via esclusiva per gli obblighi relativi a tali asset; la verifica è distinta dalla qualificazione NIS2 dell'organizzazione.");
+      verification.push("PSNC: verificare la notifica riservata di inclusione, l'elenco degli asset e delle dipendenze tecnologiche interessate, il raccordo con ACN/autorità competenti/CSIRT Italia e gli approvvigionamenti soggetti a verifica CVCN.");
     } else {
       psnc.trace.push(step("Non indicato", "Nessuna rete o sistema informativo è stato indicato come già incluso nel PSNC."));
     }
@@ -191,8 +194,24 @@
         verification.push("CRA: determinare la categoria del prodotto (ordinario / importante Classe I-II / critico) rispetto agli Allegati III e IV.");
       }
       verification.push("CRA: documentare la SBOM del prodotto, separare patch di sicurezza da patch funzionali e valutare caso per caso asset OT/industriali (PLC, DCS, CNC, SCADA, IIoT). ");
-      if (a.cra_role === "importatore_distributore") {
-        cra.trace.push(step("Ruolo: importatore/distributore", "Obblighi ridotti rispetto al fabbricante."));
+      var craRoleLabels = {
+        fabbricante: "Fabbricante",
+        importatore: "Importatore",
+        distributore: "Distributore",
+        rappresentante_autorizzato: "Rappresentante autorizzato",
+        importatore_distributore: "Importatore/distributore"
+      };
+      var craRoleNotes = {
+        fabbricante: "Responsabile della conformità del prodotto, della documentazione tecnica, della valutazione di conformità e degli obblighi post-commercializzazione.",
+        importatore: "Deve verificare, prima dell'immissione sul mercato UE, la conformità del prodotto e la disponibilità degli elementi prescritti dal CRA; non assume automaticamente il ruolo del fabbricante.",
+        distributore: "Deve verificare che il prodotto e le informazioni richieste siano accompagnati dagli elementi necessari prima di renderli disponibili sul mercato.",
+        rappresentante_autorizzato: "Agisce nei limiti del mandato scritto ricevuto dal fabbricante; il mandato non trasferisce automaticamente al rappresentante tutti gli obblighi del fabbricante.",
+        importatore_distributore: "Profilo storico compatibile con le valutazioni precedenti: distinguere, quando possibile, gli obblighi di importatore da quelli di distributore."
+      };
+      if (craRoleLabels[a.cra_role]) {
+        cra.trace.push(step("Ruolo: " + craRoleLabels[a.cra_role], craRoleNotes[a.cra_role]));
+      } else {
+        verification.push("CRA: determinare il ruolo dell'operatore economico (fabbricante, importatore, distributore o rappresentante autorizzato).");
       }
     } else {
       cra.trace.push(step("Non applicabile", "Non immette sul mercato UE prodotti con elementi digitali come operatore economico."));
