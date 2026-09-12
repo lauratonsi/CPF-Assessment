@@ -7,12 +7,11 @@
   <link rel="stylesheet" href="../assets/theme.css">
 <script>(function(){try{var t=localStorage.getItem("cpf-theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
 <style>
-  .layout { position: relative; display: grid; grid-template-columns: 1fr; gap: 1.4rem; }
-  @media (min-width: 62rem) {
-    .layout { grid-template-columns: 1fr 21rem; align-items: start; }
-    .result { position: absolute; top: 0; right: 0; width: 21rem; height: 100%; }
-    .layout > form, .layout > .result { z-index: 1; }
-  }
+  /* Layout: una sola colonna. L'esito di ogni regime compare come blocco
+     inline subito sotto il fieldset (o gruppo di fieldset) che lo genera —
+     niente colonna laterale da tenere sincronizzata, niente linee di
+     collegamento: domanda e risposta sono lo stesso blocco verticale. */
+  .layout { max-width: 42rem; }
 
   fieldset { border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.1rem 1.2rem; margin: 0 0 0.9rem; background: var(--surface); }
   legend { font-family: var(--serif); font-weight: 600; font-size: 1rem; padding: 0 0.4rem; }
@@ -29,62 +28,43 @@
   .dora-choice:first-child { margin-top: 0; }
   .dora-info { margin: 0.35rem 0 0 1.55rem; }
   .dora-info p { margin: 0.45rem 0 0; line-height: 1.45; }
-  .domain { margin-bottom: 0.9rem; padding-left: 0.8rem; border-left: 3px solid var(--domain-color); }
-  .domain--nis2 { --domain-color: #2f62d9; }
-  fieldset[data-domain] { border-top: 3px solid var(--domain-color); }
-  fieldset[data-domain="nis2"], .domain--nis2 { --domain-color: #2f62d9; }
-  fieldset[data-domain="psnc"] { --domain-color: #007c83; }
-  fieldset[data-domain="cer"] { --domain-color: #2f7d32; }
-  fieldset[data-domain="dora"] { --domain-color: #7a3e9d; }
-  fieldset[data-domain="cra"] { --domain-color: #b26b00; }
-  fieldset[data-domain="macchine"] { --domain-color: #b23a48; }
-  fieldset[data-domain="ai"] { --domain-color: #005f73; }
+  .domain { margin-bottom: 1.4rem; padding-left: 0.8rem; border-left: 3px solid var(--domain-color); }
   .domain-head { margin: 0 0 0.7rem; padding: 0.1rem 0.2rem 0.2rem; }
   .domain-head h2 { margin: 0; font-size: 1.15rem; }
   .domain-head p { margin: 0.25rem 0 0; color: var(--muted); font-size: 0.8rem; line-height: 1.45; }
-  .domain-links { display: none; }
-  @media (min-width: 62rem) {
-    .domain-links { display: block; position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
-    .domain-link { fill: none; stroke-linecap: round; stroke-width: 2.5; opacity: 0.85; }
-    .domain-link-dot { stroke: var(--paper); stroke-width: 2; }
-  }
   .reveal[hidden] { display: none; }
   .reveal { border-left: 2px solid var(--accent-tint); padding-left: 0.8rem; margin-top: 0.7rem; }
 
-  .result .rc { border: 1px solid var(--border); border-radius: 7px; padding: 0.7rem 0.8rem; margin-bottom: 0.55rem; background: var(--surface); }
-  .result-cards { position: relative; height: 100%; }
-  .result-meta { margin-top: 1.4rem; }
-  @media (min-width: 62rem) {
-    .result .rc { position: absolute; left: 0; right: 0; }
-  }
-  .result .rc[data-domain] { border-top: 3px solid var(--domain-color); }
-  .result .rc[data-domain="nis2"] { --domain-color: #2f62d9; }
-  .result .rc[data-domain="psnc"] { --domain-color: #007c83; }
-  .result .rc[data-domain="cer"] { --domain-color: #2f7d32; }
-  .result .rc[data-domain="dora"] { --domain-color: #7a3e9d; }
-  .result .rc[data-domain="cra"] { --domain-color: #b26b00; }
-  .result .rc[data-domain="macchine"] { --domain-color: #b23a48; }
-  .result .rc[data-domain="ai"] { --domain-color: #005f73; }
-  .result .rc h3 { font-size: 0.9rem; margin: 0 0 0.35rem; display: flex; justify-content: space-between; align-items: baseline; gap: 0.4rem; }
-  .result .rc .tag { font-family: var(--mono); font-size: 0.66rem; padding: 0.08rem 0.4rem; border-radius: 3px; border: 1px solid var(--border); flex: none; }
+  /* Colore per dominio: un'unica dichiarazione per [data-domain], valida sia
+     sul fieldset della domanda sia sul blocco .rc della risposta subito sotto. */
+  [data-domain="nis2"], .domain--nis2 { --domain-color: #2f62d9; }
+  [data-domain="psnc"] { --domain-color: #007c83; }
+  [data-domain="cer"]  { --domain-color: #2f7d32; }
+  [data-domain="dora"] { --domain-color: #7a3e9d; }
+  [data-domain="cra"]  { --domain-color: #b26b00; }
+  [data-domain="macchine"] { --domain-color: #b23a48; }
+  [data-domain="ai"]   { --domain-color: #005f73; }
+  fieldset[data-domain] { border-top: 3px solid var(--domain-color); }
+
+  /* Esito inline: subito sotto il fieldset (margine negativo = "attaccato"
+     alla domanda), poi il normale margine prima del dominio successivo. */
+  .rc { border: 1px solid var(--border); border-left: 3px solid var(--domain-color, var(--border)); border-radius: 7px; padding: 0.7rem 0.9rem; margin: -0.35rem 0 1.4rem; background: var(--surface-2); }
+  .rc h3 { font-size: 0.9rem; margin: 0 0 0.35rem; display: flex; justify-content: space-between; align-items: baseline; gap: 0.4rem; }
+  .rc .tag { font-family: var(--mono); font-size: 0.66rem; padding: 0.08rem 0.4rem; border-radius: 3px; border: 1px solid var(--border); flex: none; }
   .tag.on { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .result .rc[data-domain] .tag.on { background: var(--domain-color); border-color: var(--domain-color); }
+  .rc[data-domain] .tag.on { background: var(--domain-color); border-color: var(--domain-color); }
   .tag.ess { background: var(--danger); border-color: var(--danger); color: #fff; }
   .tag.off { color: var(--faint); }
-  .result .rc[data-domain] .tag.off { color: var(--domain-color); border-color: color-mix(in srgb, var(--domain-color) 45%, var(--border)); background: color-mix(in srgb, var(--domain-color) 8%, var(--surface)); }
-  .result .rc ul.trace { margin: 0.3rem 0 0; padding: 0; list-style: none; font-size: 0.76rem; color: var(--muted); }
-  .result .rc ul.trace li { margin: 0.25rem 0; }
-  .result .rc ul.trace b { color: var(--ink); font-weight: 600; }
-  .result .rc .summary { font-size: 0.73rem; line-height: 1.45; color: var(--muted); margin-top: 0.5rem; }
+  .rc[data-domain] .tag.off { color: var(--domain-color); border-color: color-mix(in srgb, var(--domain-color) 45%, var(--border)); background: color-mix(in srgb, var(--domain-color) 8%, var(--surface)); }
+  .rc ul.trace { margin: 0.3rem 0 0; padding: 0; list-style: none; font-size: 0.76rem; color: var(--muted); }
+  .rc ul.trace li { margin: 0.25rem 0; }
+  .rc ul.trace b { color: var(--ink); font-weight: 600; }
+  .rc .summary { font-size: 0.73rem; line-height: 1.45; color: var(--muted); margin-top: 0.5rem; }
+  .result-meta { margin-top: 0.5rem; }
   .panel { border: 1px solid var(--border); border-radius: 7px; padding: 0.7rem 0.8rem; margin-bottom: 0.55rem; font-size: 0.8rem; }
   .panel.verify { border-color: var(--accent); background: var(--accent-tint); color: var(--accent-ink); }
   .panel h4 { margin: 0 0 0.3rem; font-size: 0.8rem; }
   .panel ul { margin: 0; padding-left: 1.1rem; }
-  @media (max-width: 61.99rem) {
-    .result { position: static; width: auto; height: auto; }
-    .result-cards { height: auto; }
-    .result .rc { position: static; }
-  }
   .toast { position: fixed; left: 50%; bottom: 1.4rem; transform: translateX(-50%); background: var(--ink); color: var(--paper); font-size: 0.85rem; padding: 0.6rem 1rem; border-radius: 6px; opacity: 0; transition: opacity .2s; pointer-events: none; }
   .toast.show { opacity: 0.95; }
 </style>
@@ -107,7 +87,6 @@
   </header>
 
   <div class="layout">
-    <svg class="domain-links" id="domain_links" aria-hidden="true"></svg>
     <form id="f" autocomplete="off">
 
       <fieldset>
@@ -171,6 +150,8 @@
         <p class="hint">Categorie nel perimetro a prescindere dalla dimensione (art. 2, par. 2).</p>
         <div class="checks" id="special_cases"></div>
         </fieldset>
+
+        <div class="rc" data-domain="nis2" id="rc_nis2"></div>
       </section>
 
       <fieldset data-domain="psnc">
@@ -190,6 +171,7 @@
           <p>La qualificazione NIS2 dell'organizzazione resta distinta. Per gli asset inclusi, il framework PSNC prevale sugli obblighi di gestione del rischio e notifica secondo l'art. 33 del D.Lgs. 138/2024.</p>
         </details>
       </fieldset>
+      <div class="rc" data-domain="psnc" id="rc_psnc"></div>
 
       <fieldset data-domain="cer">
         <legend>CER — resilienza dei soggetti critici</legend>
@@ -209,6 +191,7 @@
         </div>
         <p class="hint">La CER integra valutazione statale dei rischi sistemici e valutazione decentrata del soggetto critico, comprese dipendenze in ingresso e impatti in uscita. La designazione resta di competenza dell'autorità settoriale.</p>
       </fieldset>
+      <div class="rc" data-domain="cer" id="rc_cer"></div>
 
       <fieldset data-domain="dora">
         <legend>DORA — resilienza operativa digitale (settore finanziario)</legend>
@@ -234,6 +217,7 @@
           </details>
         </div>
       </fieldset>
+      <div class="rc" data-domain="dora" id="rc_dora"></div>
 
       <fieldset data-domain="cra">
         <legend>CRA — prodotti con elementi digitali</legend>
@@ -261,6 +245,7 @@
           </details>
         </div>
       </fieldset>
+      <div class="rc" data-domain="cra" id="rc_cra"></div>
 
       <fieldset data-domain="macchine">
         <legend>Regolamento Macchine</legend>
@@ -274,6 +259,7 @@
           <div class="checks" id="macchine_flags"></div>
         </div>
       </fieldset>
+      <div class="rc" data-domain="macchine" id="rc_macchine"></div>
 
       <fieldset data-domain="ai">
         <legend>AI Act</legend>
@@ -322,6 +308,7 @@
           </div>
         </div>
       </fieldset>
+      <div class="rc" data-domain="ai" id="rc_ai"></div>
 
       <section class="result-meta" id="result_meta" aria-live="polite"></section>
 
@@ -333,10 +320,6 @@
         </span>
       </div>
     </form>
-
-    <aside class="result" id="result" aria-live="polite">
-      <div class="result-cards" id="result_cards"></div>
-    </aside>
   </div>
 
   <p class="disclaimer" id="disclaimer"></p>
@@ -520,85 +503,17 @@
   }
   function esc(s) { return String(s).replace(/[&<>]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]; }); }
 
-  var DOMAIN_COLORS = {
-    nis2: "#2f62d9", cer: "#2f7d32", dora: "#7a3e9d", psnc: "#007c83",
-    cra: "#b26b00", macchine: "#b23a48", ai: "#005f73"
-  };
-  function drawDomainLinks(p) {
-    var svg = $("domain_links");
-    var layout = document.querySelector(".layout");
-    if (!svg || !layout || window.innerWidth < 992) return;
-    svg.innerHTML = "";
-    var layoutRect = layout.getBoundingClientRect();
-    REG.forEach(function (rg) {
-      var domain = rg[0] === "ai_act" ? "ai" : rg[0];
-      var result = p[rg[0]] || {};
-      if (!result.applicable) return;
-      var source = domain === "nis2"
-        ? document.querySelector(".domain--nis2")
-        : document.querySelector('fieldset[data-domain="' + domain + '"]');
-      var target = document.querySelector('.result .rc[data-domain="' + domain + '"]');
-      if (!source || !target) return;
-      var sourceRect = source.getBoundingClientRect();
-      var targetRect = target.getBoundingClientRect();
-      var x1 = sourceRect.right - layoutRect.left;
-      var y1 = sourceRect.top + 28 - layoutRect.top;
-      var x2 = targetRect.left - layoutRect.left;
-      var y2 = targetRect.top + 20 - layoutRect.top;
-      var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      path.setAttribute("class", "domain-link");
-      path.setAttribute("stroke", DOMAIN_COLORS[domain]);
-      path.setAttribute("d", "M " + x1 + " " + y1 + " L " + x2 + " " + y2);
-      svg.appendChild(path);
-      [ [x1, y1], [x2, y2] ].forEach(function (point) {
-        var dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        dot.setAttribute("class", "domain-link-dot");
-        dot.setAttribute("fill", DOMAIN_COLORS[domain]);
-        dot.setAttribute("cx", point[0]); dot.setAttribute("cy", point[1]); dot.setAttribute("r", "4");
-        svg.appendChild(dot);
-      });
-    });
-  }
-  var CARD_GAP = 12; // px tra due card impilate, quando la precedente è più alta del previsto
-  function positionResultCards() {
-    if (window.innerWidth < 992) return;
-    var layout = document.querySelector(".layout");
-    var layoutRect = layout.getBoundingClientRect();
-    /* Ogni card vorrebbe allinearsi al fieldset che la genera, ma l'altezza
-       delle card varia con il contenuto (tracce, note): un ancoraggio "cieco"
-       può far scavalcare la card successiva. Si calcola prima la posizione
-       desiderata di ciascuna, poi si scorre in ordine verticale spingendo in
-       basso solo quando serve, così non si sovrappongono mai. */
-    var placements = [];
-    document.querySelectorAll(".result .rc[data-domain]").forEach(function (target) {
-      var domain = target.getAttribute("data-domain");
-      var source = domain === "nis2"
-        ? document.querySelector(".domain--nis2")
-        : document.querySelector('fieldset[data-domain="' + domain + '"]');
-      if (!source) return;
-      target.style.minHeight = "";
-      placements.push({ el: target, desired: source.getBoundingClientRect().top - layoutRect.top });
-    });
-    placements.sort(function (a, b) { return a.desired - b.desired; });
-    var cursor = 0;
-    placements.forEach(function (p) {
-      var top = Math.max(p.desired, cursor);
-      p.el.style.top = top + "px";
-      cursor = top + p.el.offsetHeight + CARD_GAP;
-    });
-  }
-
   function renderResult(p) {
-    var cards = "";
     var meta = "";
     REG.forEach(function (rg) {
       var r = p[rg[0]] || {};
       var domain = rg[0] === "ai_act" ? "ai" : rg[0];
-      cards += '<div class="rc" data-domain="' + domain + '"><h3>' + rg[1] + tagFor(rg[0], r) + '</h3>';
-      cards += '<ul class="trace">' + (r.trace || []).map(function (t) {
-        return '<li><b>' + esc(t.esito) + '</b> — ' + esc(t.base) + '</li>';
-      }).join("") + '</ul>';
-      cards += '</div>';
+      var el = $("rc_" + domain);
+      if (!el) return;
+      el.innerHTML = '<h3>' + rg[1] + tagFor(rg[0], r) + '</h3>'
+        + '<ul class="trace">' + (r.trace || []).map(function (t) {
+            return '<li><b>' + esc(t.esito) + '</b> — ' + esc(t.base) + '</li>';
+          }).join("") + '</ul>';
     });
     if (p.verification_flags && p.verification_flags.length) {
       meta += '<div class="panel verify"><h4>Priorità di verifica</h4><ul>' +
@@ -611,10 +526,7 @@
     if (p.notes && p.notes.length) {
       meta += '<div class="panel"><h4>Note</h4><ul>' + p.notes.map(function (n) { return '<li>' + esc(n) + '</li>'; }).join("") + '</ul></div>';
     }
-    $("result_cards").innerHTML = cards;
     $("result_meta").innerHTML = meta;
-    positionResultCards();
-    drawDomainLinks(p);
     $("sizeout").textContent = CPF.sizeClass(A.size) || "—";
     $("disclaimer").textContent = p._disclaimer || "";
   }
@@ -623,7 +535,7 @@
     readForm();
     org.answers = A;
     try { renderResult(CPF.classifyRegimes(A)); }
-    catch (e) { $("result").textContent = "Errore: " + e.message; }
+    catch (e) { $("result_meta").innerHTML = '<div class="panel verify">Errore: ' + esc(e.message) + '</div>'; }
   }
 
   /* ---------- azioni ---------- */
@@ -646,25 +558,9 @@
 
   document.getElementById("f").addEventListener("input", recompute);
   document.getElementById("f").addEventListener("change", recompute);
-  document.querySelectorAll("details").forEach(function (details) {
-    details.addEventListener("toggle", function () {
-      var p = CPF.classifyRegimes(A);
-      positionResultCards();
-      drawDomainLinks(p);
-    });
-  });
-  window.addEventListener("resize", function () { var p = CPF.classifyRegimes(A); positionResultCards(); drawDomainLinks(p); });
 
   fillForm();
   recompute();
-
-  /* i font IBM Plex caricano async (font-display: swap): al cambio dal
-     fallback possono cambiare gli a-capo e quindi l'altezza dei fieldset.
-     Le card sono ancorate una tantum al layout corrente: vanno riallineate
-     quando i font (e quindi il layout) si sono assestati. */
-  if (window.document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(function () { positionResultCards(); drawDomainLinks(CPF.classifyRegimes(A)); });
-  }
 })();
 </script>
 <script src="../assets/nav.js"></script>
