@@ -41,10 +41,10 @@
     function: {
       name: "Potabilizzazione — linea A",
       service_description: "Erogazione continua di acqua potabile conforme ai parametri di legge a circa 45.000 abitazioni e a due strutture ospedaliere del bacino nord. La linea A copre da sola il 60% della portata cittadina nelle ore di punta.",
-      physical_process: "Filtrazione, dosaggio del disinfettante e controllo di torbidità e cloro residuo su una linea da 320 l/s; il PLC di linea regola pompe di dosaggio e valvole di sezionamento. Stato sicuro = chiusura della linea e commutazione sul serbatoio di compenso.",
+      physical_process: "Filtrazione, dosaggio del disinfettante e controllo di torbidità e cloro residuo su una linea da 320 l/s; il PLC di linea regola pompe di dosaggio e valvole di sezionamento. Stato sicuro = chiusura della linea e commutazione sulla vasca di compenso interna (autonomia 4 h a portata di punta).",
       perimeter: "Impianto di trattamento, SCADA di stabilimento, rete di telecontrollo dei serbatoi e delle stazioni di rilancio di proprietà. Fuori perimetro: rete di distribuzione a valle del serbatoio cittadino e fornitura elettrica di media tensione.",
       criticality: 3,
-      criticality_rationale: "Ampio numero di utenti dipendenti e utenze sensibili (ospedali); l'interruzione avrebbe impatto esteso e prolungato sul bacino nord. Alternativa parziale (linea B + autobotti) attivabile solo in alcune ore e non nella punta.",
+      criticality_rationale: "Ampio numero di utenti dipendenti e utenze sensibili (ospedali); l'interruzione avrebbe impatto esteso e prolungato sul bacino nord. Un'alternativa esiste (Linea B + autobotti) ma è solo parziale — copre il 60% della portata nominale e privilegia le utenze sensibili — quindi non evita la conseguenza per le utenze non prioritarie: non è un'alternativa ampiamente disponibile ai sensi dei criteri CER, e giustifica «alta» anziché «molto alta».",
       regimes_relevant_to_this_function: ["nis2", "cer", "macchine", "ai_act"]
     },
 
@@ -84,7 +84,7 @@
         resource_or_condition: "Portata e qualità dell'acqua immessa in rete",
         class: "fisica", position: "downstream", level: "fisico", coupling: "tight", response_capacity: "adattiva",
         operational_state_relevant: "normal", failure_type_if_relevant: null,
-        activation_time_tolerable: "4 h di riserva nel serbatoio", alternative_available: true,
+        activation_time_tolerable: "6 h di riserva nel serbatoio cittadino (a valle, distinta dalla vasca di compenso interna della linea)", alternative_available: true,
         alternative_description: "Linea B (60% della portata) + autobotti per le utenze sensibili",
         alternative_activation_time: "30-60 min per la Linea B; alcune ore per le autobotti",
         alternative_sustain_duration: "indefinita su Linea B; autobotti finché durano i turni disponibili",
@@ -109,11 +109,11 @@
       },
       {
         id: "cons-2",
-        description: "Interruzione prolungata dell'erogazione (oltre la riserva del serbatoio) al bacino nord, incluse le utenze ospedaliere.",
+        description: "Interruzione prolungata dell'erogazione (oltre le 4 h di autonomia della vasca di compenso interna) al bacino nord, incluse le utenze ospedaliere.",
         compromise_paths: [
           {
             id: "path-2",
-            description: "Guasto in cascata dall'alimentazione elettrica + indisponibilità del telecontrollo → impossibile commutare sul serbatoio di compenso in tempo → svuotamento della riserva.",
+            description: "Guasto in cascata sulla rete DSO che innesca anche l'indisponibilità del collegamento di telecontrollo verso i serbatoi (link radio su circuito distinto, non coperto dal generatore di stabilimento, che backup solo pompe e filtrazione) → livelli dei serbatoi non più leggibili, impossibile verificare le condizioni e comandare la commutazione sulla vasca di compenso in tempo utile → esaurimento delle 4 h di autonomia e svuotamento della riserva.",
             required_capabilities: ["conoscenza", "continuita", "risposta"],
             essential_capabilities: ["conoscenza", "continuita"]
           }
@@ -136,7 +136,12 @@
       {
         domain_id: "segmentazione", is_essential: true,
         non_compensable_threshold: { dimension: "consolidamento", min_level: 4, rationale: "La separazione tra rete IT, DMZ industriale e rete OT di linea deve essere applicata stabilmente e verificata: è ciò che impedisce il pivot dall'accesso del fornitore al PLC di dosaggio." },
-        target_profile: profile(function (d) { return d === "consolidamento" ? tgt(5, "misurata e migliorata") : d === "efficacia" ? tgt(5, "verificata end-to-end sul percorso di dosaggio") : tgt(4, ""); }),
+        target_profile: profile(function (d) {
+          if (d === "consolidamento") return tgt(5, "misurata e migliorata: zone e conduit soggetti a verifica periodica, non solo a un audit una tantum");
+          if (d === "efficacia") return tgt(5, "verificata end-to-end sul percorso di dosaggio, incluso l'accesso di manutenzione remota dei fornitori");
+          if (d === "estensione") return tgt(4, "copre l'intera linea A, DMZ industriale compresa");
+          return tgt(4, "test di intrusione ripetuti, non un singolo riscontro storico");
+        }),
         current_profile: profile(function (d) {
           if (d === "consolidamento") return cur(4, "corroborata", "Zone e conduit secondo Purdue, verificati nell'ultimo audit OT.", "2026-02");
           if (d === "efficacia") return cur(2, "corroborata", "L'accesso di manutenzione remota bypassa la DMZ industriale: testato in tabletop, il pivot riesce.", "2025-09");
@@ -147,7 +152,12 @@
       {
         domain_id: "monitoraggio", is_essential: true,
         non_compensable_threshold: { dimension: "efficacia", min_level: 4, rationale: "Il rilevamento deve funzionare anche quando i dati di campo sono manipolati (incoerenze tra telemetria di processo e stato fisico): senza questo, il percorso 1 resta invisibile." },
-        target_profile: profile(function (d) { return d === "efficacia" ? tgt(5, "correlazione processo↔fisico, rilevamento di dati incoerenti") : tgt(4, ""); }),
+        target_profile: profile(function (d) {
+          if (d === "efficacia") return tgt(5, "correlazione processo↔fisico, rilevamento di dati incoerenti");
+          if (d === "consolidamento") return tgt(4, "casi d'uso di correlazione formalizzati e assegnati, non solo raccolta log");
+          if (d === "estensione") return tgt(4, "copre anche le RTU di serbatoio, non solo il PLC di linea");
+          return tgt(4, "almeno un'esercitazione di rilevamento su scenario OT, aggiornata");
+        }),
         current_profile: profile(function (d) {
           if (d === "efficacia") return cur(2, "non_determinabile", "Non è mai stato verificato se il SOC rileverebbe una manipolazione coordinata dei dati di campo.");
           if (d === "consolidamento") return cur(3, "corroborata", "Logging centralizzato IT+OT, casi d'uso definiti.", "2026-01");
@@ -157,10 +167,15 @@
       },
       {
         domain_id: "continuita", is_essential: true,
-        non_compensable_threshold: { dimension: "efficacia", min_level: 4, rationale: "La commutazione verso lo stato sicuro (chiusura linea + serbatoio di compenso) deve essere verificata nei vincoli operativi reali: è l'unica barriera al percorso 2." },
-        target_profile: profile(function (d) { return tgt(4, "modalità degradata verificata nei vincoli di safety"); }),
+        non_compensable_threshold: { dimension: "efficacia", min_level: 4, rationale: "La commutazione verso lo stato sicuro (chiusura linea + vasca di compenso interna) deve essere verificata nei vincoli operativi reali: è l'unica barriera al percorso 2." },
+        target_profile: profile(function (d) {
+          if (d === "consolidamento") return tgt(4, "procedura di modalità degradata formalizzata, con responsabilità e verifica periodica");
+          if (d === "estensione") return tgt(4, "copre l'intera catena della continuità: alimentazione, telecontrollo, dosaggio");
+          if (d === "efficacia") return tgt(4, "commutazione verificata nei vincoli operativi e di safety reali, entro le 4 h di autonomia");
+          return tgt(4, "esercitazioni periodiche e aggiornate, comprese le condizioni degradate");
+        }),
         current_profile: profile(function (d) {
-          if (d === "efficacia") return cur(4, "corroborata", "Prova di commutazione su serbatoio di compenso eseguita e documentata, 2026.", "2026-05");
+          if (d === "efficacia") return cur(4, "corroborata", "Prova di commutazione sulla vasca di compenso interna eseguita e documentata, con tenuta delle 4 h di autonomia dichiarate.", "2026-05");
           if (d === "consolidamento") return cur(4, "corroborata", "Procedura di modalità degradata parte del Piano di Resilienza CER.", "2026-05");
           if (d === "estensione") return cur(4, "corroborata", "Copre alimentazione, telecontrollo e dosaggio.", "2026-05");
           return cur(4, "corroborata", "Due esercitazioni recenti, esiti coerenti.", "2026-04");
@@ -169,7 +184,12 @@
       {
         domain_id: "risposta", is_essential: false,
         non_compensable_threshold: null,
-        target_profile: profile(function (d) { return tgt(4, "coordinamento IT/OT/safety e notifica alle autorità"); }),
+        target_profile: profile(function (d) {
+          if (d === "consolidamento") return tgt(4, "piano di risposta formalizzato, con raccordo esplicito alla safety di impianto");
+          if (d === "estensione") return tgt(4, "copre IT e OT dell'intera linea A, non solo il dosaggio");
+          if (d === "efficacia") return tgt(4, "verificata su più scenari (dosaggio, elettrico, telecontrollo), non uno solo");
+          return tgt(4, "esercitazioni congiunte periodiche con le autorità competenti");
+        }),
         current_profile: profile(function (d) {
           if (d === "consolidamento") return cur(3, "parziale", "Piano di risposta esiste; il raccordo con la safety di impianto è informale.", "2025-12");
           if (d === "efficacia") return cur(3, "corroborata", "Verificato sullo scenario di dosaggio in tabletop.", "2025-09");
