@@ -84,6 +84,24 @@
       }
     },
 
+    response_capacity: {
+      title: "La capacità di risposta",
+      subtitle: "Proprietà distinta dall'accoppiamento: l'accoppiamento indica quanto rapidamente il funzionamento di A risenta della perdita di B; la capacità di risposta indica se quell'effetto può essere assorbito, ritardato o compensato.",
+      items: [
+        {
+          id: "adattiva",
+          label: "Adattiva",
+          definition: "Dispone di scorte, ridondanze, alternative o procedure sostitutive."
+        },
+        {
+          id: "rigida",
+          label: "Rigida",
+          definition: "Vincoli tecnici, organizzativi o regolatori ne limitano la riconfigurazione."
+        }
+      ],
+      closing_note: "Le due proprietà si combinano, non si sovrappongono: una relazione strettamente accoppiata può risultare sostenibile in presenza di capacità di risposta adattiva; una relazione debolmente accoppiata può diventare critica quando la capacità di risposta è rigida e i margini disponibili si esauriscono."
+    },
+
     positions: {
       title: "La posizione nella catena funzionale",
       subtitle: "Assumendo A come funzione centrale, la sequenza B → A → C distingue tre posizioni.",
@@ -108,6 +126,18 @@
         }
       ],
       important_distinction: "La posizione non va confusa con il livello sul quale la dipendenza agisce: la posizione indica dove la relazione si colloca rispetto alla funzione, il livello individua il dominio (fisico, cyber, organizzativo) nel quale si manifesta inizialmente e gli eventuali passaggi attraverso cui produce conseguenze ulteriori (Setola e Theocharidou 2016)."
+    },
+
+    levels: {
+      title: "Il livello: fisico, cyber, organizzativo",
+      subtitle: "Distinto dalla posizione: la posizione indica dove la relazione si colloca rispetto alla funzione; il livello indica in quale dominio essa si manifesta inizialmente e gli eventuali passaggi attraverso cui produce conseguenze ulteriori.",
+      items: [
+        { id: "fisico", label: "Fisico", definition: "La dipendenza agisce direttamente su beni materiali, energia o sul processo fisico controllato." },
+        { id: "cyber", label: "Cyber", definition: "La dipendenza agisce su dati, segnali o sistemi informatici che supportano la supervisione o il controllo." },
+        { id: "organizzativo", label: "Organizzativo", definition: "La dipendenza agisce su procedure, responsabilità, decisioni o risorse umane necessarie a governare la funzione." }
+      ],
+      example: "Una dipendenza a monte da un fornitore di servizi di telecomunicazione interessa inizialmente il livello cyber, ma la perdita dei dati o dei segnali di supervisione può compromettere il controllo del processo fisico e richiedere l'attivazione di procedure organizzative sostitutive: il modello deve specificare sia il livello di ingresso sia gli eventuali passaggi successivi.",
+      thesis_ref: "§3.4, Setola e Theocharidou (2016)"
     },
 
     failure_types: {
@@ -139,6 +169,7 @@
       text: "Le curve rappresentano come la capacità operativa dell'elemento dipendente varia dopo la perdita della risorsa, mostrando sia il tempo che precede il primo impatto sia il contributo temporaneo delle misure di mitigazione.",
       model_extension: "Il modello caratterizza, per ogni alternativa di mitigazione: il tempo che intercorre tra la perdita della risorsa e il primo effetto sulla funzione; il tempo necessario per attivare le misure alternative; la durata per la quale queste possono sostenere il processo; il livello di servizio mantenuto in condizioni degradate; il tempo disponibile per condurre il processo verso uno stato sicuro (safe state) e quello necessario per completare il ripristino.",
       key_point: "La disponibilità nominale di un generatore di emergenza, di un collegamento ridondante o di una procedura manuale non è sufficiente a dimostrare l'adeguatezza della mitigazione: l'alternativa deve attivarsi entro il tempo tollerabile, mantenere un livello di servizio coerente con i vincoli operativi e di safety, e sostenere il processo per una durata compatibile con il ripristino — deve inoltre essere valutata rispetto alle proprie dipendenze (es. un generatore richiede carburante e manutenzione).",
+      operationalization: "Questi sei valori sono campi dell'editor qui sotto: il tempo al primo impatto su ogni riga; gli altri cinque compaiono quando si dichiara un'alternativa disponibile.",
       thesis_ref: "§3.4, Argonne National Laboratory (2015)"
     },
 

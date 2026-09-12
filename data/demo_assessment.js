@@ -52,32 +52,45 @@
       {
         id: "dep-1", source: "Fornitura elettrica di media tensione (DSO)", target: "Potabilizzazione — linea A",
         resource_or_condition: "Alimentazione delle pompe di dosaggio e del sistema di filtrazione",
-        class: "fisica", position: "upstream", coupling: "tight",
+        class: "fisica", position: "upstream", level: "fisico", coupling: "tight", response_capacity: "adattiva",
         operational_state_relevant: "normal", failure_type_if_relevant: "cascading",
         activation_time_tolerable: "15 min (UPS di quadro, non le pompe)",
-        alternative_available: true, alternative_description: "Gruppo elettrogeno di stabilimento, avvio in 2 min, autonomia 12 h"
+        alternative_available: true, alternative_description: "Gruppo elettrogeno di stabilimento, avvio in 2 min, autonomia 12 h",
+        alternative_activation_time: "2 min", alternative_sustain_duration: "12 h (autonomia gasolio)",
+        degraded_service_level: "carico pieno su pompe di dosaggio e filtrazione, nessuna degradazione nota",
+        time_to_safe_state: "non applicabile — il backup copre il carico pieno",
+        restoration_time: "variabile, tipicamente < 4 h su guasti locali della rete DSO"
       },
       {
         id: "dep-2", source: "Rete di telecontrollo (link radio verso i serbatoi)", target: "Potabilizzazione — linea A",
         resource_or_condition: "Segnali di livello dei serbatoi e comandi alle stazioni di rilancio",
-        class: "cyber", position: "upstream", coupling: "tight",
+        class: "cyber", position: "upstream", level: "cyber", coupling: "tight", response_capacity: "rigida",
         operational_state_relevant: "stressed", failure_type_if_relevant: "escalating",
-        activation_time_tolerable: "", alternative_available: false, alternative_description: ""
+        activation_time_tolerable: "", alternative_available: false, alternative_description: "",
+        alternative_activation_time: "", alternative_sustain_duration: "", degraded_service_level: "",
+        time_to_safe_state: "", restoration_time: ""
       },
       {
         id: "dep-3", source: "Fornitore del sistema di visione ML (accesso di manutenzione remota)", target: "SCADA di stabilimento",
         resource_or_condition: "Aggiornamenti del modello e diagnostica da remoto",
-        class: "cyber", position: "upstream", coupling: "loose",
+        class: "cyber", position: "upstream", level: "cyber", coupling: "loose", response_capacity: "rigida",
         operational_state_relevant: "repair_restoration", failure_type_if_relevant: "common_cause",
-        activation_time_tolerable: "giorni", alternative_available: false, alternative_description: ""
+        activation_time_tolerable: "giorni", alternative_available: false, alternative_description: "",
+        alternative_activation_time: "", alternative_sustain_duration: "", degraded_service_level: "",
+        time_to_safe_state: "", restoration_time: ""
       },
       {
         id: "dep-4", source: "Potabilizzazione — linea A", target: "Serbatoio cittadino e rete di distribuzione (altro gestore)",
         resource_or_condition: "Portata e qualità dell'acqua immessa in rete",
-        class: "fisica", position: "downstream", coupling: "tight",
+        class: "fisica", position: "downstream", level: "fisico", coupling: "tight", response_capacity: "adattiva",
         operational_state_relevant: "normal", failure_type_if_relevant: null,
         activation_time_tolerable: "4 h di riserva nel serbatoio", alternative_available: true,
-        alternative_description: "Linea B (60% della portata) + autobotti per le utenze sensibili"
+        alternative_description: "Linea B (60% della portata) + autobotti per le utenze sensibili",
+        alternative_activation_time: "30-60 min per la Linea B; alcune ore per le autobotti",
+        alternative_sustain_duration: "indefinita su Linea B; autobotti finché durano i turni disponibili",
+        degraded_service_level: "60% della portata nominale, priorità alle utenze sensibili",
+        time_to_safe_state: "non applicabile alla funzione idrica in questo scenario",
+        restoration_time: "ore per guasto elettrico di linea A, giorni per danno fisico esteso"
       }
     ],
 

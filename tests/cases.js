@@ -376,6 +376,36 @@
     var cn = root.CPF.data.dependencyReference.coupling.case_note;
     ok(cn && cn.title && cn.text && cn.thesis_ref === "§5.4.2", "case_note assente o incompleto");
   });
+  t("calcs", "dependencyTaxonomy", "capacità di risposta (adattiva/rigida) è distinta dall'accoppiamento (§3.4)", function () {
+    var rc = root.CPF.data.dependencyTaxonomy.response_capacity;
+    ok(Array.isArray(rc) && rc.length === 2, "response_capacity assente o incompleta");
+    ["adattiva", "rigida"].forEach(function (id) {
+      ok(rc.some(function (x) { return x.id === id; }), "manca la voce: " + id);
+    });
+  });
+  t("calcs", "dependencyTaxonomy", "livello (fisico/cyber/organizzativo) è distinto dalla posizione (§3.4, Setola e Theocharidou)", function () {
+    var lv = root.CPF.data.dependencyTaxonomy.levels;
+    ok(Array.isArray(lv) && lv.length === 3, "levels assente o incompleta");
+    ["fisico", "cyber", "organizzativo"].forEach(function (id) {
+      ok(lv.some(function (x) { return x.id === id; }), "manca la voce: " + id);
+    });
+  });
+  t("calcs", "dependencyReference", "capacità di risposta e livello sono spiegati in legenda, non solo nella tassonomia macchina-leggibile", function () {
+    var D = root.CPF.data.dependencyReference;
+    ok(D.response_capacity && D.response_capacity.items && D.response_capacity.items.length === 2, "response_capacity assente dalla legenda");
+    ok(D.levels && D.levels.items && D.levels.items.length === 3 && D.levels.example, "levels assente dalla legenda");
+  });
+  t("calcs", "blankDependency", "porta le sei grandezze della dependency curve (§3.4): tempo al primo impatto + cinque proprietà dell'alternativa", function () {
+    var d = root.CPF.blankDependency("x");
+    ["activation_time_tolerable", "alternative_activation_time", "alternative_sustain_duration", "degraded_service_level", "time_to_safe_state", "restoration_time"].forEach(function (f) {
+      ok(d.hasOwnProperty(f) && d[f] === "", "campo mancante o non vuoto: " + f);
+    });
+  });
+  t("calcs", "blankDependency", "porta livello e capacità di risposta con i default della tassonomia", function () {
+    var d = root.CPF.blankDependency("x");
+    eq(d.level, "cyber");
+    eq(d.response_capacity, "rigida");
+  });
   t("calcs", "caseStudies", "i sette casi del Cap. 5 sono presenti, ciascuno con almeno un collegamento al modello", function () {
     var cs = root.CPF.data.caseStudies;
     ok(Array.isArray(cs) && cs.length === 7, "attesi 7 casi, trovati " + (cs && cs.length));

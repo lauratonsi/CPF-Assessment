@@ -243,10 +243,10 @@
       + '<span><b>' + D.internal.length + '</b> interne</span><span><b>' + D.downstream.length + '</b> a valle</span>'
       + '<span style="color:var(--danger)"><b>' + D.critical.length + '</b> anelli critici</span></div>'
       + depFlow(D.upstream, D.downstream, F.name)
-      + '<table class="mini-table" style="margin-top:0.8rem"><thead><tr><th>B → A</th><th>Risorsa</th><th>Classe</th><th>Accoppiamento</th><th>Alternativa</th></tr></thead><tbody>'
+      + '<table class="mini-table" style="margin-top:0.8rem"><thead><tr><th>B → A</th><th>Risorsa</th><th>Classe</th><th>Livello</th><th>Accoppiamento</th><th>Alternativa</th></tr></thead><tbody>'
       + deps.map(function (d) {
           return '<tr class="' + (depCritical(d) ? "crit" : "") + '"><td>' + esc(d.source) + ' → ' + esc(d.target) + '</td>'
-            + '<td>' + esc(d.resource_or_condition) + '</td><td>' + esc(d.class) + '</td>'
+            + '<td>' + esc(d.resource_or_condition) + '</td><td>' + esc(d.class) + '</td><td>' + esc(d.level || "—") + '</td>'
             + '<td>' + esc(d.coupling === "tight" ? "stretto" : "debole") + '</td>'
             + '<td>' + (d.alternative_available ? esc(d.alternative_description || "sì") : "—") + '</td></tr>';
         }).join("")

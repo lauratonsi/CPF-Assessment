@@ -78,7 +78,7 @@
   </nav>
   <header class="masthead">
     <h1>Step 3 — Mappatura delle dipendenze</h1>
-    <p class="dek">Ogni dipendenza è una relazione orientata <strong>B → A</strong>. Prima di compilarla, la legenda qui sotto spiega classi, accoppiamento, posizione, tipi di guasto e dimensione temporale. Riferimento: §3.4.</p>
+    <p class="dek">Ogni dipendenza è una relazione orientata <strong>B → A</strong>. Prima di compilarla, la legenda qui sotto spiega classi, accoppiamento, capacità di risposta, posizione, livello, tipi di guasto e dimensione temporale. Riferimento: §3.4.</p>
   </header>
 
   <div class="legend" id="legend"></div>
@@ -149,9 +149,11 @@
     sectionHead(D.intro);
     sectionHead(D.classes); grid(D.classes.items, true); out.push('<p class="closing">' + esc(D.classes.closing_note) + '</p>');
     sectionHead(D.coupling); grid(D.coupling.items, true); out.push('<p class="closing">' + esc(D.coupling.dynamic_note) + '</p>'); callout(D.coupling.complexity_note); callout(D.coupling.case_note);
+    sectionHead(D.response_capacity); grid(D.response_capacity.items, true); out.push('<p class="closing">' + esc(D.response_capacity.closing_note) + '</p>');
     sectionHead(D.positions); grid(D.positions.items, false); out.push('<p class="closing">' + esc(D.positions.important_distinction) + '</p>');
+    sectionHead(D.levels); grid(D.levels.items, true); out.push('<p class="ex">' + esc(D.levels.example) + '</p>');
     sectionHead(D.failure_types); grid(D.failure_types.items, false);
-    sectionHead(D.temporal_dimension); out.push('<p>' + esc(D.temporal_dimension.model_extension) + '</p>'); callout({ title: "Il punto chiave", text: D.temporal_dimension.key_point });
+    sectionHead(D.temporal_dimension); out.push('<p>' + esc(D.temporal_dimension.model_extension) + '</p>'); callout({ title: "Il punto chiave", text: D.temporal_dimension.key_point }); callout({ title: "Nel modello", text: D.temporal_dimension.operationalization });
     sectionHead(D.empirical_grounding); out.push('<p class="ex">' + esc(D.empirical_grounding.example) + '</p>'); out.push('<p>' + esc(D.empirical_grounding.tool_implication) + '</p>');
     document.getElementById("legend").innerHTML = out.join("");
   })();
@@ -207,13 +209,24 @@
       + '    <label class="wide"><span>Risorsa o condizione trasferita / richiesta</span><textarea data-f="resource_or_condition" placeholder="cosa passa lungo questa relazione (energia, dato di processo, autorizzazione, collocazione fisica…)">' + esc(d.resource_or_condition) + '</textarea></label>'
       + '    <label><span>Classe</span><select data-f="class">' + opt(TAX.classes, d.class) + '</select></label>'
       + '    <label><span>Posizione</span><select data-f="position">' + opt(TAX.positions, d.position) + '</select></label>'
+      + '    <label><span>Livello</span><select data-f="level">' + opt(TAX.levels, d.level) + '</select></label>'
       + '    <label><span>Accoppiamento</span><select data-f="coupling">' + opt(TAX.coupling, d.coupling) + '</select></label>'
+      + '    <label><span>Capacità di risposta</span><select data-f="response_capacity">' + opt(TAX.response_capacity, d.response_capacity) + '</select></label>'
       + '    <label><span>Stato operativo rilevante</span><select data-f="operational_state_relevant">' + opt(STATES, d.operational_state_relevant) + '</select></label>'
       + '    <label><span>Tipo di guasto</span><select data-f="failure_type_if_relevant">' + opt(FAILURES, d.failure_type_if_relevant || "") + '</select></label>'
-      + '    <label><span>Tempo di attivazione tollerabile</span><input data-f="activation_time_tolerable" placeholder="es. minuti · 8 h · giorni" value="' + esc(d.activation_time_tolerable) + '"></label>'
+      + '    <label><span>Tempo al primo impatto</span><input data-f="activation_time_tolerable" placeholder="es. minuti · 8 h · giorni" value="' + esc(d.activation_time_tolerable) + '"></label>'
       + '  </div>'
       + '  <label class="alt-toggle"><input type="checkbox" data-f="alternative_available"' + (d.alternative_available ? " checked" : "") + '> Esiste un\'alternativa o una ridondanza per questa risorsa/condizione</label>'
-      + '  <div class="alt-desc"' + (d.alternative_available ? "" : " hidden") + '><textarea data-f="alternative_description" placeholder="quale alternativa, con quale capacità e tempo di subentro">' + esc(d.alternative_description) + '</textarea></div>'
+      + '  <div class="alt-desc"' + (d.alternative_available ? "" : " hidden") + '>'
+      + '    <textarea data-f="alternative_description" placeholder="quale alternativa, con quale capacità e tempo di subentro">' + esc(d.alternative_description) + '</textarea>'
+      + '    <div class="dep-grid" style="margin-top:0.5rem">'
+      + '      <label><span>Tempo di attivazione dell\'alternativa</span><input data-f="alternative_activation_time" placeholder="es. secondi · 2 min · 30-60 min" value="' + esc(d.alternative_activation_time) + '"></label>'
+      + '      <label><span>Durata del sostegno</span><input data-f="alternative_sustain_duration" placeholder="es. 12 h · finché non serve rifornimento" value="' + esc(d.alternative_sustain_duration) + '"></label>'
+      + '      <label><span>Livello di servizio in condizioni degradate</span><input data-f="degraded_service_level" placeholder="es. 60% della portata, sola lettura, manuale" value="' + esc(d.degraded_service_level) + '"></label>'
+      + '      <label><span>Tempo per lo stato sicuro (safe state)</span><input data-f="time_to_safe_state" placeholder="es. non applicabile · 30 min" value="' + esc(d.time_to_safe_state) + '"></label>'
+      + '      <label><span>Tempo di ripristino della risorsa principale</span><input data-f="restoration_time" placeholder="es. ore · giorni" value="' + esc(d.restoration_time) + '"></label>'
+      + '    </div>'
+      + '  </div>'
       + '  <ul class="dep-flags"></ul>'
       + '</div>';
   }
@@ -260,7 +273,10 @@
       out.push({ warn: false, text: "Guasto a cascata (A → B → C): tracciare la catena a valle di questo elemento." });
     }
     if (d.coupling === "tight" && !d.activation_time_tolerable) {
-      out.push({ warn: false, text: "Accoppiamento stretto senza tempo di attivazione tollerabile indicato: quantificare il margine." });
+      out.push({ warn: false, text: "Accoppiamento stretto senza tempo al primo impatto indicato: quantificare il margine." });
+    }
+    if (d.alternative_available && (!d.alternative_activation_time || !d.alternative_sustain_duration)) {
+      out.push({ warn: false, text: "Alternativa dichiarata ma tempi di attivazione o durata del sostegno non quantificati: la disponibilità nominale non dimostra da sola l'adeguatezza della mitigazione (§3.4)." });
     }
     return out;
   }

@@ -225,9 +225,15 @@ derivati §3.6), **review** (euristiche di coerenza dello Step 2), **report**
   piena, che comunicherebbe una falsa rassicurazione. Al suo posto un grafico a
   manubrio per dominio.
 - **Dipendenze:** relazione orientata B → A, quattro classi, accoppiamento,
-  posizione, tipi di guasto (Rinaldi/Peerenboom/Kelly 2001; Argonne 2015; NAT).
-  La classe *geografica* è segnalata come struttura E → {A, B} (causa comune),
-  non come relazione reciproca.
+  capacità di risposta (adattiva/rigida — proprietà distinta dall'accoppiamento),
+  posizione, livello (fisico/cyber/organizzativo — distinto dalla posizione,
+  Setola e Theocharidou 2016), tipi di guasto (Rinaldi/Peerenboom/Kelly 2001;
+  Argonne 2015; NAT). La classe *geografica* è segnalata come struttura
+  E → {A, B} (causa comune), non come relazione reciproca. La dimensione
+  temporale (dependency curves, §3.4) è raccolta per ogni dipendenza: tempo al
+  primo impatto e, quando esiste un'alternativa, il suo tempo di attivazione,
+  la durata del sostegno, il livello di servizio degradato, il tempo per lo
+  stato sicuro e il tempo di ripristino.
 - **Criticità della funzione:** raccolta nello Step 2 dai criteri CER artt. 6-7;
   entra in `domainPriority()` come `f(criticità, essenzialità, ampiezza del divario)`.
 - **Tracciabilità:** ogni classificazione di regime porta un `trace` di coppie

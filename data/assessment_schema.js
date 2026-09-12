@@ -27,12 +27,22 @@
       resource_or_condition: "",
       class: "cyber",                        // fisica|cyber|logica|geografica
       position: "upstream",                  // upstream|internal|downstream
+      level: "cyber",                        // fisico|cyber|organizzativo — dominio d'ingresso, distinto dalla posizione (§3.4, Setola e Theocharidou)
       coupling: "tight",                     // tight|loose
+      response_capacity: "rigida",           // adattiva|rigida — distinta dall'accoppiamento (§3.4)
       operational_state_relevant: "normal",  // normal|stressed|repair_restoration
       failure_type_if_relevant: null,        // cascading|escalating|common_cause|null
-      activation_time_tolerable: "",
+      // Caratterizzazione temporale (dependency curves, §3.4). Il primo campo
+      // riguarda la dipendenza in sé; i successivi cinque descrivono
+      // l'alternativa/mitigazione e sono pertinenti solo se alternative_available.
+      activation_time_tolerable: "",         // tempo al primo impatto: finestra prima che la perdita di B produca il primo effetto su A
       alternative_available: false,
-      alternative_description: ""
+      alternative_description: "",
+      alternative_activation_time: "",       // tempo necessario per attivare la misura alternativa
+      alternative_sustain_duration: "",      // durata per la quale l'alternativa può sostenere il processo
+      degraded_service_level: "",            // livello di servizio mantenuto in condizioni degradate
+      time_to_safe_state: "",                // tempo disponibile per condurre il processo verso lo stato sicuro
+      restoration_time: ""                   // tempo necessario per completare il ripristino della risorsa principale
     };
   };
 
