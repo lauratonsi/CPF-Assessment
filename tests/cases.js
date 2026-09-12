@@ -391,9 +391,9 @@
       ok(ids.indexOf(id) !== -1, "id atteso mancante (usato nei link incrociati Step 2/3): " + id);
     });
   });
-  t("calcs", "caseStudies", "sintesi §5.5 presente (Assante e Lee vs modello del Cap. 3)", function () {
+  t("calcs", "caseStudies", "sintesi §5.5/§5.7 presente (Assante e Lee + il divario conformità/continuità generalizzato dal §5.7)", function () {
     var syn = root.CPF.data.caseStudiesSynthesis;
-    ok(syn && syn.thesis_ref === "§5.5" && syn.text, "caseStudiesSynthesis assente o incompleta");
+    ok(syn && syn.thesis_ref === "§5.5, §5.7" && syn.text, "caseStudiesSynthesis assente o incompleta");
   });
 
   /* ================================================================

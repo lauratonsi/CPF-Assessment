@@ -143,11 +143,15 @@
     }
   ];
 
-  /* Sintesi del §5.5, usata come lead della pagina: la tassonomia di Assante
-     e Lee classifica l'effetto tecnico sul processo; il modello del Cap. 3
-     valuta le capacità necessarie ad assorbirlo e preservare la funzione. */
+  /* Sintesi del §5.5 (la tassonomia di Assante e Lee classifica l'effetto
+     tecnico sul processo; il modello del Cap. 3 valuta le capacità necessarie
+     ad assorbirlo) generalizzata dal §5.7 a tutto il capitolo: lo stesso
+     divario — tra ciò che regimi e tassonomie classificano e ciò che serve a
+     preservare la funzione — vale non solo per Assante e Lee ma anche per le
+     soglie giuridiche del §5.3 e per il PSNC del §5.2. Usata come lead della
+     pagina. */
   root.CPF.data.caseStudiesSynthesis = {
-    thesis_ref: "§5.5",
-    text: "Assante e Lee classificano ciò che accade al processo; il modello di questo strumento valuta le capacità necessarie ad assorbire l'effetto e preservare la funzione che da quel processo dipende. Per questo alcuni casi — Estonia, il Baltico, KA-SAT, Norsk Hydro — restano fuori dalla tassonomia tecnica pur essendo istruttivi per il modello: la loro assenza di manipolazione diretta del processo è essa stessa un'informazione."
+    thesis_ref: "§5.5, §5.7",
+    text: "Assante e Lee classificano ciò che accade al processo; il modello di questo strumento valuta le capacità necessarie ad assorbire l'effetto e preservare la funzione che da quel processo dipende (§5.5). È lo stesso divario che attraversa l'intero capitolo (§5.7): nessun regime di conformità e nessuna tassonomia tecnica, per quanto raffinati, sostituiscono la valutazione di quanto un'organizzazione riesca davvero ad assorbire l'effetto e preservare la funzione essenziale. Per questo alcuni casi — Estonia, il Baltico, KA-SAT, Norsk Hydro — restano fuori dalla tassonomia tecnica pur essendo istruttivi per il modello: la loro assenza di manipolazione diretta del processo è essa stessa un'informazione."
   };
 })(window);

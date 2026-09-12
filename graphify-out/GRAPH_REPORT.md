@@ -1,110 +1,105 @@
-# Graph Report - CPF Assesment  (2026-08-29)
+# Graph Report - CPF Assesment  (2026-09-11)
 
 ## Corpus Check
-- Corpus is ~37,340 words - fits in a single context window. You may not need a graph.
+- Corpus is ~46,453 words - fits in a single context window. You may not need a graph.
 
 ## Summary
-- 96 nodes · 171 edges · 12 communities (10 shown, 2 thin omitted)
-- Extraction: 84% EXTRACTED · 16% INFERRED · 0% AMBIGUOUS · INFERRED: 27 edges (avg confidence: 0.84)
-- Token cost: 145,000 input · 8,400 output
+- 114 nodes · 104 edges · 44 communities (36 shown, 8 thin omitted)
+- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 4 edges (avg confidence: 0.82)
+- Token cost: 180,434 input · 4,200 output
 
 ## Community Hubs (Navigation)
-- Capability Assessment & §3.6 Calculations
+- App Hub & Project Docs
 - Multi-Regime Classification Engine
-- App Core, Persistence & Test Runner
-- Dependency Mapping (§3.4)
-- Function Definition & Data Schema
-- CCE Logic: Consequences & Paths (§3.1)
+- Capability Model (Cap. 3)
+- App Shell & Accessibility
 - Theme Toggle
-- Test Assertion Suite
+- Test Framework Helpers
+- Dependency Case Studies (§3.4)
 - Dumbbell Chart Renderer
-- App Shell / Appbar
+- Dependency Taxonomy Sources
+- Dependency Diagram (SVG)
+- Index: Step Progress
+- Step 1: Draw Domain Links
+- Step 1: Render Result
+- Step 3: Persist
+- Step 4a: Sync
 
 ## God Nodes (most connected - your core abstractions)
-1. `Dashboard — Assessment outcome` - 18 edges
-2. `Step 1 — Regime classification` - 14 edges
-3. `Step 4a — Intolerable consequences & compromise paths` - 14 edges
-4. `Step 2 — Cyber-physical function definition` - 12 edges
-5. `Step 3 — Dependency mapping` - 11 edges
-6. `Step 4b — Capability assessment` - 11 edges
-7. `CPF Assessment — Home & assessment list` - 9 edges
-8. `CPF measurement model (Ch. 3)` - 8 edges
-9. `Engine verification page` - 7 edges
-10. `B->A dependency notation (§3.4)` - 5 edges
+1. `CPF Assessment (progetto)` - 11 edges
+2. `Step 2 — Definizione della funzione cyber-fisica` - 8 edges
+3. `Step 4b — Valutazione delle capacità` - 8 edges
+4. `index.html — ingresso valutazioni` - 6 edges
+5. `Step 1 — Regimi applicabili` - 6 edges
+6. `Dashboard — Esito della valutazione` - 6 edges
+7. `build()` - 5 edges
+8. `Step 4a — Conseguenze intollerabili e percorsi` - 5 edges
+9. `Test page — regime engine` - 4 edges
+10. `Step 3 — Mappatura delle dipendenze` - 4 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `CPF measurement model (Ch. 3)` --conceptually_related_to--> `Function as unit of analysis (§3.2)`  [INFERRED]
-  README.md → pages/step2-funzione.html
-- `CPF measurement model (Ch. 3)` --conceptually_related_to--> `Non-compensable threshold / weak link (§3.6)`  [INFERRED]
+- `Complementarità PSNC/strumento (§5.2, §5.7)` --rationale_for--> `Dashboard — Esito della valutazione`  [INFERRED]
+  README.md → pages/dashboard.html
+- `Complementarità PSNC/strumento (§5.2, §5.7)` --rationale_for--> `Step 1 — Regimi applicabili`  [INFERRED]
+  README.md → pages/step1-regimi.html
+- `CPF Assessment (progetto)` --references--> `Step 4a — Conseguenze intollerabili e percorsi`  [EXTRACTED]
   README.md → pages/step4a-conseguenze.html
-- `Regulatory verification priority` --semantically_similar_to--> `Intervention vs verification priority (§3.6)`  [INFERRED] [semantically similar]
-  pages/step1-regimi.html → pages/dashboard.html
-- `CPF Assessment — Home & assessment list` --references--> `Dashboard — Assessment outcome`  [EXTRACTED]
-  index.html → pages/dashboard.html
-- `CPF Assessment — Home & assessment list` --references--> `Step 1 — Regime classification`  [EXTRACTED]
-  index.html → pages/step1-regimi.html
+- `CPF Assessment (progetto)` --references--> `Step 4b — Valutazione delle capacità`  [EXTRACTED]
+  README.md → pages/step4b-capacita.html
+- `CPF Assessment (progetto)` --references--> `tests/calcs.html — runner suite calcs`  [EXTRACTED]
+  README.md → tests/calcs.html
 
 ## Import Cycles
 - None detected.
 
 ## Hyperedges (group relationships)
-- **CPF Assessment six-step wizard flow** — pages_step1_regimi_html_step1_regimi, pages_step2_funzione_html_step2_funzione, pages_step3_dipendenze_html_step3_dipendenze, pages_step4a_conseguenze_html_step4a_conseguenze, pages_step4b_capacita_html_step4b_capacita, pages_dashboard_html_dashboard [EXTRACTED 0.95]
-- **§3.6 derived calculations** — pages_dashboard_html_dimension_gap, pages_dashboard_html_essential_shortfall, pages_dashboard_html_rank_domains, pages_step4a_conseguenze_html_non_compensable_threshold, pages_dashboard_html_priority_split [INFERRED 0.85]
-- **CPF test-suite pages and shared cases** — tests_calcs_html_calcs, tests_engine_html_engine, pages_test_html_test, tests_cases, tests_runner [EXTRACTED 0.95]
+- **Flusso del wizard CPF (index → step1 → step2 → step3 → step4a → step4b → dashboard)** — index_page, pages_step1_regimi_page, pages_step2_funzione_page, pages_step3_dipendenze_page, pages_step4a_conseguenze_page, pages_step4b_capacita_page, pages_dashboard_page [EXTRACTED 1.00]
+- **Logica CCE: conseguenza → percorso → capacità → soglia essenziale** — readme_logica_cce, readme_capacita_essenziali, pages_step4a_conseguenze_page, pages_step4b_capacita_page [INFERRED 0.85]
+- **Verifica distinta da intervento: pattern epistemico ricorrente** — pages_step1_regimi_page, pages_step4b_capacita_page, pages_dashboard_page, readme_forza_probatoria [INFERRED 0.80]
 
-## Communities (12 total, 2 thin omitted)
+## Communities (44 total, 8 thin omitted)
 
-### Community 0 - "Capability Assessment & §3.6 Calculations"
-Cohesion: 0.25
-Nodes (14): Dashboard — Assessment outcome, Descriptive-only aggregate (§3.7), Dimension gap (§3.6), Essential shortfall (§3.6), Intervention vs verification priority (§3.6), Domain ranking (§3.6), Target profile (§3.6), Capability domains (6-7 fixed, §2.9) (+6 more)
+### Community 0 - "App Hub & Project Docs"
+Cohesion: 0.22
+Nodes (17): index.html — ingresso valutazioni, Casi di riferimento (Cap. 5), Dashboard — Esito della valutazione, Step 1 — Regimi applicabili, Step 2 — Definizione della funzione cyber-fisica, Step 3 — Mappatura delle dipendenze, Verifica del motore (test.html), CPF Assessment (progetto) (+9 more)
 
-### Community 1 - "Multi-Regime Classification Engine"
-Cohesion: 0.15
-Nodes (6): Multi-regime classification, Regime interactions, Size-cap rule (NIS2), Step 1 — Regime classification, Regulatory verification priority, Test page — regime engine
-
-### Community 2 - "App Core, Persistence & Test Runner"
-Cohesion: 0.19
-Nodes (5): CPF Assessment — Home & assessment list, Client-side persistence (localStorage + JSON import/export), Function-definition coherence heuristics, Engine verification page, Test page — §3.6 derived calculations
-
-### Community 3 - "Dependency Mapping (§3.4)"
-Cohesion: 0.23
-Nodes (10): Dependency flow diagram (upstream/downstream SVG), B->A dependency notation (§3.4), Critical link (tight coupling + no alternative), Dependency taxonomy: class / coupling / position / failure (§3.4), Empirical grounding (Gudrun 2005, NAT, 2003 blackout), Ryden & Sonesson — storm Gudrun (2005), Step 3 — Dependency mapping, Dependency curves / temporal dimension (+2 more)
-
-### Community 4 - "Function Definition & Data Schema"
+### Community 2 - "Capability Model (Cap. 3)"
 Cohesion: 0.29
-Nodes (4): Reusable organization regime profile, Per-function regime override (§3.2), Step 2 — Cyber-physical function definition, Function as unit of analysis (§3.2)
+Nodes (8): Step 4a — Conseguenze intollerabili e percorsi, Step 4b — Valutazione delle capacità, Bochman & Freeman 2021 (INL), Capacità essenziali e soglie non compensabili (anello debole), Priorità come regola ordinale (domainPriority), Forza probatoria (separata dal livello), Logica CCE (Consequence-driven Cyber-informed Engineering), Matrice di corroborazione (§3.5)
 
-### Community 5 - "CCE Logic: Consequences & Paths (§3.1)"
-Cohesion: 0.52
-Nodes (7): Bochman & Freeman, Countering Cyber Sabotage (2021), INL, CCE logic (consequence-driven), Compromise paths, Intolerable consequences (§3.1), Non-compensable threshold / weak link (§3.6), Required vs essential capabilities, Step 4a — Intolerable consequences & compromise paths
+### Community 3 - "App Shell & Accessibility"
+Cohesion: 0.48
+Nodes (5): a11y(), absorbToggle(), backToTop(), build(), footer()
 
-### Community 6 - "Theme Toggle"
+### Community 5 - "Theme Toggle"
 Cohesion: 0.60
 Nodes (5): apply(), current(), mount(), render(), systemDark()
 
-### Community 7 - "Test Assertion Suite"
+### Community 6 - "Test Framework Helpers"
 Cohesion: 0.47
 Nodes (3): has(), ok(), traceHas()
 
+### Community 7 - "Dependency Case Studies (§3.4)"
+Cohesion: 0.40
+Nodes (5): depIssues(d), Caso infrastrutture sottomarine del Baltico, Casi fuori dall'unità di analisi del modello, Caso Estonia, Ridondanza reale vs nominale (§5.4.2, Baltico)
+
+### Community 11 - "Dependency Taxonomy Sources"
+Cohesion: 0.67
+Nodes (3): Argonne National Laboratory 2015, Dipendenze B → A, Rinaldi, Peerenboom & Kelly 2001
+
 ## Knowledge Gaps
-- **5 isolated node(s):** `Size-cap rule (NIS2)`, `Regime interactions`, `Dependency curves / temporal dimension`, `Argonne National Laboratory (2015)`, `Ryden & Sonesson — storm Gudrun (2005)`
+- **14 isolated node(s):** `Prof. Michele Colajanni (relatore)`, `Matrice di corroborazione (§3.5)`, `Forza probatoria (separata dal livello)`, `Bochman & Freeman 2021 (INL)`, `Rinaldi, Peerenboom & Kelly 2001` (+9 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **2 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **8 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Dashboard — Assessment outcome` connect `Capability Assessment & §3.6 Calculations` to `Multi-Regime Classification Engine`, `App Core, Persistence & Test Runner`, `Dependency Mapping (§3.4)`, `CCE Logic: Consequences & Paths (§3.1)`, `Demo Assessment Data`, `Dumbbell Chart Renderer`?**
-  _High betweenness centrality (0.255) - this node is a cross-community bridge._
-- **Why does `Step 3 — Dependency mapping` connect `Dependency Mapping (§3.4)` to `App Core, Persistence & Test Runner`, `Function Definition & Data Schema`, `CCE Logic: Consequences & Paths (§3.1)`?**
-  _High betweenness centrality (0.149) - this node is a cross-community bridge._
-- **Why does `Step 1 — Regime classification` connect `Multi-Regime Classification Engine` to `Capability Assessment & §3.6 Calculations`, `App Core, Persistence & Test Runner`, `Function Definition & Data Schema`?**
-  _High betweenness centrality (0.137) - this node is a cross-community bridge._
-- **Are the 2 inferred relationships involving `Dashboard — Assessment outcome` (e.g. with `Step 1 — Regime classification` and `Step 4a — Intolerable consequences & compromise paths`) actually correct?**
-  _`Dashboard — Assessment outcome` has 2 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 2 inferred relationships involving `Step 4a — Intolerable consequences & compromise paths` (e.g. with `Step 3 — Dependency mapping` and `Dashboard — Assessment outcome`) actually correct?**
-  _`Step 4a — Intolerable consequences & compromise paths` has 2 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 2 inferred relationships involving `Step 3 — Dependency mapping` (e.g. with `Step 2 — Cyber-physical function definition` and `Step 4a — Intolerable consequences & compromise paths`) actually correct?**
-  _`Step 3 — Dependency mapping` has 2 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `Size-cap rule (NIS2)`, `Regime interactions`, `Dependency curves / temporal dimension` to the rest of the system?**
-  _5 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Why does `CPF Assessment (progetto)` connect `App Hub & Project Docs` to `Capability Model (Cap. 3)`?**
+  _High betweenness centrality (0.029) - this node is a cross-community bridge._
+- **Why does `Casi di riferimento (Cap. 5)` connect `App Hub & Project Docs` to `Dependency Case Studies (§3.4)`?**
+  _High betweenness centrality (0.022) - this node is a cross-community bridge._
+- **Are the 2 inferred relationships involving `Step 1 — Regimi applicabili` (e.g. with `Step 4b — Valutazione delle capacità` and `Complementarità PSNC/strumento (§5.2, §5.7)`) actually correct?**
+  _`Step 1 — Regimi applicabili` has 2 INFERRED edges - model-reasoned connections that need verification._
+- **What connects `Prof. Michele Colajanni (relatore)`, `Matrice di corroborazione (§3.5)`, `Forza probatoria (separata dal livello)` to the rest of the system?**
+  _14 weakly-connected nodes found - possible documentation gaps or missing edges._
