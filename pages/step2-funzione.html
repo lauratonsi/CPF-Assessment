@@ -258,7 +258,7 @@
     perimeter: "Perimetro", criticality: "Criticità", criticality_rationale: "Motivazione", regimes: "Regimi"
   };
   function currentFindings() {
-    return CPF.reviewFunction({ function: F, regime_profile: RP });
+    return CPF.reviewFunction({ function: F, regime_profile: RP, dependencies: a.dependencies });
   }
   var _reviewHTML = "";
   function renderReview() {

@@ -76,6 +76,12 @@
   .prio-item .band.bassa { color: var(--muted); }
   .prio-item small { display: block; color: var(--muted); font-size: 0.76rem; margin-top: 0.15rem; }
 
+  .comp-box { border: 1px solid var(--accent); border-radius: var(--r-lg); padding: 0.9rem 1.05rem; background: var(--accent-tint); }
+  .comp-box h2 { color: var(--accent-ink); margin: 0 0 0.3rem; font-size: 1.05rem; }
+  .comp-group-item { border-top: 1px solid var(--border); padding: 0.5rem 0; font-size: 0.85rem; }
+  .comp-group-item:first-of-type { border-top: 0; margin-top: 0.5rem; }
+  .comp-group-item ul { margin: 0.3rem 0 0; padding-left: 1.1rem; }
+
   .cons-item { border: 1px solid var(--border); border-radius: var(--r); padding: 0.7rem 0.85rem; margin: 0.6rem 0; background: var(--surface); font-size: 0.85rem; }
   .cons-item > b { display: block; margin-bottom: 0.3rem; }
   .cons-item .path { border-left: 2px solid var(--accent-tint); padding-left: 0.7rem; margin: 0.4rem 0; font-size: 0.82rem; color: var(--muted); }
@@ -90,7 +96,7 @@
   @media print {
     .stepper, .theme-toggle, .dash-actions, .btn-row { display: none !important; }
     .wrap { max-width: none; }
-    .cap-block, .reg-card, .fn-head, .prio-col { break-inside: avoid; }
+    .cap-block, .reg-card, .fn-head, .prio-col, .comp-group-item { break-inside: avoid; }
   }
 </style>
 </head>
@@ -153,6 +159,7 @@
   var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
   var $ = function (id) { return document.getElementById(id); };
   var SC = CPF.data.scales.dimensions;
+  var DIMS = ["consolidamento", "estensione", "efficacia", "prestazione_osservata"];
   var STRLAB = {}; CPF.data.scales.evidentiary_strength.values.forEach(function (s) { STRLAB[s.id] = s.label; });
   var DOMS = CPF.data.capabilityDomains.domains;
   var domLabel = function (id) { var d = DOMS.filter(function (x) { return x.id === id; })[0]; return d ? d.label : id; };
@@ -354,6 +361,24 @@
         + (interv.length ? interv.map(function (r) { return prioItem(r, "int"); }).join("") : '<p class="lead" style="margin:0">Nessuna carenza corroborata con divario.</p>') + '</div>'
       + '<div class="prio-col"><h3>Priorità di verifica</h3>'
         + (verif.length ? verif.map(function (r) { return prioItem(r, "ver"); }).join("") : '<p class="lead" style="margin:0">Nessuna condizione da chiarire.</p>') + '</div>'
+      + '</div></section>');
+  }
+
+  /* ---------- compensazione tra capacità accessorie comparabili (§3.5) ---------- */
+  var compGroups = R.compensated_groups || [];
+  if (compGroups.length) {
+    out.push('<section class="d-sec"><div class="comp-box"><h2>Compensazione tra capacità accessorie comparabili</h2>'
+      + '<p class="lead" style="margin:0">Indicatore descrittivo e secondario (§3.5): ammesso solo tra capacità <b>accessorie</b> (non essenziali) comparabili che concorrono allo stesso risultato operativo, se la sostituibilità è motivata. Non sostituisce i profili individuali e non tocca divari, priorità o soglie non compensabili.</p>'
+      + compGroups.map(function (g) {
+          var rows = DIMS.map(function (d) {
+            var x = g.dimensions[d];
+            if (x.compensated_level == null) return "";
+            return '<li>' + esc(SC[d].label) + ': <b>' + x.compensated_level + '</b>' + (x.uncertain ? ' <small style="color:var(--accent-ink)">(parziale: almeno una capacità del gruppo non determinabile)</small>' : '') + '</li>';
+          }).join("");
+          return '<div class="comp-group-item"><b>' + esc(g.group) + '</b> — ' + g.domain_ids.map(domLabel).join(" + ")
+            + (g.rationale ? '<br><small style="color:var(--muted)">' + esc(g.rationale) + '</small>' : '<br><small style="color:var(--danger)">manca la motivazione della sostituibilità</small>')
+            + '<ul>' + rows + '</ul></div>';
+        }).join("")
       + '</div></section>');
   }
 

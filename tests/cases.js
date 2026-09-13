@@ -297,6 +297,32 @@
     var p = root.CPF.domainPriority(mk({ consolidamento: { level: 4, evidentiary_strength: "corroborata" } }, { consolidamento: { level: 4 } }, false, null), 3);
     eq(p.priorita_intervento, null); eq(p.priorita_verifica, null);
   });
+
+  /* ---- CPF.compensatedGroups: §3.5, solo tra capacità accessorie comparabili ---- */
+  var accessory = function (id, group, rationale, level) {
+    return {
+      domain_id: id, is_essential: false, comparable_group: group, comparable_rationale: rationale,
+      current_profile: { consolidamento: { level: level, evidentiary_strength: "corroborata" } }
+    };
+  };
+  t("calcs", "compensatedGroups", "due accessorie comparabili → compensated_level = massimo del gruppo", function () {
+    var g = root.CPF.compensatedGroups([accessory("continuita", "backup-alim", "generatore e UPS sostituibili", 2), accessory("filiera", "backup-alim", "", 4)]);
+    eq(g.length, 1); eq(g[0].dimensions.consolidamento.compensated_level, 4);
+    eq(g[0].rationale, "generatore e UPS sostituibili");
+  });
+  t("calcs", "compensatedGroups", "capacità essenziale con comparable_group → esclusa dal gruppo", function () {
+    var e1 = accessory("continuita", "backup-alim", "x", 2); e1.is_essential = true;
+    var g = root.CPF.compensatedGroups([e1, accessory("filiera", "backup-alim", "x", 4)]);
+    eq(g.length, 0);
+  });
+  t("calcs", "compensatedGroups", "un solo membro nel gruppo → nessuna compensazione", function () {
+    eq(root.CPF.compensatedGroups([accessory("continuita", "solo-uno", "x", 3)]).length, 0);
+  });
+  t("calcs", "compensatedGroups", "livello non determinabile su un membro → gruppo segnalato come parziale", function () {
+    var a2 = accessory("filiera", "g", "x", 3); a2.current_profile.consolidamento.evidentiary_strength = "non_determinabile";
+    var g = root.CPF.compensatedGroups([accessory("continuita", "g", "x", 2), a2]);
+    eq(g[0].dimensions.consolidamento.compensated_level, 2); eq(g[0].dimensions.consolidamento.uncertain, true);
+  });
   t("calcs", "blankCurrentProfile", "4 dimensioni, livello non attribuito (null) + non determinabile, estensione con esclusioni []", function () {
     var cp = root.CPF.blankCurrentProfile();
     eq(Object.keys(cp).sort(), ["consolidamento", "efficacia", "estensione", "prestazione_osservata"]);
@@ -430,7 +456,7 @@
      SUITE "review" — controllo di coerenza della funzione (Step 2)
      CPF.reviewFunction: euristiche di aiuto, non validazione giuridica.
      ================================================================ */
-  var rv = function (fn, rp) { return root.CPF.reviewFunction({ function: fn, regime_profile: rp || {} }); };
+  var rv = function (fn, rp, deps) { return root.CPF.reviewFunction({ function: fn, regime_profile: rp || {}, dependencies: deps }); };
   var hasFinding = function (findings, field, level) {
     return findings.some(function (x) { return x.field === field && (!level || x.level === level); });
   };
@@ -479,6 +505,15 @@
   t("review", "reviewFunction", "scostamento (override) senza motivazione → 'da fare'", function () {
     var f = rv(goodFn, { nis2: { qualification: "essenziale", overridden_from_org_profile: true, override_reason: "" } });
     ok(hasFinding(f, "regimes", "todo"), "override senza motivo");
+  });
+  t("review", "reviewFunction", "dipendenze a valle mappate ma criticità bassa → verifica (§3.2, §3.4)", function () {
+    var g = JSON.parse(JSON.stringify(goodFn)); g.criticality = 2;
+    var deps = [{ position: "downstream" }, { position: "upstream" }];
+    ok(hasFinding(rv(g, {}, deps), "criticality", "warn"), "warn dipendenze a valle vs criticità bassa");
+  });
+  t("review", "reviewFunction", "dipendenze a valle con criticità alta → nessuna segnalazione aggiuntiva", function () {
+    var deps = [{ position: "downstream" }];
+    eq(rv(goodFn, { nis2: { qualification: "essenziale" } }, deps), []);
   });
 
   /* ================================================================

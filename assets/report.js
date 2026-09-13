@@ -123,6 +123,7 @@
       domains: domains,
       essential_shortfalls: essShort,
       essential_verifications: essVer,
+      compensated_groups: (typeof CPF.compensatedGroups === "function") ? CPF.compensatedGroups(CA) : [],
       ranked: ranked,
       priority_intervento: ranked.filter(function (r) { return r.priorita_intervento; }),
       priority_verifica: ranked.filter(function (r) { return r.priorita_verifica; }),

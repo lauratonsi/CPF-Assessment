@@ -56,6 +56,18 @@
   .thr-fb.verify { border-color: var(--accent); color: var(--accent-ink); background: var(--accent-tint); }
   .thr-fb.ok { border-color: var(--ok); color: var(--ok); }
 
+  .comp-group { margin-top: 0.7rem; padding-top: 0.6rem; border-top: 1px dashed var(--border); display: grid; gap: 0.4rem 0.6rem; grid-template-columns: 1fr; }
+  @media (min-width: 40rem) { .comp-group { grid-template-columns: 1fr 1fr; } .comp-group .wide { grid-column: 1 / -1; } }
+  .comp-group label { font-size: 0.74rem; color: var(--muted); display: block; }
+  .comp-group label > span { display: block; margin-bottom: 0.15rem; }
+  .comp-group input { width: 100%; font: inherit; font-size: 0.83rem; padding: 0.36rem 0.5rem; border: 1px solid var(--border); border-radius: 5px; background: var(--paper); color: var(--ink); }
+  .comp-group .desc { grid-column: 1 / -1; font-size: 0.73rem; color: var(--faint); margin: 0; }
+
+  .comp-summary { margin-top: 1rem; padding: 0.6rem 0.75rem; border: 1px solid var(--accent); border-radius: 7px; background: var(--accent-tint); font-size: 0.8rem; }
+  .comp-summary h4 { margin: 0 0 0.3rem; font-size: 0.82rem; color: var(--accent-ink); }
+  .comp-summary ul { margin: 0.3rem 0; padding-left: 1.1rem; }
+  .comp-summary .note { color: var(--muted); font-size: 0.74rem; }
+
   .ed-summary { border: 1px solid var(--border); border-radius: 7px; padding: 0.7rem 0.85rem; margin-top: 1.2rem; font-size: 0.82rem; background: var(--surface-2); }
   .ed-summary b { font-family: var(--mono); }
   .ed-summary .crit { color: var(--danger); }
@@ -211,13 +223,24 @@
     return h;
   }
 
+  function compGroupBlock(e) {
+    if (e.is_essential) return "";
+    return '<div class="comp-group">'
+      + '<label><span>Gruppo di sostituibilità (opzionale)</span>'
+      + '<input data-f="comparable_group" placeholder="es. backup-alimentazione — stesso id per capacità comparabili" value="' + esc(e.comparable_group || "") + '"></label>'
+      + '<label class="wide"><span>Motivazione della sostituibilità</span>'
+      + '<input data-f="comparable_rationale" placeholder="perché queste capacità sono comparabili e sostituibili rispetto a questo scenario" value="' + esc(e.comparable_rationale || "") + '"></label>'
+      + '<p class="desc">§3.5: solo tra capacità <b>accessorie</b> che concorrono allo stesso risultato operativo — usa lo stesso gruppo su un\'altra capacità accessoria per comporre l\'indicatore descrittivo e secondario in dashboard. Non compensa mai le capacità essenziali né sostituisce i profili individuali.</p>'
+      + '</div>';
+  }
+
   function domCard(e) {
     return '<div class="dom' + (e.is_essential ? " ess" : "") + '" data-dom="' + esc(e.domain_id) + '">'
       + '<h3>' + esc(domLabel(e.domain_id)) + (e.is_essential ? ' <span class="tag">ESSENZIALE</span>' : '') + '</h3>'
       + '<p class="dsc">' + esc(domDesc(e.domain_id)) + '</p>'
       + '<div class="prio" data-prio></div>'
       + DIMS.map(function (d) { return dimBlock(e, d); }).join("")
-      + (e.is_essential ? '<div class="thr-fb" data-thr></div>' : '')
+      + (e.is_essential ? '<div class="thr-fb" data-thr></div>' : compGroupBlock(e))
       + '</div>';
   }
 
@@ -231,6 +254,12 @@
     Array.prototype.forEach.call(listEl.querySelectorAll(".dom"), function (el) {
       var e = a.capability_assessment.filter(function (x) { return x.domain_id === el.getAttribute("data-dom"); })[0];
       if (!e) return;
+      if (!e.is_essential) {
+        var cg = el.querySelector('[data-f="comparable_group"]');
+        var cr = el.querySelector('[data-f="comparable_rationale"]');
+        e.comparable_group = cg && cg.value.trim() ? cg.value.trim() : null;
+        e.comparable_rationale = cr ? cr.value : "";
+      }
       Array.prototype.forEach.call(el.querySelectorAll(".dim"), function (dEl) {
         var d = dEl.getAttribute("data-dim");
         var cp = e.current_profile[d] || (e.current_profile[d] = {});
@@ -347,8 +376,26 @@
           var x = CPF.essentialShortfall(e);
           return '<li>' + esc(domLabel(e.domain_id)) + ' — ' + SC[x.dimension].label + ' ' + x.have + '/' + x.need + '</li>';
         }).join("") + '</ul>' : '')
-      + '<span class="muted" style="font-size:.78rem">L\'ordinamento completo e i grafici sono nella dashboard. L\'aggregato è descrittivo (§3.7): i divari essenziali non vi sono assorbiti.</span>';
+      + '<span class="muted" style="font-size:.78rem">L\'ordinamento completo e i grafici sono nella dashboard. L\'aggregato è descrittivo (§3.7): i divari essenziali non vi sono assorbiti.</span>'
+      + compensationSummary();
     flashUpdate(s, html);
+  }
+
+  function compensationSummary() {
+    var groups = CPF.compensatedGroups(a.capability_assessment);
+    if (!groups.length) return "";
+    return '<div class="comp-summary"><h4>Compensazione tra capacità accessorie comparabili (§3.5)</h4>'
+      + groups.map(function (g) {
+        var rows = DIMS.map(function (d) {
+          var x = g.dimensions[d];
+          if (x.compensated_level == null) return "";
+          return '<li>' + esc(SC[d].label) + ': <b>' + x.compensated_level + '</b>' + (x.uncertain ? ' (parziale: livello non determinabile per almeno una capacità del gruppo)' : '') + '</li>';
+        }).join("");
+        return '<p><b>' + esc(g.group) + '</b> — ' + g.domain_ids.map(domLabel).join(" + ")
+          + (g.rationale ? ' <span class="note">(' + esc(g.rationale) + ')</span>' : ' <span class="note">manca la motivazione della sostituibilità</span>')
+          + '</p><ul>' + rows + '</ul>';
+      }).join("")
+      + '<p class="note">Indicatore descrittivo e secondario: vale solo per capacità accessorie, non sostituisce i profili individuali e non incide su divari, priorità o soglie non compensabili.</p></div>';
   }
 
   // aggiorna solo se cambiato + breve pulsazione "aggiornato" (transitoria)

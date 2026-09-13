@@ -236,6 +236,8 @@
       e.is_essential = !!r.ess[id];
       if (e.is_essential && !e.non_compensable_threshold) e.non_compensable_threshold = { dimension: "estensione", min_level: 4, rationale: "" };
       if (!e.is_essential) e.non_compensable_threshold = null;
+      // La compensazione tra comparabili vale solo per capacità accessorie (§3.5).
+      if (e.is_essential) { e.comparable_group = null; e.comparable_rationale = ""; }
       return e;
     });
     // conserva eventuali profili correnti (Step 4b) per domini non più richiesti? no: si ricreano se rientrano.

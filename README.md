@@ -223,7 +223,11 @@ derivati §3.6), **review** (euristiche di coerenza dello Step 2), **report**
   ad «alta» a prescindere dall'aggregato.
 - **Aggregati** solo descrittivi/secondari (§3.6-3.7): niente radar ad area
   piena, che comunicherebbe una falsa rassicurazione. Al suo posto un grafico a
-  manubrio per dominio.
+  manubrio per dominio. Unica eccezione ammessa dal §3.5: tra capacità
+  **accessorie** (mai essenziali) comparabili che concorrono allo stesso
+  risultato operativo, se la sostituibilità è motivata rispetto allo scenario
+  (`CPF.compensatedGroups`) — resta un indicatore secondario, non tocca gap,
+  priorità o soglie non compensabili.
 - **Dipendenze:** relazione orientata B → A, quattro classi, accoppiamento,
   capacità di risposta (adattiva/rigida — proprietà distinta dall'accoppiamento),
   posizione, livello (fisico/cyber/organizzativo — distinto dalla posizione,
@@ -236,6 +240,10 @@ derivati §3.6), **review** (euristiche di coerenza dello Step 2), **report**
   stato sicuro e il tempo di ripristino.
 - **Criticità della funzione:** raccolta nello Step 2 dai criteri CER artt. 6-7;
   entra in `domainPriority()` come `f(criticità, essenzialità, ampiezza del divario)`.
+  Le dipendenze a valle concorrono a determinarla (§3.2, §3.4): lo strumento
+  segnala il riscontro in entrambi i sensi, allo Step 3 se la criticità non ne
+  tiene conto e a `reviewFunction()` (Step 2) se la criticità dichiarata resta
+  bassa nonostante dipendenze a valle già mappate.
 - **Tracciabilità:** ogni classificazione di regime porta un `trace` di coppie
   `{ esito, base }` che la motivano — esempio di trasparenza metodologica per il
   Capitolo 4, verificabile dalla pagina `test.html`.

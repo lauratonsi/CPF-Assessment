@@ -307,7 +307,30 @@
       '<b>' + a.dependencies.length + '</b> dipendenze · <b>' + by.upstream + '</b> a monte · <b>' + by.internal + '</b> interne · <b>' + by.downstream + '</b> a valle'
       + ' · <span class="' + (crit ? "crit" : "") + '"><b>' + crit + '</b> anelli critici</span>'
       + (undet ? ' · <b>' + undet + '</b> senza margine temporale quantificato' : '')
-      + '<br><span class="muted" style="font-size:.78rem">La visualizzazione Sankey e l\'aggancio ai percorsi di compromissione (Step 4a) useranno questa mappa.</span>';
+      + '<br><span class="muted" style="font-size:.78rem">La visualizzazione Sankey e l\'aggancio ai percorsi di compromissione (Step 4a) useranno questa mappa.</span>'
+      + downstreamCriticalityHint(by.downstream);
+  }
+
+  // Le dipendenze a valle concorrono a determinare la criticità della funzione
+  // (§3.2, §3.4): rendono visibili utenti, servizi e settori esposti. Qui si
+  // mappano dopo che la criticità è stata fissata nello Step 2, quindi il
+  // riscontro va segnalato in questo verso; CPF.reviewFunction chiude l'anello
+  // nell'altro verso quando si rientra nello Step 2.
+  function downstreamCriticalityHint(nDownstream) {
+    if (!nDownstream) return "";
+    var crit = a.function && a.function.criticality;
+    if (!crit) {
+      return '<br><span class="muted" style="font-size:.78rem">' + nDownstream + ' dipendenza/e a valle mappata/e: torna allo Step 2 per fissare la criticità tenendone conto (utenti e settori esposti, §3.2).</span>';
+    }
+    if (crit <= 2) {
+      return '<br><span class="crit" style="font-size:.78rem"><b>' + nDownstream + '</b> dipendenza/e a valle mappata/e ma la criticità in Step 2 è «' + esc(scaleCritLabel(crit)) + '»: verifica che la motivazione tenga conto degli utenti e settori esposti a valle (§3.2, §3.4).</span>';
+    }
+    return "";
+  }
+
+  function scaleCritLabel(v) {
+    var sc = (CPF.data.scales.function_criticality.levels || []).filter(function (l) { return l.value === v; })[0];
+    return sc ? sc.label : v;
   }
 
   var saveTimer = null;

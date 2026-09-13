@@ -272,6 +272,48 @@
       });
   };
 
+  // Compensazione tra capacità accessorie comparabili (§3.5): «soltanto nella
+  // rappresentazione aggregata», tra capacità NON essenziali riferite allo
+  // stesso comparable_group, quando concorrono al medesimo risultato
+  // operativo e la sostituibilità è motivata rispetto allo scenario. Mai per
+  // le capacità essenziali; mai tra dimensioni diverse; il valore resta
+  // descrittivo e secondario, non tocca gap, priorità o soglie non
+  // compensabili (calcolati sempre sui singoli domini da domainPriority).
+  CPF.compensatedGroups = function (capabilityAssessment) {
+    var byGroup = {};
+    (capabilityAssessment || []).forEach(function (da) {
+      var g = da && !da.is_essential && da.comparable_group;
+      if (!g) return;
+      (byGroup[g] = byGroup[g] || []).push(da);
+    });
+    var out = [];
+    Object.keys(byGroup).forEach(function (g) {
+      var members = byGroup[g];
+      if (members.length < 2) return; // nulla da comparare
+      var rationale = members.map(function (m) { return m.comparable_rationale; }).filter(Boolean)[0] || "";
+      var dims = {};
+      DIMS.forEach(function (dim) {
+        var levels = members.map(function (m) {
+          var c = (m.current_profile || {})[dim];
+          return (c && c.level != null && c.evidentiary_strength !== "non_determinabile") ? c.level : null;
+        });
+        var known = levels.filter(function (l) { return l != null; });
+        dims[dim] = {
+          compensated_level: known.length ? Math.max.apply(null, known) : null,
+          members_levels: levels,
+          uncertain: known.length < members.length
+        };
+      });
+      out.push({
+        group: g,
+        domain_ids: members.map(function (m) { return m.domain_id; }),
+        rationale: rationale,
+        dimensions: dims
+      });
+    });
+    return out;
+  };
+
   /* ----------------------------------------------------------------------
      Revisione assistita della definizione di funzione (Step 2).
      NON è una validazione giuridica: sono euristiche che aiutano l'utente
@@ -332,6 +374,13 @@
       } else if (F.criticality >= 3 && !/(utent|settor|durat|estensione|geograf|alternativ|propagazion|ambient|sicurezza pubblic|incolumit|dipenden)/i.test(F.criticality_rationale)) {
         add("warn", "criticality_rationale", "Criticità alta ma la motivazione non richiama i criteri CER (utenti e settori dipendenti, durata ed estensione, alternative, propagazione): argomentala meglio.");
       }
+    }
+
+    // --- dipendenze a valle vs criticità (§3.2, §3.4): concorrono a
+    // determinarla rendendo visibili utenti, servizi e settori esposti.
+    var downstreamDeps = (a.dependencies || []).filter(function (d) { return d.position === "downstream"; });
+    if (downstreamDeps.length && F.criticality && F.criticality <= 2) {
+      add("warn", "criticality", "Sono mappate " + downstreamDeps.length + " dipendenze a valle (utenti, servizi o settori esposti alla degradazione di questa funzione) ma la criticità dichiarata è " + F.criticality + ": le dipendenze a valle concorrono a determinarla secondo i criteri CER (§3.2, §3.4) — verifica che la motivazione ne tenga conto.");
     }
 
     // --- regimi rilevanti ---
