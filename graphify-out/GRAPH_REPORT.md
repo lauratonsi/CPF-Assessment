@@ -1,105 +1,96 @@
-# Graph Report - CPF Assesment  (2026-09-11)
+# Graph Report - CPF Assesment  (2026-09-13)
 
 ## Corpus Check
-- Corpus is ~46,453 words - fits in a single context window. You may not need a graph.
+- Corpus is ~49,148 words - fits in a single context window. You may not need a graph.
 
 ## Summary
-- 114 nodes · 104 edges · 44 communities (36 shown, 8 thin omitted)
-- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 4 edges (avg confidence: 0.82)
-- Token cost: 180,434 input · 4,200 output
+- 107 nodes · 98 edges · 30 communities (26 shown, 4 thin omitted)
+- Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 7 edges (avg confidence: 0.85)
+- Token cost: 105,544 input · 0 output
 
 ## Community Hubs (Navigation)
-- App Hub & Project Docs
-- Multi-Regime Classification Engine
-- Capability Model (Cap. 3)
-- App Shell & Accessibility
+- Model Rationale & Page Renderers
+- Verification & Case Studies
+- Capability Dimensions & Compensation
+- Regime Engine & Tests
+- App Shell (Header/Footer/A11y)
 - Theme Toggle
-- Test Framework Helpers
-- Dependency Case Studies (§3.4)
-- Dumbbell Chart Renderer
-- Dependency Taxonomy Sources
-- Dependency Diagram (SVG)
-- Index: Step Progress
-- Step 1: Draw Domain Links
-- Step 1: Render Result
-- Step 3: Persist
-- Step 4a: Sync
+- Dumbbell Chart
+- Criticality Cross-Check Loop
+- Step1 Org Init
 
 ## God Nodes (most connected - your core abstractions)
-1. `CPF Assessment (progetto)` - 11 edges
-2. `Step 2 — Definizione della funzione cyber-fisica` - 8 edges
-3. `Step 4b — Valutazione delle capacità` - 8 edges
-4. `index.html — ingresso valutazioni` - 6 edges
-5. `Step 1 — Regimi applicabili` - 6 edges
-6. `Dashboard — Esito della valutazione` - 6 edges
-7. `build()` - 5 edges
-8. `Step 4a — Conseguenze intollerabili e percorsi` - 5 edges
-9. `Test page — regime engine` - 4 edges
-10. `Step 3 — Mappatura delle dipendenze` - 4 edges
+1. `Tesi: Dall'IT all'OT — misurare, verificare e regolare il rischio cyber-fisico` - 8 edges
+2. `decorate() — gap/threshold/priority feedback` - 6 edges
+3. `build()` - 5 edges
+4. `Test page — regime engine` - 4 edges
+5. `Quattro dimensioni ordinali di capacità, senza compensazione` - 4 edges
+6. `CPF Assessment (tool)` - 4 edges
+7. `Dashboard Main IIFE` - 4 edges
+8. `backToTop()` - 3 edges
+9. `current()` - 3 edges
+10. `mount()` - 3 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `Complementarità PSNC/strumento (§5.2, §5.7)` --rationale_for--> `Dashboard — Esito della valutazione`  [INFERRED]
-  README.md → pages/dashboard.html
-- `Complementarità PSNC/strumento (§5.2, §5.7)` --rationale_for--> `Step 1 — Regimi applicabili`  [INFERRED]
-  README.md → pages/step1-regimi.html
-- `CPF Assessment (progetto)` --references--> `Step 4a — Conseguenze intollerabili e percorsi`  [EXTRACTED]
-  README.md → pages/step4a-conseguenze.html
-- `CPF Assessment (progetto)` --references--> `Step 4b — Valutazione delle capacità`  [EXTRACTED]
-  README.md → pages/step4b-capacita.html
-- `CPF Assessment (progetto)` --references--> `tests/calcs.html — runner suite calcs`  [EXTRACTED]
-  README.md → tests/calcs.html
+- `depFlow() SVG Dependency Diagram` --semantically_similar_to--> `CPF.renderDumbbell`  [INFERRED] [semantically similar]
+  pages/dashboard.html → assets/dumbbell.js
+- `Dashboard Main IIFE` --calls--> `CPF.buildReport`  [EXTRACTED]
+  pages/dashboard.html → assets/report.js
+- `calcs test runner page (§3.6 derived calculations)` --conceptually_related_to--> `decorate() — gap/threshold/priority feedback`  [INFERRED]
+  tests/calcs.html → pages/step4b-capacita.html
+- `Dashboard Main IIFE` --calls--> `CPF.renderDumbbell`  [EXTRACTED]
+  pages/dashboard.html → assets/dumbbell.js
+- `CPF.buildReport` --references--> `Test Engine Page`  [EXTRACTED]
+  assets/report.js → pages/test.html
 
 ## Import Cycles
 - None detected.
 
 ## Hyperedges (group relationships)
-- **Flusso del wizard CPF (index → step1 → step2 → step3 → step4a → step4b → dashboard)** — index_page, pages_step1_regimi_page, pages_step2_funzione_page, pages_step3_dipendenze_page, pages_step4a_conseguenze_page, pages_step4b_capacita_page, pages_dashboard_page [EXTRACTED 1.00]
-- **Logica CCE: conseguenza → percorso → capacità → soglia essenziale** — readme_logica_cce, readme_capacita_essenziali, pages_step4a_conseguenze_page, pages_step4b_capacita_page [INFERRED 0.85]
-- **Verifica distinta da intervento: pattern epistemico ricorrente** — pages_step1_regimi_page, pages_step4b_capacita_page, pages_dashboard_page, readme_forza_probatoria [INFERRED 0.80]
+- **Capability scoring functions validated together by the calcs test suite (§3.6)** — tests_calcs_page [EXTRACTED 1.00]
+- **CPF Assessment wizard flow (Step1 → Step2 → Step3 → Step4a → Step4b → Dashboard)** — index_renderassessments, pages_step1_regimi_recompute, pages_step2_funzione_read, pages_step3_dipendenze_depissues, pages_step4a_conseguenze_reconciletargets, pages_step4b_capacita_decorate, pages_dashboard_dashboard_main [EXTRACTED 1.00]
+- **Bidirectional criticality/dependency consistency check between Step 2 and Step 3** — pages_step2_funzione_renderreview, pages_step3_dipendenze_downstreamcriticalityhint, readme_dependency_model [INFERRED 0.85]
+- **Dashboard Outcome Rendering Pipeline** — pages_dashboard_dashboard_main, assets_report_buildreport, assets_dumbbell_renderdumbbell, pages_dashboard_depflow [EXTRACTED 1.00]
+- **Engine Test Verification Chain** — pages_test_page, tests_runner_runtests, tests_cases_cpf_test_cases, assets_report_buildreport [EXTRACTED 1.00]
+- **Case Study Data Consumption** — pages_casi_studio_page, data_case_studies_casestudies, data_case_studies_casestudiessynthesis, tests_cases [EXTRACTED 1.00]
 
-## Communities (44 total, 8 thin omitted)
+## Communities (30 total, 4 thin omitted)
 
-### Community 0 - "App Hub & Project Docs"
-Cohesion: 0.22
-Nodes (17): index.html — ingresso valutazioni, Casi di riferimento (Cap. 5), Dashboard — Esito della valutazione, Step 1 — Regimi applicabili, Step 2 — Definizione della funzione cyber-fisica, Step 3 — Mappatura delle dipendenze, Verifica del motore (test.html), CPF Assessment (progetto) (+9 more)
+### Community 0 - "Model Rationale & Page Renderers"
+Cohesion: 0.13
+Nodes (15): CPF.renderDumbbell, Dashboard Main IIFE, depFlow() SVG Dependency Diagram, renderResult() / tagFor(), read()/persist() / badge(), depIssues() — critical-ring / coupling flags, pathCard()/capRow() — consequence→path→capability mapping (CCE), Ridondanza reale vs nominale — infrastrutture sottomarine del Baltico (§5.4.2) (+7 more)
 
-### Community 2 - "Capability Model (Cap. 3)"
-Cohesion: 0.29
-Nodes (8): Step 4a — Conseguenze intollerabili e percorsi, Step 4b — Valutazione delle capacità, Bochman & Freeman 2021 (INL), Capacità essenziali e soglie non compensabili (anello debole), Priorità come regola ordinale (domainPriority), Forza probatoria (separata dal livello), Logica CCE (Consequence-driven Cyber-informed Engineering), Matrice di corroborazione (§3.5)
+### Community 1 - "Verification & Case Studies"
+Cohesion: 0.19
+Nodes (11): CPF.buildReport, CPF.data.caseStudies, CPF.data.caseStudiesSynthesis, Casi di Riferimento Page, Test Engine Page, test.html run() Function, CPF_TEST_CASES Array, has() (+3 more)
 
-### Community 3 - "App Shell & Accessibility"
+### Community 2 - "Capability Dimensions & Compensation"
+Cohesion: 0.19
+Nodes (12): persist() / save & next handlers, compGroupBlock() — accessory-capability compensation UI, decorate() — gap/threshold/priority feedback, Quattro dimensioni ordinali di capacità, senza compensazione, Matrice di corroborazione (§3.5), CPF Assessment (tool), domainPriority — regola ordinale, non somma (§3.6-3.7), Forza probatoria separata dal livello (+4 more)
+
+### Community 4 - "App Shell (Header/Footer/A11y)"
 Cohesion: 0.48
 Nodes (5): a11y(), absorbToggle(), backToTop(), build(), footer()
 
-### Community 5 - "Theme Toggle"
+### Community 6 - "Theme Toggle"
 Cohesion: 0.60
 Nodes (5): apply(), current(), mount(), render(), systemDark()
 
-### Community 6 - "Test Framework Helpers"
-Cohesion: 0.47
-Nodes (3): has(), ok(), traceHas()
-
-### Community 7 - "Dependency Case Studies (§3.4)"
-Cohesion: 0.40
-Nodes (5): depIssues(d), Caso infrastrutture sottomarine del Baltico, Casi fuori dall'unità di analisi del modello, Caso Estonia, Ridondanza reale vs nominale (§5.4.2, Baltico)
-
-### Community 11 - "Dependency Taxonomy Sources"
-Cohesion: 0.67
-Nodes (3): Argonne National Laboratory 2015, Dipendenze B → A, Rinaldi, Peerenboom & Kelly 2001
-
 ## Knowledge Gaps
-- **14 isolated node(s):** `Prof. Michele Colajanni (relatore)`, `Matrice di corroborazione (§3.5)`, `Forza probatoria (separata dal livello)`, `Bochman & Freeman 2021 (INL)`, `Rinaldi, Peerenboom & Kelly 2001` (+9 more)
+- **10 isolated node(s):** `depIssues() — critical-ring / coupling flags`, `pathCard()/capRow() — consequence→path→capability mapping (CCE)`, `Laura Tonsi (autrice)`, `Prof. Michele Colajanni (relatore)`, `renderReview() — coherence-check panel` (+5 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **8 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **4 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `CPF Assessment (progetto)` connect `App Hub & Project Docs` to `Capability Model (Cap. 3)`?**
-  _High betweenness centrality (0.029) - this node is a cross-community bridge._
-- **Why does `Casi di riferimento (Cap. 5)` connect `App Hub & Project Docs` to `Dependency Case Studies (§3.4)`?**
-  _High betweenness centrality (0.022) - this node is a cross-community bridge._
-- **Are the 2 inferred relationships involving `Step 1 — Regimi applicabili` (e.g. with `Step 4b — Valutazione delle capacità` and `Complementarità PSNC/strumento (§5.2, §5.7)`) actually correct?**
-  _`Step 1 — Regimi applicabili` has 2 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `Prof. Michele Colajanni (relatore)`, `Matrice di corroborazione (§3.5)`, `Forza probatoria (separata dal livello)` to the rest of the system?**
-  _14 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Why does `Tesi: Dall'IT all'OT — misurare, verificare e regolare il rischio cyber-fisico` connect `Model Rationale & Page Renderers` to `Capability Dimensions & Compensation`?**
+  _High betweenness centrality (0.144) - this node is a cross-community bridge._
+- **Why does `Dashboard Main IIFE` connect `Model Rationale & Page Renderers` to `Verification & Case Studies`?**
+  _High betweenness centrality (0.135) - this node is a cross-community bridge._
+- **Are the 2 inferred relationships involving `decorate() — gap/threshold/priority feedback` (e.g. with `reconcileTargets()` and `calcs test runner page (§3.6 derived calculations)`) actually correct?**
+  _`decorate() — gap/threshold/priority feedback` has 2 INFERRED edges - model-reasoned connections that need verification._
+- **What connects `depIssues() — critical-ring / coupling flags`, `pathCard()/capRow() — consequence→path→capability mapping (CCE)`, `Laura Tonsi (autrice)` to the rest of the system?**
+  _10 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `Model Rationale & Page Renderers` be split into smaller, more focused modules?**
+  _Cohesion score 0.1323529411764706 - nodes in this community are weakly interconnected._

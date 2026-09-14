@@ -14,16 +14,6 @@
   root.CPF = root.CPF || {};
   var CPF = root.CPF;
 
-  /* ---------- tema ---------- */
-  // L'applicazione del tema salvato avviene con lo snippet inline in <head>
-  // di ogni pagina (evita il flash) e con assets/theme-toggle.js.
-  CPF.toggleTheme = function () {
-    var cur = document.documentElement.getAttribute("data-theme");
-    var next = cur === "dark" ? "light" : "dark";
-    document.documentElement.setAttribute("data-theme", next);
-    try { localStorage.setItem("cpf-theme", next); } catch (e) {}
-  };
-
   /* ---------- persistenza ---------- */
   var KEY_PREFIX = "cpf-assessment-";
   var KEY_ACTIVE = "cpf-active-id";
@@ -70,20 +60,15 @@
       else alert("Spazio del browser esaurito. Esporta le valutazioni in JSON e rimuovine qualcuna prima di continuare.");
       throw e;
     }
-    if (CPF.storageBytes() > CPF.STORAGE_WARN_BYTES && typeof CPF.onStorageWarn === "function") {
-      CPF.onStorageWarn(CPF.storageBytes());
+    // storageBytes() scorre l'intero localStorage: calcolarlo solo se qualcuno ascolta.
+    if (typeof CPF.onStorageWarn === "function") {
+      var used = CPF.storageBytes();
+      if (used > CPF.STORAGE_WARN_BYTES) CPF.onStorageWarn(used);
     }
     return a;
   };
 
   CPF.deleteAssessment = function (id) { localStorage.removeItem(KEY_PREFIX + id); };
-
-  CPF.newAssessment = function () {
-    var a = CPF.blankAssessment();
-    CPF.saveAssessment(a);
-    CPF.setActive(a.assessment_id);
-    return a;
-  };
 
   // Crea una valutazione a partire da un profilo organizzazione: clona il
   // regime_profile (con i flag overridden_from_org_profile) — §3.2, Cap. 4.
@@ -107,23 +92,60 @@
     return id ? CPF.loadAssessment(id) : null;
   };
 
-  CPF.exportAssessment = function (id) {
-    var a = CPF.loadAssessment(id);
-    if (!a) return;
-    var blob = new Blob([JSON.stringify(a, null, 2)], { type: "application/json" });
-    var url = URL.createObjectURL(blob);
+  // Unica implementazione dell'esportazione (la dashboard passa l'oggetto già in
+  // memoria e il regime_profile ricalcolato). I campi interni non finiscono nel
+  // file: _answers è lo stato del form dello Step 1, _demo marca il fac-simile.
+  CPF.exportAssessment = function (idOrAssessment, overrides) {
+    var a = (idOrAssessment && typeof idOrAssessment === "object")
+      ? idOrAssessment
+      : CPF.loadAssessment(idOrAssessment);
+    if (!a) return null;
+
+    var payload = JSON.parse(JSON.stringify(a));
+    delete payload._answers;
+    delete payload._demo;
+    if (overrides) {
+      Object.keys(overrides).forEach(function (k) { payload[k] = overrides[k]; });
+    }
+
+    var base = (payload.function && payload.function.name) || payload.assessment_id || "valutazione";
+    var name = "cpf-" + String(base).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+    var url = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }));
     var link = document.createElement("a");
     link.href = url;
-    link.download = a.assessment_id + ".json";
+    link.download = name + ".json";
+    // l'anchor va agganciato al documento: su alcuni browser il click
+    // programmatico su un elemento staccato non avvia il download.
+    document.body.appendChild(link);
     link.click();
-    URL.revokeObjectURL(url);
+    document.body.removeChild(link);
+    // revoca differita: revocare subito dopo click() può annullare il download.
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    return payload;
+  };
+
+  // Confine del sistema: il file arriva dall'utente e può essere qualunque cosa.
+  // Senza questo controllo un JSON valido ma estraneo entra in localStorage come
+  // voce fantasma con assessment_id undefined.
+  CPF.isAssessmentShape = function (a) {
+    return !!a && typeof a === "object" && !Array.isArray(a) &&
+           typeof a.assessment_id === "string" && a.assessment_id !== "" &&
+           !!a.function && typeof a.function === "object";
   };
 
   CPF.importAssessment = function (file, cb) {
     var r = new FileReader();
+    r.onerror = function () { cb(new Error("File illeggibile")); };
     r.onload = function () {
+      var a;
+      try { a = JSON.parse(r.result); }
+      catch (e) { cb(new Error("Il file non è JSON valido")); return; }
+      if (!CPF.isAssessmentShape(a)) {
+        cb(new Error("Il file è JSON valido ma non è una valutazione CPF (mancano assessment_id o function)"));
+        return;
+      }
       try {
-        var a = JSON.parse(r.result);
         CPF.saveAssessment(a);
         CPF.setActive(a.assessment_id);
         cb(null, a);
@@ -145,13 +167,26 @@
   };
 
   // Divario essenziale (anello debole): flag non assorbibile in medie.
+  // §3.6 tiene separati i due esiti: «una priorità di intervento per le carenze
+  // corroborate e una priorità di verifica per le condizioni ancora parzialmente
+  // documentate o non determinabili». Quindi un livello solo PARZIALE non produce
+  // mai un divario essenziale accertato — né quando è sotto soglia (la carenza non
+  // è corroborata) né quando la raggiunge (§3.5: non trasformare una singola
+  // evidenza positiva in una certificazione implicita di resilienza).
   CPF.essentialShortfall = function (domainAssessment) {
     var t = domainAssessment && domainAssessment.non_compensable_threshold;
     if (!domainAssessment || !domainAssessment.is_essential || !t) return null;
     var cur = (domainAssessment.current_profile || {})[t.dimension];
     if (!cur) return null;
     if (cur.evidentiary_strength === "non_determinabile" || cur.level == null) {
-      return { kind: "verifica", dimension: t.dimension, rationale: t.rationale };
+      return { kind: "verifica", reason: "non_determinabile", dimension: t.dimension, need: t.min_level, rationale: t.rationale };
+    }
+    if (cur.evidentiary_strength === "parziale") {
+      return {
+        kind: "verifica", reason: "parziale", dimension: t.dimension,
+        have: cur.level, need: t.min_level, below: cur.level < t.min_level,
+        rationale: t.rationale
+      };
     }
     if (cur.level < t.min_level) {
       return { kind: "divario_essenziale", dimension: t.dimension, have: cur.level, need: t.min_level, rationale: t.rationale };

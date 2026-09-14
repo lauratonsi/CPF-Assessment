@@ -309,6 +309,8 @@ body.has-appbar .stepper { top: 3rem; }
 }
 .masthead h1 { margin-bottom: 0.5rem; max-width: 30ch; }
 .masthead .dek, .dek { color: var(--muted); max-width: 46rem; font-size: 0.98rem; line-height: 1.6; }
+.thesis-note { color: var(--faint); max-width: 46rem; font-size: 0.82rem; line-height: 1.55; margin-top: 0.6rem; }
+.thesis-note em { color: var(--muted); font-style: italic; }
 
 /* ---------------- section title ---------------- */
 .kicker {

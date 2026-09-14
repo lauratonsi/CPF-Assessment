@@ -275,6 +275,25 @@
   t("calcs", "essentialShortfall", "soglia su livello non determinabile → verifica (non intervento)", function () {
     eq(root.CPF.essentialShortfall(mk({ estensione: { level: 2, evidentiary_strength: "non_determinabile" } }, {}, true, { dimension: "estensione", min_level: 5, rationale: "x" })).kind, "verifica");
   });
+  /* §3.6: intervento solo per le carenze CORROBORATE; le condizioni parzialmente
+     documentate generano verifica. Un livello 'parziale' non è mai un divario essenziale. */
+  t("calcs", "essentialShortfall", "sotto soglia ma solo parzialmente documentata → verifica, non divario essenziale (§3.6)", function () {
+    var s = root.CPF.essentialShortfall(mk({ estensione: { level: 2, evidentiary_strength: "parziale" } }, {}, true, { dimension: "estensione", min_level: 4, rationale: "x" }));
+    eq(s.kind, "verifica"); eq(s.reason, "parziale"); eq(s.below, true); eq([s.have, s.need], [2, 4]);
+  });
+  t("calcs", "essentialShortfall", "soglia raggiunta ma solo parzialmente documentata → verifica (§3.5, nessuna certificazione implicita)", function () {
+    var s = root.CPF.essentialShortfall(mk({ estensione: { level: 4, evidentiary_strength: "parziale" } }, {}, true, { dimension: "estensione", min_level: 4, rationale: "x" }));
+    eq(s.kind, "verifica"); eq(s.reason, "parziale"); eq(s.below, false);
+  });
+  t("calcs", "essentialShortfall", "soglia raggiunta e corroborata → nessuna segnalazione", function () {
+    eq(root.CPF.essentialShortfall(mk({ estensione: { level: 4, evidentiary_strength: "corroborata" } }, {}, true, { dimension: "estensione", min_level: 4, rationale: "x" })), null);
+  });
+  t("calcs", "domainPriority", "soglia essenziale su livello parziale → niente intervento e niente contraddizione con la verifica", function () {
+    var da = mk({ estensione: { level: 2, evidentiary_strength: "parziale" } }, { estensione: { level: 4 } }, true, { dimension: "estensione", min_level: 4, rationale: "x" });
+    var p = root.CPF.domainPriority(da, 3);
+    eq(p.priorita_intervento, null);
+    ok(!!p.priorita_verifica, "attesa una priorità di verifica");
+  });
   t("calcs", "domainPriority", "crit 4 + essenziale + gap 3 corroborato → intervento alta, nessuna verifica", function () {
     var p = root.CPF.domainPriority(mk(
       { consolidamento: { level: 2, evidentiary_strength: "corroborata" }, estensione: { level: 2, evidentiary_strength: "corroborata" } },
@@ -408,6 +427,18 @@
     ["adattiva", "rigida"].forEach(function (id) {
       ok(rc.some(function (x) { return x.id === id; }), "manca la voce: " + id);
     });
+  });
+  t("calcs", "dependencyTaxonomy", "gli stati operativi stanno nella tassonomia, non nella pagina (§3.4)", function () {
+    var st = (root.CPF.data.dependencyTaxonomy.operational_states || []).map(function (s) { return s.id; });
+    eq(st, ["normal", "stressed", "repair_restoration"]);
+  });
+  t("calcs", "isAssessmentShape", "riconosce una valutazione e rifiuta JSON estranei (confine del sistema)", function () {
+    ok(root.CPF.isAssessmentShape({ assessment_id: "x", function: {} }), "valutazione valida attesa");
+    ok(!root.CPF.isAssessmentShape(null), "null rifiutato");
+    ok(!root.CPF.isAssessmentShape({}), "oggetto vuoto rifiutato");
+    ok(!root.CPF.isAssessmentShape([{ assessment_id: "x", function: {} }]), "array rifiutato");
+    ok(!root.CPF.isAssessmentShape({ assessment_id: "x" }), "senza function rifiutato");
+    ok(!root.CPF.isAssessmentShape({ function: {} }), "senza assessment_id rifiutato");
   });
   t("calcs", "dependencyTaxonomy", "livello (fisico/cyber/organizzativo) è distinto dalla posizione (§3.4, Setola e Theocharidou)", function () {
     var lv = root.CPF.data.dependencyTaxonomy.levels;

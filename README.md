@@ -220,7 +220,11 @@ derivati §3.6), **review** (euristiche di coerenza dello Step 2), **report**
   2021, INL). Non si adatta alle capacità già presenti.
 - **Capacità essenziali** con soglie non compensabili (anello debole): mai
   assorbite in una media; un divario essenziale porta la priorità di intervento
-  ad «alta» a prescindere dall'aggregato.
+  ad «alta» a prescindere dall'aggregato. Il divario essenziale richiede però un
+  livello **corroborato**: se la dimensione della soglia poggia su evidenze solo
+  parziali non si produce una carenza accertata ma una priorità di verifica —
+  sotto soglia («la carenza non è corroborata») come sopra soglia («il rispetto
+  della soglia non è corroborato», §3.5: nessuna certificazione implicita).
 - **Aggregati** solo descrittivi/secondari (§3.6-3.7): niente radar ad area
   piena, che comunicherebbe una falsa rassicurazione. Al suo posto un grafico a
   manubrio per dominio. Unica eccezione ammessa dal §3.5: tra capacità
@@ -237,7 +241,12 @@ derivati §3.6), **review** (euristiche di coerenza dello Step 2), **report**
   temporale (dependency curves, §3.4) è raccolta per ogni dipendenza: tempo al
   primo impatto e, quando esiste un'alternativa, il suo tempo di attivazione,
   la durata del sostegno, il livello di servizio degradato, il tempo per lo
-  stato sicuro e il tempo di ripristino.
+  stato sicuro e il tempo di ripristino. Nell'esito ogni dipendenza ha una
+  scheda che rende la sequenza come **curva temporale** leggibile (impatto →
+  alternativa → stato sicuro → ripristino), con i valori mancanti marcati «non
+  quantificato»: una dipendenza senza tempi viene dichiarata non caratterizzata,
+  perché la disponibilità nominale di un'alternativa non ne dimostra da sola
+  l'adeguatezza.
 - **Criticità della funzione:** raccolta nello Step 2 dai criteri CER artt. 6-7;
   entra in `domainPriority()` come `f(criticità, essenzialità, ampiezza del divario)`.
   Le dipendenze a valle concorrono a determinarla (§3.2, §3.4): lo strumento

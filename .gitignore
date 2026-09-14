@@ -6,6 +6,7 @@ node_modules/
 
 # materiale di lavoro, non parte del tool
 TESI_LAURA_TONSI.md
+TESI_*.md
 *.pdf
 
 # graphify: ignore working state and cache, keep the real outputs

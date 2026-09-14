@@ -17,8 +17,21 @@
       "input_tokens": 180434,
       "output_tokens": 4200,
       "files": 33
+    },
+    {
+      "date": "2026-09-13T08:40:09.841802+00:00",
+      "input_tokens": 173554,
+      "output_tokens": 0,
+      "files": 18
+    },
+    {
+      "date": "2026-09-13T08:48:47.069219+00:00",
+      "input_tokens": 105544,
+      "output_tokens": 0,
+      "files": 8,
+      "note": "targeted re-extraction: dashboard/test/casi-studio isolation fix"
     }
   ],
-  "total_input_tokens": 577434,
+  "total_input_tokens": 856532,
   "total_output_tokens": 42600
 }

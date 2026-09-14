@@ -62,6 +62,15 @@
   .ess-box h2 { color: var(--danger); margin: 0 0 0.3rem; font-size: 1.05rem; }
   .ess-box ul { margin: 0.4rem 0 0; padding-left: 1.1rem; font-size: 0.86rem; }
   .ess-box .none { color: var(--ok); font-size: 0.88rem; }
+  .ess-verify {
+    margin-top: 0.85rem; padding: 0.7rem 0.85rem; border-radius: var(--r);
+    border: 1px solid var(--accent); background: var(--accent-tint);
+  }
+  .ess-verify h3 { margin: 0; font-size: 0.85rem; color: var(--accent-ink); }
+  .ess-verify ul { margin: 0.35rem 0 0; padding-left: 1.1rem; font-size: 0.84rem; }
+  .ess-verify li { margin: 0.15rem 0; }
+  .ess-verify .qual { color: var(--muted); }
+  .ess-verify .why { margin: 0.45rem 0 0; font-size: 0.78rem; color: var(--muted); }
 
   .prio-cols { display: grid; gap: 0.8rem; grid-template-columns: 1fr; }
   @media (min-width: 44rem) { .prio-cols { grid-template-columns: 1fr 1fr; } }
@@ -76,6 +85,48 @@
   .prio-item .band.bassa { color: var(--muted); }
   .prio-item small { display: block; color: var(--muted); font-size: 0.76rem; margin-top: 0.15rem; }
 
+  /* --- scheda dipendenza + curva temporale (§3.4) --- */
+  .dep-card {
+    border: 1px solid var(--border); border-left: 3px solid var(--border-strong);
+    border-radius: var(--r); padding: 0.75rem 0.9rem 0.85rem; margin: 0.6rem 0;
+    background: var(--surface);
+  }
+  .dep-card.crit { border-left-color: var(--danger); }
+  .dc-head { display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; font-size: 0.9rem; }
+  .dc-head .arr { color: var(--faint); }
+  .dc-flag {
+    font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--danger); border: 1px solid var(--danger); border-radius: 3px; padding: 0.04rem 0.35rem;
+  }
+  .dc-res { margin: 0.2rem 0 0; font-size: 0.82rem; color: var(--muted); }
+  .dc-badges { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.5rem; }
+  .dc-badges .b {
+    font-size: 0.72rem; border: 1px solid var(--border); border-radius: 3px;
+    padding: 0.1rem 0.4rem; background: var(--surface-2); color: var(--ink);
+  }
+  .dc-badges .b i { font-style: normal; color: var(--faint); margin-right: 0.3rem; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .dc-badges .b.hot { border-color: var(--danger); color: var(--danger); background: transparent; }
+  .dc-badges .b.hot i { color: var(--danger); opacity: 0.75; }
+
+  .dc-from { margin: 0.75rem 0 0; font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--faint); }
+  .dc-curve { display: grid; grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr)); margin-top: 0.35rem; }
+  .dc-curve .stage { position: relative; border-top: 2px solid var(--border); padding: 0.75rem 0.7rem 0 0; }
+  .dc-curve .stage::before {
+    content: ""; position: absolute; top: -5px; left: 0;
+    width: 8px; height: 8px; border-radius: 50%; background: var(--border-strong);
+  }
+  /* min-height: le etichette su due righe non devono disallineare i valori */
+  .dc-curve .stage .k { display: block; min-height: 2.1em; font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.07em; text-transform: uppercase; color: var(--faint); }
+  .dc-curve .stage .v { display: block; font-size: 0.82rem; margin-top: 0.1rem; }
+  .dc-curve .stage .v.miss { color: var(--faint); font-style: italic; }
+  .dc-curve .s-loss::before, .dc-curve .s-hit::before { background: var(--danger); }
+  .dc-curve .s-alt::before { background: var(--accent); }
+  .dc-curve .s-safe::before, .dc-curve .s-rest::before { background: var(--ok); }
+  .dc-alt { margin: 0.6rem 0 0; font-size: 0.8rem; color: var(--muted); }
+  .dc-alt i { font-style: normal; color: var(--faint); }
+  .dc-warn { margin: 0.4rem 0 0; font-size: 0.78rem; color: var(--accent-ink); }
+  .dc-none { margin: 0.6rem 0 0; font-size: 0.8rem; color: var(--muted); font-style: italic; }
+
   .comp-box { border: 1px solid var(--accent); border-radius: var(--r-lg); padding: 0.9rem 1.05rem; background: var(--accent-tint); }
   .comp-box h2 { color: var(--accent-ink); margin: 0 0 0.3rem; font-size: 1.05rem; }
   .comp-group-item { border-top: 1px solid var(--border); padding: 0.5rem 0; font-size: 0.85rem; }
@@ -85,8 +136,18 @@
   .cons-item { border: 1px solid var(--border); border-radius: var(--r); padding: 0.7rem 0.85rem; margin: 0.6rem 0; background: var(--surface); font-size: 0.85rem; }
   .cons-item > b { display: block; margin-bottom: 0.3rem; }
   .cons-item .path { border-left: 2px solid var(--accent-tint); padding-left: 0.7rem; margin: 0.4rem 0; font-size: 0.82rem; color: var(--muted); }
-  .cons-item .path .caps { margin-top: 0.25rem; font-family: var(--mono); font-size: 0.72rem; }
-  .cons-item .path .caps .e { color: var(--danger); }
+  .cons-item .path .caps { margin-top: 0.4rem; display: flex; flex-wrap: wrap; gap: 0.3rem; }
+  .cap-chip {
+    display: inline-flex; align-items: baseline; gap: 0.35rem;
+    font-size: 0.74rem; border: 1px solid var(--border); border-radius: 3px;
+    padding: 0.1rem 0.4rem; background: var(--surface-2); color: var(--ink);
+  }
+  .cap-chip i {
+    font-style: normal; font-family: var(--mono); font-size: 0.62rem;
+    letter-spacing: 0.05em; text-transform: uppercase; color: var(--faint);
+  }
+  .cap-chip.ess { border-color: var(--danger); color: var(--danger); background: transparent; }
+  .cap-chip.ess i { color: var(--danger); opacity: 0.8; }
 
   .dash-actions { display: flex; gap: 0.7rem; flex-wrap: wrap; margin-top: 1.5rem; }
   .engine-check { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem; padding: 0.9rem 1rem; border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--r); background: var(--surface); }
@@ -96,7 +157,7 @@
   @media print {
     .stepper, .theme-toggle, .dash-actions, .btn-row { display: none !important; }
     .wrap { max-width: none; }
-    .cap-block, .reg-card, .fn-head, .prio-col, .comp-group-item { break-inside: avoid; }
+    .cap-block, .reg-card, .fn-head, .prio-col, .comp-group-item, .dep-card, .ess-verify { break-inside: avoid; }
   }
 </style>
 </head>
@@ -243,6 +304,7 @@
   var D = R.dependencies;
   var deps = D.all;
   var depCritical = D.is_critical;
+  var POS_LABEL = { upstream: "a monte", internal: "interna", downstream: "a valle" };
   if (deps.length) {
     out.push('<section class="d-sec"><h2>Dipendenze</h2>'
       + '<p class="lead">Relazioni orientate B → A (§3.4). In rosso gli anelli critici: accoppiamento stretto e nessuna alternativa.</p>'
@@ -250,14 +312,67 @@
       + '<span><b>' + D.internal.length + '</b> interne</span><span><b>' + D.downstream.length + '</b> a valle</span>'
       + '<span style="color:var(--danger)"><b>' + D.critical.length + '</b> anelli critici</span></div>'
       + depFlow(D.upstream, D.downstream, F.name)
-      + '<table class="mini-table" style="margin-top:0.8rem"><thead><tr><th>B → A</th><th>Risorsa</th><th>Classe</th><th>Livello</th><th>Accoppiamento</th><th>Alternativa</th></tr></thead><tbody>'
-      + deps.map(function (d) {
-          return '<tr class="' + (depCritical(d) ? "crit" : "") + '"><td>' + esc(d.source) + ' → ' + esc(d.target) + '</td>'
-            + '<td>' + esc(d.resource_or_condition) + '</td><td>' + esc(d.class) + '</td><td>' + esc(d.level || "—") + '</td>'
-            + '<td>' + esc(d.coupling === "tight" ? "stretto" : "debole") + '</td>'
-            + '<td>' + (d.alternative_available ? esc(d.alternative_description || "sì") : "—") + '</td></tr>';
-        }).join("")
-      + '</tbody></table></section>');
+      + '<p class="lead" style="margin:1.1rem 0 .2rem">Per ciascuna relazione: la tassonomia (§3.4) e la caratterizzazione temporale — quanto tempo passa prima dell\'impatto, se e quando un\'alternativa sostiene il processo, con quale servizio residuo e per quanto.</p>'
+      + deps.map(depCard).join("")
+      + '</section>');
+  }
+
+  // Scheda di una dipendenza: intestazione B → A, tassonomia come badge,
+  // curva temporale come sequenza di stadi (§3.4).
+  function depCard(d) {
+    var crit = depCritical(d);
+    var badges = [
+      { k: "classe", v: d.class },
+      { k: "livello", v: d.level || "—" },
+      { k: "posizione", v: POS_LABEL[d.position] || d.position },
+      { k: "accoppiamento", v: d.coupling === "tight" ? "stretto" : "debole", hot: d.coupling === "tight" },
+      { k: "capacità di risposta", v: d.response_capacity || "—", hot: d.response_capacity === "rigida" }
+    ].map(function (b) {
+      return '<span class="b' + (b.hot ? " hot" : "") + '"><i>' + esc(b.k) + '</i>' + esc(b.v) + '</span>';
+    }).join("");
+
+    return '<div class="dep-card' + (crit ? " crit" : "") + '">'
+      + '<div class="dc-head"><b>' + esc(d.source) + ' <span class="arr">→</span> ' + esc(d.target) + '</b>'
+      + (crit ? '<span class="dc-flag">anello critico</span>' : '') + '</div>'
+      + (d.resource_or_condition ? '<p class="dc-res">' + esc(d.resource_or_condition) + '</p>' : '')
+      + '<div class="dc-badges">' + badges + '</div>'
+      + depCurve(d)
+      + '</div>';
+  }
+
+  function depCurve(d) {
+    var hasAny = [d.activation_time_tolerable, d.alternative_activation_time, d.alternative_sustain_duration,
+                  d.degraded_service_level, d.time_to_safe_state, d.restoration_time]
+                 .some(function (v) { return v && String(v).trim(); });
+
+    if (!hasAny) {
+      return '<p class="dc-none">Caratterizzazione temporale non compilata: senza tempi, la disponibilità di un\'alternativa resta nominale e non dimostra l\'adeguatezza della mitigazione (§3.4).</p>';
+    }
+
+    var stages = [{ cls: "s-hit", k: "Primo impatto", v: d.activation_time_tolerable }];
+    if (d.alternative_available) {
+      stages.push({ cls: "s-alt", k: "Alternativa attiva in", v: d.alternative_activation_time });
+      stages.push({ cls: "s-alt", k: "Autonomia", v: d.alternative_sustain_duration });
+      stages.push({ cls: "s-alt", k: "Servizio degradato", v: d.degraded_service_level });
+    }
+    stages.push({ cls: "s-safe", k: "Stato sicuro", v: d.time_to_safe_state });
+    stages.push({ cls: "s-rest", k: "Ripristino", v: d.restoration_time });
+
+    var strip = '<p class="dc-from">dalla perdita della risorsa (t<sub>0</sub>):</p>'
+      + '<div class="dc-curve">' + stages.map(function (s) {
+      var val = s.v && String(s.v).trim()
+        ? '<span class="v">' + esc(s.v) + '</span>'
+        : '<span class="v miss">non quantificato</span>';
+      return '<div class="stage ' + s.cls + '"><span class="k">' + esc(s.k) + '</span>' + val + '</div>';
+    }).join("") + '</div>';
+
+    var alt = d.alternative_available && d.alternative_description
+      ? '<p class="dc-alt"><i>Alternativa:</i> ' + esc(d.alternative_description) + '</p>' : '';
+
+    var warn = (d.alternative_available && (!d.alternative_activation_time || !d.alternative_sustain_duration))
+      ? '<p class="dc-warn">Alternativa dichiarata ma tempo di attivazione o autonomia non quantificati: la disponibilità nominale non dimostra da sola l\'adeguatezza (§3.4).</p>' : '';
+
+    return strip + alt + warn;
   }
 
   function depFlow(up, down, fnName) {
@@ -327,6 +442,21 @@
   }
 
   /* ---------- divari essenziali ---------- */
+  // Una soglia essenziale può non essere corroborata in tre modi diversi: il
+  // testo lo dice, invece di appiattirli tutti su «non determinabile» (§3.5-3.6).
+  function essVerifyLine(x) {
+    var s = x.shortfall, dim = esc(SC[s.dimension].label), dom = '<b>' + esc(domLabel(x.domain_id)) + '</b> — ';
+    if (s.reason === "parziale" && s.below) {
+      return dom + dim + ' a ' + s.have + ', soglia minima ' + s.need
+        + ' <span class="qual">su livello solo parzialmente documentato: la carenza non è corroborata</span>';
+    }
+    if (s.reason === "parziale") {
+      return dom + dim + ' a ' + s.have + ', soglia raggiunta'
+        + ' <span class="qual">ma su livello solo parzialmente documentato: il rispetto della soglia non è corroborato</span>';
+    }
+    return dom + dim + ' <span class="qual">livello non determinabile: la soglia non è verificabile</span>';
+  }
+
   var essShort = R.essential_shortfalls, essVer = R.essential_verifications;
   out.push('<section class="d-sec"><div class="ess-box"><h2>Divari essenziali — anello debole</h2>'
     + '<p class="lead" style="margin:0">Sotto la soglia non compensabile: nessuna forza sulle altre dimensioni li compensa. Portano la priorità di intervento ad «alta» a prescindere dall\'aggregato (§3.6).</p>'
@@ -337,8 +467,11 @@
               + (s.rationale ? '<br><small style="color:var(--muted)">' + esc(s.rationale) + '</small>' : '') + '</li>';
           }).join("") + '</ul>'
         : '<p class="none">Nessun divario essenziale corroborato.</p>')
-    + (essVer.length ? '<p class="lead" style="margin:.6rem 0 0">Soglie su livello non determinabile (verifica prioritaria, non intervento): '
-        + essVer.map(function (x) { return esc(domLabel(x.domain_id)) + " / " + esc(SC[x.shortfall.dimension].label); }).join("; ") + '.</p>' : '')
+    + (essVer.length
+        ? '<div class="ess-verify"><h3>Soglie essenziali non corroborate — verificare prima di intervenire</h3>'
+          + '<ul>' + essVer.map(function (x) { return '<li>' + essVerifyLine(x) + '</li>'; }).join("") + '</ul>'
+          + '<p class="why">L\'assenza di prova non è prova dell\'assenza (§3.6): queste condizioni generano una priorità di <b>verifica</b>, non di intervento.</p></div>'
+        : '')
     + '</div></section>');
 
   /* ---------- priorità ---------- */
@@ -386,16 +519,19 @@
   var cons = R.consequences;
   if (cons.length) {
     out.push('<section class="d-sec"><h2>Conseguenze intollerabili e percorsi</h2>'
-      + '<p class="lead">Il punto di partenza (§3.1): l\'esito da escludere, i percorsi che vi arrivano, le capacità che li interrompono.</p>'
+      + '<p class="lead">Il punto di partenza (§3.1): l\'esito da escludere, i percorsi che vi arrivano, le capacità che li interrompono. Una capacità <b>essenziale</b> è quella la cui insufficienza lascerebbe praticabile il percorso; le altre sono richieste ma non costituiscono da sole una barriera indispensabile in questo scenario (§3.6).</p>'
       + cons.map(function (c) {
           return '<div class="cons-item"><b>' + esc(c.description) + '</b>'
             + (c.compromise_paths || []).map(function (p) {
+                // Ogni capacità porta la propria qualifica: una legenda condivisa in
+                // coda alla riga verrebbe letta come riferita all'ultimo elemento.
                 var reqL = (p.required_capabilities || []).map(function (d) {
                   var isE = (p.essential_capabilities || []).indexOf(d) !== -1;
-                  return '<span class="' + (isE ? "e" : "") + '">' + esc(domLabel(d)) + (isE ? " *" : "") + '</span>';
+                  return '<span class="cap-chip' + (isE ? " ess" : "") + '">' + esc(domLabel(d))
+                    + '<i>' + (isE ? "essenziale" : "richiesta") + '</i></span>';
                 });
                 return '<div class="path">' + esc(p.description || "(percorso senza descrizione)")
-                  + (reqL.length ? '<div class="caps">capacità: ' + reqL.join(", ") + ' &nbsp; <span class="e">* = essenziale</span></div>' : '')
+                  + (reqL.length ? '<div class="caps">' + reqL.join("") + '</div>' : '')
                   + '</div>';
               }).join("")
             + '</div>';
@@ -425,17 +561,9 @@
 
   /* ---------- azioni ---------- */
   $("print").addEventListener("click", function () { window.print(); });
+  // regime_profile esplicito: qui può essere stato ricalcolato da _answers.
   $("export").addEventListener("click", function () {
-    var payload = JSON.parse(JSON.stringify(a));
-    delete payload._answers; delete payload._demo;
-    payload.regime_profile = RP;
-    var blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-    var url = URL.createObjectURL(blob);
-    var link = document.createElement("a");
-    link.href = url;
-    link.download = "cpf-" + (F.name || "valutazione").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + ".json";
-    document.body.appendChild(link); link.click(); document.body.removeChild(link);
-    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    CPF.exportAssessment(a, { regime_profile: RP });
   });
 })();
 </script>

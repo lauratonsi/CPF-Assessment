@@ -43,6 +43,15 @@
       { id: "cyber",         label: "Cyber" },
       { id: "organizzativo", label: "Organizzativo" }
     ],
+    // §3.4: «la rilevanza della dipendenza varia con lo stato operativo, poiché
+    // una risorsa non determinante durante il funzionamento ordinario può
+    // diventare essenziale in condizioni di stress, durante un'emergenza o
+    // nella fase di riparazione e ripristino».
+    operational_states: [
+      { id: "normal",             label: "Normale" },
+      { id: "stressed",           label: "Sotto stress / emergenza" },
+      { id: "repair_restoration", label: "Riparazione e ripristino" }
+    ],
     failure_types: [
       { id: "cascading",    label: "A cascata (cascading failure)",      notation: "A → B → C" },
       { id: "escalating",   label: "Per aggravamento (escalating failure)" },

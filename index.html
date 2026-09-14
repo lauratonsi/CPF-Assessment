@@ -29,7 +29,8 @@
 <div class="wrap">
   <header class="masthead">
     <h1>Valutazione delle capacità cyber-fisiche</h1>
-    <p class="dek">Classificazione multi-regime, definizione della funzione, mappatura delle dipendenze, profilo delle capacità corrente e obiettivo. Strumento a supporto del Capitolo 4 della tesi. I dati restano nel browser (localStorage).</p>
+    <p class="dek">Classificazione multi-regime, definizione della funzione, mappatura delle dipendenze, profilo delle capacità corrente e obiettivo. I dati restano nel browser (localStorage).</p>
+    <p class="thesis-note">Strumento pratico del Capitolo 4 della tesi di laurea magistrale <em>«Dall'Information Technology (IT) all'Operational Technology (OT): misurare, verificare e regolare il rischio cyber-fisico a tutela dei servizi essenziali»</em> di Laura Tonsi (relatore Prof. Michele Colajanni) — Alma Mater Studiorum, Università di Bologna, Corso di laurea magistrale in Governance e Politiche dell'Innovazione Digitale (LM-91), tesi in Governance della Cybersecurity, a.a. 2025/2026. Il modello di misurazione è sviluppato nel Capitolo 3.</p>
   </header>
 
   <div class="flow">
@@ -169,7 +170,7 @@
   document.getElementById("file-import").onchange = function (e) {
     if (!e.target.files[0]) return;
     CPF.importAssessment(e.target.files[0], function (err, a) {
-      if (err) { alert("File non valido"); return; }
+      if (err) { alert(err.message || "File non valido"); return; }
       renderAssessments();
     });
   };

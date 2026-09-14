@@ -56,6 +56,10 @@
   .thr-fb.verify { border-color: var(--accent); color: var(--accent-ink); background: var(--accent-tint); }
   .thr-fb.ok { border-color: var(--ok); color: var(--ok); }
 
+  .corr-rule { font-size: 0.8rem; border: 1px solid var(--border); border-radius: 5px; padding: 0.4rem 0.65rem; background: var(--surface-2); margin-bottom: 1rem; }
+  .corr-rule summary { cursor: pointer; color: var(--accent-ink); }
+  .corr-rule p { margin: 0.4rem 0 0.15rem; color: var(--muted); max-width: 68ch; }
+
   .comp-group { margin-top: 0.7rem; padding-top: 0.6rem; border-top: 1px dashed var(--border); display: grid; gap: 0.4rem 0.6rem; grid-template-columns: 1fr; }
   @media (min-width: 40rem) { .comp-group { grid-template-columns: 1fr 1fr; } .comp-group .wide { grid-column: 1 / -1; } }
   .comp-group label { font-size: 0.74rem; color: var(--muted); display: block; }
@@ -105,6 +109,8 @@
   <div id="editor" hidden>
     <p class="intro" id="ed-fn"></p>
     <p class="intro">Il <b>livello</b> è ordinale (1-5), non un voto: descrive uno stato, non una percentuale. La <b>forza probatoria</b> è separata dal livello — «non determinabile» non abbassa il livello, ma sospende il divario e genera una priorità di <i>verifica</i>, non di intervento (§3.6). Per ogni dimensione, «Evidenze pertinenti» elenca i tipi di prova che possono sostenere quel giudizio (matrice di corroborazione, §3.5); la <b>data dell'evidenza</b> serve a segnalare quando un riscontro non rappresenta più lo stato corrente.</p>
+
+    <details class="corr-rule"><summary>Quando un'evidenza è pertinente (§3.5)</summary><p id="corr-rule-text"></p></details>
 
     <div id="dom-list"></div>
 
@@ -168,6 +174,7 @@
 
   var crit = (typeof a.function.criticality === "number") ? a.function.criticality : null;
   $("editor").hidden = false;
+  $("corr-rule-text").textContent = CPF.data.scales.corroboration_rule;
   $("ed-fn").innerHTML = "Funzione: <b>" + esc(a.function.name) + "</b>"
     + (crit ? " · criticità " + crit + "/4" : " · criticità non indicata")
     + " · " + a.capability_assessment.length + " domini · "
@@ -335,6 +342,14 @@
         } else if (s.kind === "divario_essenziale") {
           thrEl.className = "thr-fb short";
           thrEl.textContent = "DIVARIO ESSENZIALE — anello debole: " + SC[s.dimension].label + " a " + s.have + ", soglia minima " + s.need + ". Non compensabile da altre dimensioni; porta la priorità di intervento ad «alta».";
+        } else if (s.reason === "parziale" && s.below) {
+          thrEl.className = "thr-fb verify";
+          thrEl.textContent = "Sotto la soglia (" + SC[s.dimension].label + " a " + s.have + ", minimo " + s.need
+            + ") ma su livello solo parzialmente documentato: la carenza non è corroborata. Priorità di verifica, non di intervento (§3.6).";
+        } else if (s.reason === "parziale") {
+          thrEl.className = "thr-fb verify";
+          thrEl.textContent = "Soglia raggiunta (" + SC[s.dimension].label + " a " + s.have
+            + ") ma su livello solo parzialmente documentato: il rispetto della soglia non è corroborato — una singola evidenza positiva non certifica la capacità (§3.5).";
         } else {
           thrEl.className = "thr-fb verify";
           thrEl.textContent = "Soglia su livello non determinabile (" + SC[s.dimension].label + "): priorità di verifica sulla capacità essenziale, non di intervento.";

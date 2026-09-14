@@ -43,7 +43,7 @@
     if (document.querySelector(".site-footer")) return;
     var element = document.createElement("footer");
     element.className = "site-footer";
-    element.innerHTML = '<span>Sviluppato da <b>Laura Tonsi</b></span>'
+    element.innerHTML = '<span>Sviluppato da <b>Laura Tonsi</b> — Capitolo 4 della tesi di laurea magistrale in Governance della Cybersecurity, Alma Mater Studiorum – Università di Bologna</span>'
       + '<span class="site-footer-links">'
       + '<a href="https://github.com/lauratonsi" target="_blank" rel="noopener noreferrer">GitHub</a>'
       + '<a href="mailto:laura.tonsi@studio.unibo.it">laura.tonsi@studio.unibo.it</a>'

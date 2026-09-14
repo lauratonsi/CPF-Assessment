@@ -116,6 +116,7 @@
 <script src="../data/dependency_taxonomy.js"></script>
 <script src="../data/dependency_reference.js"></script>
 <script src="../data/assessment_schema.js"></script>
+<script src="../data/scales.js"></script>
 <script src="../assets/app.js"></script>
 <script>
 (function () {
@@ -160,11 +161,7 @@
 
   /* ============ editor delle dipendenze ============ */
   var TAX = CPF.data.dependencyTaxonomy;
-  var STATES = [
-    { id: "normal", label: "Normale" },
-    { id: "stressed", label: "Sotto stress / emergenza" },
-    { id: "repair_restoration", label: "Riparazione e ripristino" }
-  ];
+  var STATES = TAX.operational_states;
   var FAILURES = [{ id: "", label: "— nessuno / non rilevante —" }].concat(TAX.failure_types.map(function (f) {
     return { id: f.id, label: f.label + (f.notation ? "  (" + f.notation + ")" : "") };
   }));
@@ -274,6 +271,17 @@
     }
     if (d.coupling === "tight" && !d.activation_time_tolerable) {
       out.push({ warn: false, text: "Accoppiamento stretto senza tempo al primo impatto indicato: quantificare il margine." });
+    }
+    // §3.4: «il grado di accoppiamento deve essere valutato insieme alla capacità
+    // di risposta». Adattiva è definita dal disporre di scorte, ridondanze,
+    // alternative o procedure sostitutive: dichiararla senza alternativa è
+    // contraddittorio. E una relazione debolmente accoppiata può diventare
+    // critica quando i margini si esauriscono e le sostitutive non sono attivabili.
+    if (d.response_capacity === "adattiva" && !d.alternative_available) {
+      out.push({ warn: false, text: "Capacità di risposta dichiarata «adattiva» ma nessuna alternativa indicata: adattiva significa disporre di scorte, ridondanze, alternative o procedure sostitutive (§3.4). Indicare l'alternativa oppure correggere in «rigida»." });
+    }
+    if (d.coupling === "loose" && d.response_capacity === "rigida" && !d.alternative_available && !downstream) {
+      out.push({ warn: false, text: "Accoppiamento debole ma capacità di risposta rigida e nessuna alternativa: il margine iniziale non è una garanzia — il §3.4 avverte che una relazione debolmente accoppiata diventa critica quando i margini si esauriscono e le misure sostitutive non sono attivabili." });
     }
     if (d.alternative_available && (!d.alternative_activation_time || !d.alternative_sustain_duration)) {
       out.push({ warn: false, text: "Alternativa dichiarata ma tempi di attivazione o durata del sostegno non quantificati: la disponibilità nominale non dimostra da sola l'adeguatezza della mitigazione (§3.4)." });

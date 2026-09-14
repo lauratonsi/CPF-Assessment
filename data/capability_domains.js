@@ -46,8 +46,9 @@
         id: "filiera",
         label: "Sicurezza della filiera e dei fornitori",
         thesis_ref: "§2.8, §3.4",
-        description: "Qualificazione fornitori, contrattualizzazione requisiti, monitoraggio dipendenze upstream esterne.",
-        optional: true
+        // Nessun flag "optional": se un dominio sia richiesto lo determinano i
+        // percorsi di compromissione nello Step 4a (§3.6), non un attributo fisso.
+        description: "Qualificazione fornitori, contrattualizzazione requisiti, monitoraggio dipendenze upstream esterne."
       }
     ]
   };

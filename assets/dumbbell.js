@@ -67,6 +67,16 @@
 
     var thr = da.non_compensable_threshold || null;
 
+    // Il divario essenziale lo decide CPF.essentialShortfall, non una regola
+    // riscritta qui: un livello solo parzialmente documentato non è una carenza
+    // corroborata e non va disegnato come tale (§3.6). La forza probatoria resta
+    // comunque visibile nello stile del marker.
+    var shortfallDim = null;
+    if (typeof root.CPF.essentialShortfall === "function") {
+      var _s = root.CPF.essentialShortfall(da);
+      if (_s && _s.kind === "divario_essenziale") shortfallDim = _s.dimension;
+    }
+
     DIMS.forEach(function (dim, i) {
       var y = padT + rowH * i + rowH / 2;
       var cur = (da.current_profile || {})[dim] || {};
@@ -75,8 +85,7 @@
       var strength = cur.evidentiary_strength || "corroborata";
       var undetermined = strength === "non_determinabile";
       var isThrDim = thr && thr.dimension === dim;
-      var shortfall = isThrDim && da.is_essential && !undetermined &&
-        typeof curLvl === "number" && curLvl < thr.min_level;
+      var shortfall = shortfallDim === dim;
 
       var accent = shortfall ? "var(--danger)" : "var(--accent)";
 
