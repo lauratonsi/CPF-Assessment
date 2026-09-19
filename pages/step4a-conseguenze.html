@@ -236,7 +236,7 @@
       e.is_essential = !!r.ess[id];
       if (e.is_essential && !e.non_compensable_threshold) e.non_compensable_threshold = { dimension: "estensione", min_level: 4, rationale: "" };
       if (!e.is_essential) e.non_compensable_threshold = null;
-      // La compensazione tra comparabili vale solo per capacità accessorie (§3.5).
+      // La compensazione tra comparabili vale solo per capacità accessorie (§3.6).
       if (e.is_essential) { e.comparable_group = null; e.comparable_rationale = ""; }
       return e;
     });

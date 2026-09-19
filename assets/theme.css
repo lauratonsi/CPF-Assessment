@@ -31,6 +31,8 @@
 
   --danger: #c0392b;
   --danger-tint: #fbeae8;
+  --warn: #a36200;
+  --warn-tint: #fdf1e3;
   --ok: #1f8a54;
   --ok-tint: #e3f2ea;
 
@@ -70,6 +72,8 @@
     --accent-ink: #b9cdf8;
     --danger: #e8776a;
     --danger-tint: #2c1a17;
+    --warn: #f2b34c;
+    --warn-tint: #2e2114;
     --ok: #5cbe8a;
     --ok-tint: #16241d;
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
@@ -94,6 +98,8 @@
   --accent-ink: #b9cdf8;
   --danger: #e8776a;
   --danger-tint: #2c1a17;
+  --warn: #f2b34c;
+  --warn-tint: #2e2114;
   --ok: #5cbe8a;
   --ok-tint: #16241d;
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
@@ -574,6 +580,8 @@ legend { font-weight: 600; font-size: 0.95rem; padding: 0 0.4rem; }
     --accent-ink: #1d3f8f;
     --danger: #a5291b;
     --danger-tint: #fbeae8;
+    --warn: #a36200;
+    --warn-tint: #fdf1e3;
     --ok: #16693c;
     --ok-tint: #e3f2ea;
     --shadow-sm: none;

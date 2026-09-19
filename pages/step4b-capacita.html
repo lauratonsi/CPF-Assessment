@@ -237,7 +237,7 @@
       + '<input data-f="comparable_group" placeholder="es. backup-alimentazione — stesso id per capacità comparabili" value="' + esc(e.comparable_group || "") + '"></label>'
       + '<label class="wide"><span>Motivazione della sostituibilità</span>'
       + '<input data-f="comparable_rationale" placeholder="perché queste capacità sono comparabili e sostituibili rispetto a questo scenario" value="' + esc(e.comparable_rationale || "") + '"></label>'
-      + '<p class="desc">§3.5: solo tra capacità <b>accessorie</b> che concorrono allo stesso risultato operativo — usa lo stesso gruppo su un\'altra capacità accessoria per comporre l\'indicatore descrittivo e secondario in dashboard. Non compensa mai le capacità essenziali né sostituisce i profili individuali.</p>'
+      + '<p class="desc">§3.6: solo tra capacità <b>accessorie</b> che concorrono allo stesso risultato operativo — usa lo stesso gruppo su un\'altra capacità accessoria per comporre l\'indicatore descrittivo e secondario in dashboard. Non compensa mai le capacità essenziali né sostituisce i profili individuali.</p>'
       + '</div>';
   }
 
@@ -399,7 +399,7 @@
   function compensationSummary() {
     var groups = CPF.compensatedGroups(a.capability_assessment);
     if (!groups.length) return "";
-    return '<div class="comp-summary"><h4>Compensazione tra capacità accessorie comparabili (§3.5)</h4>'
+    return '<div class="comp-summary"><h4>Compensazione tra capacità accessorie comparabili (§3.6)</h4>'
       + groups.map(function (g) {
         var rows = DIMS.map(function (d) {
           var x = g.dimensions[d];

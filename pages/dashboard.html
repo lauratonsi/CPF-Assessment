@@ -47,6 +47,13 @@
   .mini-table th, .mini-table td { text-align: left; padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--border); vertical-align: top; }
   .mini-table th { font-size: 0.7rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
   .mini-table tr.crit td { color: var(--danger); }
+  .mini-table tr.verify td { color: var(--warn); }
+  .gap-tag {
+    font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--warn); border: 1px solid var(--warn); border-radius: 3px; padding: 0 0.3rem; margin-left: 0.3rem; white-space: nowrap;
+  }
+  .lg-crit { color: var(--danger); font-weight: 600; }
+  .lg-verify { color: var(--warn); font-weight: 600; }
 
   .cap-block { border: 1px solid var(--border); border-radius: var(--r); padding: 0.8rem 0.9rem; margin: 0.7rem 0; background: var(--surface); }
   .cap-block.ess { border-color: var(--danger); }
@@ -427,18 +434,23 @@
         var stale = "";
         if (dd.currency && dd.currency.state === "assente") stale = ' <small style="color:var(--accent-ink)">· data evidenza n/d</small>';
         else if (dd.currency && dd.currency.state === "da_rivalutare") stale = ' <small style="color:var(--accent-ink)">· evidenza ' + esc(c.evidence_date) + ', da rivalutare</small>';
-        rows.push('<tr' + (g.state === "ok" && g.gap > 0 ? ' class="crit"' : '') + '>'
+        // Stesso criterio di domainPriority (§3.6): un divario su livello solo
+        // parzialmente documentato va verificato, non è una carenza corroborata.
+        var hasGap = g.state === "ok" && g.gap > 0;
+        var partial = hasGap && c.evidentiary_strength === "parziale";
+        var rowCls = partial ? "verify" : (hasGap ? "crit" : "");
+        rows.push('<tr' + (rowCls ? ' class="' + rowCls + '"' : '') + '>'
           + '<td>' + esc(domLabel(dom.domain_id)) + (dom.is_essential ? ' ⚠' : '') + '</td>'
           + '<td>' + esc(SC[dd.dimension].label) + '</td>'
           + '<td>' + (c.level != null ? c.level : "—") + ' <small style="color:var(--faint)">(' + esc(STRLAB[c.evidentiary_strength] || "—") + ')</small>' + stale + '</td>'
           + '<td>' + (t.level != null ? t.level : "—") + '</td>'
-          + '<td>' + gtxt + '</td></tr>');
+          + '<td>' + gtxt + (partial ? ' <span class="gap-tag">da verificare</span>' : '') + '</td></tr>');
       });
     });
     out.push('<section class="d-sec"><h2>Tabella dei divari</h2>'
       + '<table class="mini-table"><thead><tr><th>Dominio</th><th>Dimensione</th><th>Corrente</th><th>Obiettivo</th><th>Divario</th></tr></thead>'
       + '<tbody>' + rows.join("") + '</tbody></table>'
-      + '<p class="lead" style="margin-top:.5rem">⚠ = capacità essenziale. «—» nel divario = livello non determinabile: priorità di verifica. «Da rivalutare» = evidenza non recente (§3.5): l\'attualità va confermata.</p></section>');
+      + '<p class="lead" style="margin-top:.5rem"><span class="lg-crit">Rosso</span> = divario su livello corroborato: carenza accertata, priorità di intervento. <span class="lg-verify">Ambra</span> = divario su livello solo parzialmente documentato: da verificare prima di intervenire (§3.6). «—» nel divario = livello non determinabile. ⚠ = capacità essenziale. «Da rivalutare» = evidenza non recente (§3.5).</p></section>');
   }
 
   /* ---------- divari essenziali ---------- */
@@ -497,11 +509,11 @@
       + '</div></section>');
   }
 
-  /* ---------- compensazione tra capacità accessorie comparabili (§3.5) ---------- */
+  /* ---------- compensazione tra capacità accessorie comparabili (§3.6) ---------- */
   var compGroups = R.compensated_groups || [];
   if (compGroups.length) {
     out.push('<section class="d-sec"><div class="comp-box"><h2>Compensazione tra capacità accessorie comparabili</h2>'
-      + '<p class="lead" style="margin:0">Indicatore descrittivo e secondario (§3.5): ammesso solo tra capacità <b>accessorie</b> (non essenziali) comparabili che concorrono allo stesso risultato operativo, se la sostituibilità è motivata. Non sostituisce i profili individuali e non tocca divari, priorità o soglie non compensabili.</p>'
+      + '<p class="lead" style="margin:0">Indicatore descrittivo e secondario (§3.6): ammesso solo tra capacità <b>accessorie</b> (non essenziali) comparabili che concorrono allo stesso risultato operativo, se la sostituibilità è motivata. Non sostituisce i profili individuali e non tocca divari, priorità o soglie non compensabili.</p>'
       + compGroups.map(function (g) {
           var rows = DIMS.map(function (d) {
             var x = g.dimensions[d];

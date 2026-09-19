@@ -307,7 +307,7 @@
       });
   };
 
-  // Compensazione tra capacità accessorie comparabili (§3.5): «soltanto nella
+  // Compensazione tra capacità accessorie comparabili (§3.6): «soltanto nella
   // rappresentazione aggregata», tra capacità NON essenziali riferite allo
   // stesso comparable_group, quando concorrono al medesimo risultato
   // operativo e la sostituibilità è motivata rispetto allo scenario. Mai per

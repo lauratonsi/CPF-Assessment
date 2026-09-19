@@ -94,9 +94,11 @@ pages/                      i sei passi del wizard + verifica
   step4a-conseguenze.html   conseguenze intollerabili → percorsi di compromissione → capacità richieste/essenziali (CCE, §3.1);
                             genera il profilo obiettivo per dimensione (§3.6)
   step4b-capacita.html      profilo corrente per i domini richiesti: 4 dimensioni × livello/forza probatoria, feedback live sui divari
-  dashboard.html            esito: renderizza CPF.buildReport() — regimi, dipendenze (diagramma SVG), dumbbell per
-                            dominio, tabella dei divari, divari essenziali, priorità di intervento / di verifica,
-                            export JSON + stampa
+  dashboard.html            esito: renderizza CPF.buildReport() — regimi, dipendenze (diagramma SVG + scheda con
+                            curva temporale per relazione), dumbbell per dominio, tabella dei divari (tre stati:
+                            corroborato/da verificare/nessun divario), divari essenziali, priorità di intervento
+                            / di verifica, compensazione tra capacità accessorie, conseguenze e percorsi
+                            (capacità essenziale vs richiesta), export JSON + stampa
   test.html                 "Verifica del motore": esegue in pagina l'intera batteria di test, con spiegazione e sorgente dei casi
   casi-studio.html          "Casi di riferimento": i 7 casi del Cap. 5 (§5.4.1-§5.4.7) riletti come esempi del modello,
                             ciascuno con collegamento esplicito al punto preciso del Cap. 3 che illustra
@@ -122,14 +124,20 @@ assets/
   theme.css                 design system: token colore/tipografia, IBM Plex Sans + Mono, componenti
                             (grigi neutri + un accent, raggi piccoli, densità compatta, nessuna texture)
   vendor/fonts/             IBM Plex Sans / Mono (woff2, per uso offline)
-  app.js                    persistenza localStorage + export/import + guard quota
+  app.js                    persistenza localStorage; CPF.exportAssessment/importAssessment (unica
+                            implementazione, usata da index.html e dashboard; CPF.isAssessmentShape() valida
+                            il file in ingresso prima di salvarlo) + guard quota
                             + calcoli §3.6 (dimensionGap, essentialShortfall, domainPriority — a regola
-                              ordinale, non a somma —, rankDomains) + CPF.evidenceCurrency() (attualità §3.5)
+                            ordinale, non a somma —, rankDomains, compensatedGroups) + CPF.evidenceCurrency()
+                            (attualità §3.5)
                             + CPF.reviewFunction() (euristiche di coerenza per lo Step 2)
   regime-engine.js          CPF.classifyRegimes(answers) → regime_profile — funzione pura, ogni esito con trace motivato
   report.js                 CPF.buildReport(assessment) → sintesi dell'esito (regimi + dipendenze + divari +
-                            divari essenziali + due priorità), funzione pura che la dashboard renderizza
-  dumbbell.js               grafico gap a manubrio per dominio (sostituisce il radar, §3.6-3.7)
+                            divari essenziali + due priorità + gruppi compensati), funzione pura che la
+                            dashboard renderizza
+  dumbbell.js               grafico gap a manubrio per dominio (sostituisce il radar, §3.6-3.7); il divario
+                            essenziale mostrato nel grafico è delegato a CPF.essentialShortfall, non ricalcolato
+                            — stessa regola, stesso esito del resto dello strumento
   nav.js                    stepper: attributi ARIA + stato di completamento reale + riga di contesto
   shell.js                  barra applicativa fissa (monogramma, wordmark, tasto tema) + skip-link + landmark <main>
   theme-toggle.js           tema chiaro/scuro persistito
@@ -227,7 +235,7 @@ derivati §3.6), **review** (euristiche di coerenza dello Step 2), **report**
   della soglia non è corroborato», §3.5: nessuna certificazione implicita).
 - **Aggregati** solo descrittivi/secondari (§3.6-3.7): niente radar ad area
   piena, che comunicherebbe una falsa rassicurazione. Al suo posto un grafico a
-  manubrio per dominio. Unica eccezione ammessa dal §3.5: tra capacità
+  manubrio per dominio. Unica eccezione ammessa dal §3.6: tra capacità
   **accessorie** (mai essenziali) comparabili che concorrono allo stesso
   risultato operativo, se la sostituibilità è motivata rispetto allo scenario
   (`CPF.compensatedGroups`) — resta un indicatore secondario, non tocca gap,
@@ -237,7 +245,11 @@ derivati §3.6), **review** (euristiche di coerenza dello Step 2), **report**
   posizione, livello (fisico/cyber/organizzativo — distinto dalla posizione,
   Setola e Theocharidou 2016), tipi di guasto (Rinaldi/Peerenboom/Kelly 2001;
   Argonne 2015; NAT). La classe *geografica* è segnalata come struttura
-  E → {A, B} (causa comune), non come relazione reciproca. La dimensione
+  E → {A, B} (causa comune), non come relazione reciproca. Lo Step 3 segnala
+  anche le combinazioni incoerenti tra le due proprietà: capacità di risposta
+  «adattiva» dichiarata senza alcuna alternativa indicata, oppure accoppiamento
+  debole con capacità di risposta rigida e nessuna alternativa (il margine
+  iniziale non è una garanzia, §3.4). La dimensione
   temporale (dependency curves, §3.4) è raccolta per ogni dipendenza: tempo al
   primo impatto e, quando esiste un'alternativa, il suo tempo di attivazione,
   la durata del sostegno, il livello di servizio degradato, il tempo per lo
@@ -253,6 +265,13 @@ derivati §3.6), **review** (euristiche di coerenza dello Step 2), **report**
   segnala il riscontro in entrambi i sensi, allo Step 3 se la criticità non ne
   tiene conto e a `reviewFunction()` (Step 2) se la criticità dichiarata resta
   bassa nonostante dipendenze a valle già mappate.
+- **Tabella dei divari a tre stati:** rosso per un divario su livello
+  corroborato (carenza accertata, priorità di intervento), ambra per un
+  divario su livello solo parzialmente documentato (da verificare prima di
+  intervenire, §3.6), nessun colore se non c'è divario o il livello non è
+  determinabile. Lo stesso criterio distingue, nell'elenco dei percorsi di
+  compromissione, le capacità **essenziali** da quelle solo **richieste**
+  (etichetta separata per ciascuna, non una legenda condivisa a fine riga).
 - **Tracciabilità:** ogni classificazione di regime porta un `trace` di coppie
   `{ esito, base }` che la motivano — esempio di trasparenza metodologica per il
   Capitolo 4, verificabile dalla pagina `test.html`.

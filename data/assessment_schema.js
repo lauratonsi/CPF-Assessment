@@ -89,7 +89,7 @@
       non_compensable_threshold: isEssential
         ? { dimension: "estensione", min_level: 4, rationale: "" }
         : null,
-      // Compensazione tra capacità accessorie comparabili (§3.5): valorizzabili
+      // Compensazione tra capacità accessorie comparabili (§3.6): valorizzabili
       // solo quando is_essential è false. comparable_group accomuna capacità
       // che concorrono allo stesso risultato operativo e la cui sostituibilità
       // è motivata rispetto allo scenario; vedi CPF.compensatedGroups in app.js.
